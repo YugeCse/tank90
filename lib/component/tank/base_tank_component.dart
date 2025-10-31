@@ -114,10 +114,10 @@ abstract class BaseTankComponent extends SpriteComponent
         }
       }
       // 停止当前运动方向（发生碰撞时暂时停止移动）
+      direction = Vector2.zero();
       if (other is BaseTankComponent) {
         other.direction = Vector2.zero();
       }
-      // direction = Vector2.zero();
     }
     super.onCollisionStart(intersectionPoints, other);
   }

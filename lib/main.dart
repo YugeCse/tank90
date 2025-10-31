@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/services.dart' show SystemSound, SystemSoundType;
 import 'package:tank90/scene/splash_screen.dart' show SplashScreenGame;
 import 'package:flame/flame.dart';
 import 'package:flutter/foundation.dart';
@@ -23,6 +24,15 @@ class MyApplicaption extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: const SplashScreenGame(),
+      builder: (context, child) {
+        // 拦截所有按钮声音
+        return Listener(
+          onPointerDown: (event) {
+            SystemSound.play(SystemSoundType.click);
+          },
+          child: child!,
+        );
+      },
       theme: ThemeData.dark(),
       debugShowCheckedModeBanner: false,
     );

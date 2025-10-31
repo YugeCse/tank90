@@ -10,8 +10,7 @@ import 'package:tank90/component/joystick/joystick_bg_component.dart'
 import 'package:tank90/component/joystick/joystick_knob_component.dart'
     show JoystickKnobComponent;
 import 'package:tank90/component/map/war_map_component.dart';
-import 'package:tank90/component/tank/enemy_tank_component.dart'
-    show EnemyTankComponent;
+import 'package:tank90/component/tank/enemy_tank_component.dart';
 import 'package:tank90/component/tank/player_tank_component.dart'
     show PlayerTankComponent;
 import 'package:tank90/data/notifier/tank_bom_notifier.dart';
@@ -57,12 +56,8 @@ class GameScene extends FlameGame
         ),
       );
     }
+    add(EnemyTankFactory()); //添加敌方坦克工厂组件
     addToWarMap(playerTank ??= PlayerTankComponent(joystick: joystick));
-    addToWarMap(EnemyTankComponent.create(type: TankType.enemy0));
-    addToWarMap(EnemyTankComponent.create(type: TankType.enemy1));
-    addToWarMap(EnemyTankComponent.create(type: TankType.enemy2));
-    addToWarMap(EnemyTankComponent.create(type: TankType.enemy3));
-    addToWarMap(EnemyTankComponent.create(type: TankType.enemy4));
   }
 
   /// 接受消息事件
@@ -74,6 +69,10 @@ class GameScene extends FlameGame
       }
     }
   }
+
+  /// 获取地图上还有的敌方坦克信息
+  Iterable<EnemyTankComponent> get enemyTanks =>
+      mapComponent?.children.whereType<EnemyTankComponent>() ?? [];
 
   /// 添加到战场地图
   void addToWarMap(PositionComponent comp) => mapComponent?.add(comp);
