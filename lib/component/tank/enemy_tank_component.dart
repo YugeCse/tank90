@@ -89,17 +89,23 @@ class EnemyTankFactory extends PositionComponent
     TankType.enemy4,
   ];
 
+  /// 每批次允许的数量
   final int maxPerTankCount;
 
+  /// 最大生产数量
   final int maxTotalTankCount;
 
+  /// 统计生产了的数量
   int _produceTankCount = 0;
 
+  /// 随机对象
   late Random _random;
 
-  late TimerComponent _factoryTimer;
+  /// 是否正在生产坦克
+  bool _isGeneratingTank = false;
 
-  bool _isLastTaskComplete = true;
+  /// 生产坦克的定时器
+  late TimerComponent _factoryTimer;
 
   EnemyTankFactory({this.maxPerTankCount = 5, this.maxTotalTankCount = 20});
 
@@ -114,18 +120,22 @@ class EnemyTankFactory extends PositionComponent
     add(_factoryTimer); //添加生成定时器
   }
 
+  /// 检查并生成坦克
   void _checkAndGenerateTanks() async {
     if (_produceTankCount >= maxTotalTankCount) {
       _factoryTimer.timer.stop();
       _factoryTimer.removeFromParent();
-      debugPrint('达到生成总数目！');
+      debugPrint('所有坦克达到生产总数目：$maxTotalTankCount');
       return;
     }
-    if (!_isLastTaskComplete) return;
-    _isLastTaskComplete = false;
+    if (_isGeneratingTank) return;
+    _isGeneratingTank = true;
     var diffCount = maxPerTankCount - game.enemyTanks.length;
-    if (diffCount <= 0) return;
-    debugPrint('要生成数目：$diffCount');
+    if (diffCount <= 0) {
+      _isGeneratingTank = false;
+      return;
+    }
+    debugPrint('将要要生产的坦克数目：$diffCount');
     while (diffCount > 0) {
       var tanks =
           game.mapComponent?.children.whereType<BaseTankComponent>().toList() ??
@@ -140,19 +150,22 @@ class EnemyTankFactory extends PositionComponent
         );
         if (tanks.any((e) => e.toRect().overlaps(targetRect)) ||
             addedTanks.any((e) => e.toRect().overlaps(targetRect))) {
-          debugPrint('有其他坦克，无法在该位置生成');
+          debugPrint('因有其他坦克还在生产线($position)，无法在该位置生成');
           await Future.delayed(const Duration(milliseconds: 200));
           continue;
         }
         var newTank = generate(position);
         game.addToWarMap(newTank);
+        if (--diffCount <= 0) {
+          debugPrint('本批次所有坦克已经生产完成');
+          break; //所有坦克已经生产完成，需要跳出循环
+        }
         await Future.delayed(const Duration(milliseconds: 120));
         addedTanks.add(newTank); //记录这个新增的坦克
         _produceTankCount++; //已经生成的坦克数量++
       }
-      diffCount = maxPerTankCount - game.enemyTanks.length;
     }
-    _isLastTaskComplete = true; //标记上一次任务完成
+    _isGeneratingTank = false; //标记上一次任务完成
   }
 
   EnemyTankComponent generate(Vector2 targetPosition) {

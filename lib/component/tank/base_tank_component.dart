@@ -5,6 +5,7 @@ import 'package:tank90/component/base/map_cell_type.dart';
 import 'package:tank90/component/base/tank_type.dart';
 import 'package:tank90/component/bullet/bullet_component.dart';
 import 'package:tank90/component/map/map_cell_component.dart';
+import 'package:tank90/component/tank/player_tank_component.dart';
 import 'package:tank90/component/tank/tank_born_component.dart';
 import 'package:tank90/data/map_constants.dart';
 import 'package:tank90/data/notifier/tank_bom_notifier.dart'
@@ -15,6 +16,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart' show KeyEvent;
 import 'package:flutter/services.dart'
     show KeyDownEvent, KeyUpEvent, LogicalKeyboardKey;
+import 'package:tank90/utils/audio_utils.dart';
 
 /// 坦克组件基类
 abstract class BaseTankComponent extends SpriteComponent
@@ -165,10 +167,18 @@ abstract class BaseTankComponent extends SpriteComponent
     }
   }
 
+  /// 被攻击
+  void hit() {}
+
   /// 爆炸并消灭
   void bomAndDestroy() {
     removeFromParent();
     hitbox.collisionType = CollisionType.inactive;
+    if (runtimeType is PlayerTankComponent) {
+      AudioUtils().playPlayerCrack();
+    } else {
+      AudioUtils().playTankCrack();
+    }
     game.addToWarMap(
       _TankBomEffectComponent(
         position: position,

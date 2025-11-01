@@ -19,6 +19,7 @@ import 'package:flame/game.dart';
 import 'package:flame/input.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart' show EdgeInsets;
+import 'package:tank90/utils/audio_utils.dart';
 
 /// 游戏主场景
 class GameScene extends FlameGame
@@ -33,6 +34,7 @@ class GameScene extends FlameGame
 
   @override
   FutureOr<void> load() async {
+    AudioUtils().playStart(); //播放开始的声音
     assetImage = await images.load('tankAll.png');
     add(mapComponent ??= WarMapComponent(stage: 1));
     if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {

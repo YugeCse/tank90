@@ -8,6 +8,7 @@ import 'package:tank90/scene/game_scene.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart' hide Image;
+import 'package:tank90/utils/audio_utils.dart' show AudioUtils;
 
 /// 子弹组件
 class BulletComponent extends SpriteComponent
@@ -74,6 +75,7 @@ class BulletComponent extends SpriteComponent
     Set<Vector2> intersectionPoints,
     PositionComponent other,
   ) {
+    if (intersectionPoints.isEmpty) return;
     if (other is MapCellComponent &&
         other.type != MapCellType.grass &&
         other.type != MapCellType.rive) {
@@ -86,6 +88,7 @@ class BulletComponent extends SpriteComponent
       // removeFromParent();
       other.bomAndDestroy(); //爆炸并损坏
     }
+    AudioUtils().playBulletCrack();
     super.onCollisionStart(intersectionPoints, other);
   }
 
