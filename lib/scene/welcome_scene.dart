@@ -26,6 +26,11 @@ class _WelcomeSceneState extends State<WelcomeScene> {
 
   @override
   Widget build(BuildContext context) {
-    return Image.asset('assets/images/menu.gif', fit: BoxFit.fitHeight);
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Center(
+        child: Image.asset('assets/images/menu.gif', fit: BoxFit.fitHeight),
+      ),
+    );
   }
 }

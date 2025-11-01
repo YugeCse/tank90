@@ -3,7 +3,15 @@ import 'package:flame_splash_screen/flame_splash_screen.dart'
     show FlameSplashScreen, FlameSplashTheme;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart'
-    show StatefulWidget, State, BuildContext, Widget, Text, Navigator, Scaffold;
+    show
+        BuildContext,
+        Colors,
+        Navigator,
+        Scaffold,
+        State,
+        StatefulWidget,
+        Text,
+        Widget;
 
 /// 启动界面
 class SplashScreenGame extends StatefulWidget {
@@ -17,6 +25,7 @@ class SplashScreenGameState extends State<SplashScreenGame> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.black,
       body: FlameSplashScreen(
         showAfter: (BuildContext context) {
           return const Text('90坦克大战');

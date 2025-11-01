@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flame/extensions.dart';
+import 'package:flutter/rendering.dart';
 import 'package:tank90/component/base/direction.dart' show Direction;
 import 'package:tank90/component/base/tank_type.dart' show TankType;
 import 'package:tank90/component/tank/base_tank_component.dart'
@@ -88,13 +89,19 @@ class EnemyTankFactory extends PositionComponent
     TankType.enemy4,
   ];
 
-  final int maxTankCount;
+  final int maxPerTankCount;
+
+  final int maxTotalTankCount;
+
+  int _produceTankCount = 0;
 
   late Random _random;
 
   late TimerComponent _factoryTimer;
 
-  EnemyTankFactory({this.maxTankCount = 5});
+  bool _isLastTaskComplete = true;
+
+  EnemyTankFactory({this.maxPerTankCount = 5, this.maxTotalTankCount = 20});
 
   @override
   FutureOr<void> onLoad() {
@@ -104,27 +111,48 @@ class EnemyTankFactory extends PositionComponent
       repeat: true,
       onTick: _checkAndGenerateTanks,
     );
-    add(_factoryTimer);
+    add(_factoryTimer); //添加生成定时器
   }
 
-  void _checkAndGenerateTanks() {
-    var diffCount = maxTankCount - game.enemyTanks.length;
-    if (diffCount <= 0) return;
-    while (diffCount >= 0) {
-      var tanks = game.mapComponent?.children
-          .whereType<BaseTankComponent>()
-          .toList();
-      if (tanks?.isNotEmpty == true) {
-        for (var i = 0; i < tanks!.length; i++) {
-          var tankRect = tanks[i].toRect();
-          for (var j = 0; j < EnemyTankComponent.bornPositions.length; j++) {
-            var position = EnemyTankComponent.bornPositions[j];
-            if (tankRect.containsPoint(position)) continue;
-            game.addToWarMap(generate(position));
-          }
-        }
-      }
+  void _checkAndGenerateTanks() async {
+    if (_produceTankCount >= maxTotalTankCount) {
+      _factoryTimer.timer.stop();
+      _factoryTimer.removeFromParent();
+      debugPrint('达到生成总数目！');
+      return;
     }
+    if (!_isLastTaskComplete) return;
+    _isLastTaskComplete = false;
+    var diffCount = maxPerTankCount - game.enemyTanks.length;
+    if (diffCount <= 0) return;
+    debugPrint('要生成数目：$diffCount');
+    while (diffCount > 0) {
+      var tanks =
+          game.mapComponent?.children.whereType<BaseTankComponent>().toList() ??
+          [];
+      var addedTanks = <BaseTankComponent>[];
+      for (var j = 0; j < EnemyTankComponent.bornPositions.length; j++) {
+        var position = EnemyTankComponent.bornPositions[j];
+        var targetRect = Rect.fromCenter(
+          width: 32,
+          height: 32,
+          center: position.toOffset(),
+        );
+        if (tanks.any((e) => e.toRect().overlaps(targetRect)) ||
+            addedTanks.any((e) => e.toRect().overlaps(targetRect))) {
+          debugPrint('有其他坦克，无法在该位置生成');
+          await Future.delayed(const Duration(milliseconds: 200));
+          continue;
+        }
+        var newTank = generate(position);
+        game.addToWarMap(newTank);
+        await Future.delayed(const Duration(milliseconds: 120));
+        addedTanks.add(newTank); //记录这个新增的坦克
+        _produceTankCount++; //已经生成的坦克数量++
+      }
+      diffCount = maxPerTankCount - game.enemyTanks.length;
+    }
+    _isLastTaskComplete = true; //标记上一次任务完成
   }
 
   EnemyTankComponent generate(Vector2 targetPosition) {
