@@ -33,7 +33,13 @@ class SplashScreenGameState extends State<SplashScreenGame> {
         theme: FlameSplashTheme.dark,
         onFinish: (context) => Navigator.pushReplacement<void, void>(
           context,
-          PageRouteBuilder(pageBuilder: (_, _, _) => WelcomeScene()),
+          PageRouteBuilder(
+            pageBuilder: (_, _, _) => WelcomeScene(),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) =>
+                    FadeTransition(opacity: animation, child: child),
+            transitionDuration: const Duration(seconds: 1),
+          ),
         ),
       ),
     );

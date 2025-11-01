@@ -19,6 +19,9 @@ class _WelcomeSceneState extends State<WelcomeScene> {
         context,
         PageRouteBuilder(
           pageBuilder: (_, _, _) => GameWidget(game: GameScene()),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) =>
+              FadeTransition(opacity: animation, child: child),
+          transitionDuration: const Duration(seconds: 1),
         ),
       );
     });

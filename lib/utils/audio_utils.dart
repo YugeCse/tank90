@@ -17,7 +17,7 @@ class AudioUtils {
 
   /// 播放开始音乐
   void playStart() =>
-      _checkAndPlay(() => FlameAudio.play('start.mp3', volume: 0.5));
+      _checkAndPlay(() => FlameAudio.playLongAudio('start.mp3', volume: 0.5));
 
   void playAttack() => _checkAndPlay(() => FlameAudio.play('attack.mp3'));
 
