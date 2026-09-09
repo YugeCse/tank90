@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:tank90/component/base/hitbox_mixin.dart';
 import 'package:tank90/component/base/map_cell_type.dart' show MapCellType;
 import 'package:tank90/scene/game_scene.dart' show GameScene;
 import 'package:flame/collisions.dart';
@@ -7,12 +8,9 @@ import 'package:flame/components.dart';
 
 /// 地图单元组件
 class MapCellComponent extends SpriteComponent
-    with HasGameReference<GameScene> {
+    with HasGameReference<GameScene>, HitboxMixin {
   /// 地图单元类型
   MapCellType type;
-
-  /// 碰撞盒
-  late RectangleHitbox hitbox;
 
   MapCellComponent({required this.type, super.position})
     : super(size: MapCellType.size);

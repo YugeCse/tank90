@@ -1,18 +1,20 @@
+import 'package:flutter/widgets.dart';
 import 'package:tank90/component/base/direction.dart' show Direction;
 import 'package:tank90/component/base/tank_type.dart' show TankType;
 import 'package:tank90/data/map_constants.dart' show MapConstants;
 import 'package:flame/components.dart'
     show KeyboardHandler, JoystickDirection, Vector2;
 import 'package:flame/input.dart' show JoystickComponent;
-import 'package:flutter/material.dart' show KeyEvent;
 import 'package:flutter/services.dart'
     show LogicalKeyboardKey, KeyDownEvent, KeyUpEvent;
 import 'base_tank_component.dart';
 
 /// 玩家坦克组件
 class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
+  /// 开火间隔时间
   double fireSpanTime = 0.5;
 
+  /// 记录上一次的开火时间
   double _lastFireTime = 0;
 
   /// 虚拟控制器
@@ -54,17 +56,6 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
 
   /// 处理Tank行为
   void _updateTankAction() {
-    if (_pressedKeys.contains(LogicalKeyboardKey.keyW)) {
-      setFacingDirection(Direction.up);
-    } else if (_pressedKeys.contains(LogicalKeyboardKey.keyS)) {
-      setFacingDirection(Direction.down);
-    } else if (_pressedKeys.contains(LogicalKeyboardKey.keyA)) {
-      setFacingDirection(Direction.left);
-    } else if (_pressedKeys.contains(LogicalKeyboardKey.keyD)) {
-      setFacingDirection(Direction.right);
-    } else {
-      velocity = Vector2.zero(); //方向速度归零
-    }
     if (_pressedKeys.contains(LogicalKeyboardKey.keyJ)) {
       var curTimeSec = DateTime.now().millisecondsSinceEpoch / 1000;
       var diffTimeSec = curTimeSec - _lastFireTime;
@@ -73,15 +64,36 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
         fire(); //执行开火
       }
     }
+    // 处理方向 - 使用标志位
+    bool hasDirection = false;
+    if (_pressedKeys.contains(LogicalKeyboardKey.keyW)) {
+      hasDirection = true;
+      setFacingDirection(Direction.up);
+      debugPrint("up direction");
+    } else if (_pressedKeys.contains(LogicalKeyboardKey.keyS)) {
+      hasDirection = true;
+      setFacingDirection(Direction.down);
+      debugPrint("down direction");
+    } else if (_pressedKeys.contains(LogicalKeyboardKey.keyA)) {
+      hasDirection = true;
+      setFacingDirection(Direction.left);
+      debugPrint("left direction");
+    } else if (_pressedKeys.contains(LogicalKeyboardKey.keyD)) {
+      hasDirection = true;
+      setFacingDirection(Direction.right);
+      debugPrint("right direction");
+    }
+    if (!hasDirection) {
+      velocity = Vector2.zero(); //方向速度归零
+    }
   }
 
   /// 处理键盘事件，返回是否处理该事件
   void handleKeyEvent(KeyEvent event) {
-    switch (event) {
-      case KeyDownEvent():
-        _pressedKeys.add(event.logicalKey);
-      case KeyUpEvent():
-        _pressedKeys.remove(event.logicalKey);
+    if (event is KeyDownEvent) {
+      _pressedKeys.add(event.logicalKey);
+    } else if (event is KeyUpEvent) {
+      _pressedKeys.remove(event.logicalKey);
     }
   }
 

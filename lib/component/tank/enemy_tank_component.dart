@@ -150,8 +150,7 @@ class EnemyTankFactory extends PositionComponent
         );
         if (tanks.any((e) => e.toRect().overlaps(targetRect)) ||
             addedTanks.any((e) => e.toRect().overlaps(targetRect))) {
-          debugPrint('因有其他坦克还在生产线($position)，无法在该位置生成');
-          await Future.delayed(const Duration(milliseconds: 200));
+          await Future.delayed(const Duration(milliseconds: 500));
           continue;
         }
         var newTank = generate(position);

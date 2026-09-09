@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:tank90/component/base/direction.dart';
+import 'package:tank90/component/base/hitbox_mixin.dart';
 import 'package:tank90/component/base/map_cell_type.dart';
 import 'package:tank90/component/base/tank_type.dart';
 import 'package:tank90/component/bullet/bullet_component.dart';
@@ -17,9 +18,7 @@ import 'package:tank90/utils/audio_utils.dart';
 
 /// 坦克组件基类
 abstract class BaseTankComponent extends SpriteComponent
-    with HasGameReference<GameScene>, CollisionCallbacks {
-  late RectangleHitbox hitbox;
-
+    with HasGameReference<GameScene>, CollisionCallbacks, HitboxMixin {
   /// 坦克类型
   TankType type;
 
@@ -31,6 +30,9 @@ abstract class BaseTankComponent extends SpriteComponent
 
   /// 坦克有效的方向数据
   Vector2 facingDirection = Vector2.zero();
+
+  /// 碰撞对象集合
+  final Set<Component> _collisionObjects = {};
 
   BaseTankComponent({
     required this.type,
@@ -67,7 +69,51 @@ abstract class BaseTankComponent extends SpriteComponent
   @override
   void update(double dt) {
     super.update(dt);
-    _updatePosition(dt); //更新位置
+    position += velocity * speed * dt;
+    _adjustLimitPosition(dt); //更新位置
+  }
+
+  /// 更新限制位置信息
+  void _adjustLimitPosition(double dt) {
+    _adjustCollisionPosition(); //调整碰撞位置信息
+    position.clamp(Vector2.zero() + size / 2, MapConstants.mapSize - size / 2);
+  }
+
+  var _isCollisionHandled = false;
+
+  /// 调整碰撞位置信息
+  void _adjustCollisionPosition() {
+    if (_isCollisionHandled) return;
+    _isCollisionHandled = true;
+    var collisionList = _collisionObjects.toList();
+    for (var obj in collisionList) {
+      if (obj is HitboxMixin) {
+        _adjustPositionByHitbox(obj.hitbox);
+      }
+    }
+    _isCollisionHandled = false;
+  }
+
+  /// 碰撞盒处理并修正位置
+  void _adjustPositionByHitbox(RectangleHitbox otherHitbox) {
+    const double epsilon = 0.5;
+    var selfRect = toAbsoluteRect();
+    var selfCenter = selfRect.center;
+    var objRect = otherHitbox.toAbsoluteRect();
+    var objCenter = objRect.center;
+    var nCollisionDx = selfRect.size.width / 2 + objRect.size.width / 2;
+    var nCollisionDy = selfRect.size.height / 2 + objRect.size.height / 2;
+    var diffCenter = selfCenter - objCenter;
+    final overlapX = nCollisionDx - diffCenter.dx.abs(); // 穿透深度
+    final overlapY = nCollisionDy - diffCenter.dy.abs(); // 穿透深度
+    if (overlapX > epsilon && overlapY > epsilon) {
+      if (overlapX < overlapY) {
+        position.x += (diffCenter.dx < 0 ? -overlapX : overlapX); // 向左/右推开
+      } else {
+        position.y += (diffCenter.dy < 0 ? -overlapY : overlapY); // 向左/右推开
+      }
+      velocity = Vector2.zero();
+    }
   }
 
   @override
@@ -75,67 +121,29 @@ abstract class BaseTankComponent extends SpriteComponent
     Set<Vector2> intersectionPoints,
     PositionComponent other,
   ) {
-    if (intersectionPoints.isEmpty) return;
     if ((other is MapCellComponent && other.type != MapCellType.grass) ||
         other is BaseTankComponent) {
-      hitbox.collisionType = CollisionType.inactive;
-      if (other is BaseTankComponent) {
-        other.hitbox.collisionType = CollisionType.inactive;
-      }
-      // 使用轴向最小分离（MTV）来解决穿透：仅沿穿透最小的轴推开
-      var iRect = toRect().intersect(other.toRect());
-      if (iRect.width > 0 && iRect.height > 0) {
-        // 决定沿哪一轴分离（选择穿透深度更小的轴）
-        if (iRect.width <= iRect.height) {
-          // 沿 X 轴分离
-          // 根据两个中心点的相对位置确定推开方向
-          final sign = (position.x - other.position.x) >= 0 ? 1.0 : -1.0;
-          // 如果碰到另一个坦克，双方各退一半；若是墙体，则只退自己全部距离
-          final move = iRect.width;
-          if (other is BaseTankComponent) {
-            position.x += sign * (move / 2);
-            other.position.x -= sign * (move / 2);
-            other.velocity = Vector2.zero();
-          } else {
-            position.x += sign * move;
-          }
-        } else {
-          // 沿 Y 轴分离
-          final sign = (position.y - other.position.y) >= 0 ? 1.0 : -1.0;
-          final move = iRect.height;
-          if (other is BaseTankComponent) {
-            position.y += sign * (move / 2);
-            other.position.y -= sign * (move / 2);
-            other.velocity = Vector2.zero();
-          } else {
-            position.y += sign * move;
-          }
-        }
-      }
-      // 停止当前运动方向（发生碰撞时暂时停止移动）
-      velocity = Vector2.zero();
-      if (other is BaseTankComponent) {
-        other.velocity = Vector2.zero();
-      }
+      _collisionObjects.add(other);
     }
     super.onCollisionStart(intersectionPoints, other);
   }
 
   @override
-  void onCollisionEnd(PositionComponent other) {
-    hitbox.collisionType = CollisionType.active;
-    if (other is BaseTankComponent) {
-      other.hitbox.collisionType = CollisionType.active;
+  void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
+    if ((other is MapCellComponent && other.type != MapCellType.grass) ||
+        other is BaseTankComponent) {
+      _collisionObjects.add(other);
     }
-    super.onCollisionEnd(other);
+    super.onCollision(intersectionPoints, other);
   }
 
-  /// 更新位置
-  void _updatePosition(double dt) {
-    // 记录最近有效移动方向已移除（不再基于历史方向回退）
-    // 计算每帧位移向量，按轴分离移动并做最小分离修正
-    position += velocity * speed * dt;
-    position.clamp(Vector2.zero() + size / 2, MapConstants.mapSize - size / 2);
+  @override
+  void onCollisionEnd(PositionComponent other) {
+    if ((other is MapCellComponent && other.type != MapCellType.grass) ||
+        other is BaseTankComponent) {
+      _collisionObjects.remove(other);
+    }
+    super.onCollisionEnd(other);
   }
 
   /// 改变坦克方向并更新精灵
