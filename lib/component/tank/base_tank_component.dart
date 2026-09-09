@@ -13,9 +13,6 @@ import 'package:tank90/data/notifier/tank_bom_notifier.dart'
 import 'package:tank90/scene/game_scene.dart' show GameScene;
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
-import 'package:flutter/material.dart' show KeyEvent;
-import 'package:flutter/services.dart'
-    show KeyDownEvent, KeyUpEvent, LogicalKeyboardKey;
 import 'package:tank90/utils/audio_utils.dart';
 
 /// 坦克组件基类
@@ -29,19 +26,19 @@ abstract class BaseTankComponent extends SpriteComponent
   /// 移动速度
   double speed;
 
-  /// 坦克移动的方向
-  Vector2 direction;
+  /// 坦克的向量速度
+  Vector2 velocity;
 
   /// 坦克有效的方向数据
-  Vector2 _tankDirection = Vector2.zero();
+  Vector2 facingDirection = Vector2.zero();
 
   BaseTankComponent({
     required this.type,
     double? speed,
-    Vector2? direction,
+    Vector2? facingDirection,
     super.position,
   }) : speed = type.initialSpeed,
-       direction = direction ?? Direction.up,
+       velocity = facingDirection ?? Direction.up,
        super(size: type.srcSize, anchor: Anchor.center, priority: 600);
 
   @override
@@ -49,11 +46,11 @@ abstract class BaseTankComponent extends SpriteComponent
     sprite = Sprite(
       game.assetImage,
       srcSize: type.srcSize,
-      srcPosition: type.getSrcPosition(direction),
+      srcPosition: type.getSrcPosition(velocity),
     );
-    _tankDirection = direction;
-    direction = Vector2.zero();
-    add(hitbox = RectangleHitbox(size: size - Vector2.all(2.0)));
+    facingDirection = velocity;
+    velocity = Vector2.zero();
+    add(hitbox = RectangleHitbox(size: size - Vector2.all(1.0)));
     opacity = 0; //默认设置透明度为0
     hitbox.collisionType = CollisionType.inactive;
     game.addToWarMap(
@@ -98,7 +95,7 @@ abstract class BaseTankComponent extends SpriteComponent
           if (other is BaseTankComponent) {
             position.x += sign * (move / 2);
             other.position.x -= sign * (move / 2);
-            other.direction = Vector2.zero();
+            other.velocity = Vector2.zero();
           } else {
             position.x += sign * move;
           }
@@ -109,16 +106,16 @@ abstract class BaseTankComponent extends SpriteComponent
           if (other is BaseTankComponent) {
             position.y += sign * (move / 2);
             other.position.y -= sign * (move / 2);
-            other.direction = Vector2.zero();
+            other.velocity = Vector2.zero();
           } else {
             position.y += sign * move;
           }
         }
       }
       // 停止当前运动方向（发生碰撞时暂时停止移动）
-      direction = Vector2.zero();
+      velocity = Vector2.zero();
       if (other is BaseTankComponent) {
-        other.direction = Vector2.zero();
+        other.velocity = Vector2.zero();
       }
     }
     super.onCollisionStart(intersectionPoints, other);
@@ -137,30 +134,33 @@ abstract class BaseTankComponent extends SpriteComponent
   void _updatePosition(double dt) {
     // 记录最近有效移动方向已移除（不再基于历史方向回退）
     // 计算每帧位移向量，按轴分离移动并做最小分离修正
-    position += direction * speed * dt;
+    position += velocity * speed * dt;
     position.clamp(Vector2.zero() + size / 2, MapConstants.mapSize - size / 2);
   }
 
   /// 改变坦克方向并更新精灵
-  void setTankDirection(Vector2 newDirection) {
-    _tankDirection = newDirection;
-    if (direction != newDirection) {
-      direction = newDirection; //更新方向
-      sprite = Sprite(
-        game.assetImage,
-        srcSize: type.srcSize,
-        srcPosition: type.getSrcPosition(direction),
-      );
+  void setFacingDirection(Vector2 facingDirection) {
+    if (facingDirection != Vector2.zero()) {
+      if (velocity != facingDirection) {
+        sprite = Sprite(
+          game.assetImage,
+          srcSize: type.srcSize,
+          srcPosition: type.getSrcPosition(facingDirection),
+        );
+      }
+      this.facingDirection = facingDirection;
+      velocity = facingDirection; //更新速度向量数据
     }
   }
 
+  /// 开火
   void fire({void Function()? onFinished}) {
-    if (_tankDirection != Vector2.zero()) {
+    if (facingDirection != Vector2.zero()) {
       game.addToWarMap(
         BulletComponent.create(
-          position: position,
           ownerType: runtimeType,
-          direction: _tankDirection,
+          direction: facingDirection,
+          position: position + facingDirection * size.x / 2,
         ),
       );
       if (onFinished != null) onFinished();
@@ -187,34 +187,6 @@ abstract class BaseTankComponent extends SpriteComponent
         },
       ),
     );
-  }
-
-  /// 处理键盘事件，返回是否处理该事件
-  bool handleKeyEvent(KeyEvent event) {
-    if (event is KeyDownEvent) {
-      var key = event.logicalKey;
-      if (key == LogicalKeyboardKey.keyW) {
-        setTankDirection(Direction.up);
-      } else if (key == LogicalKeyboardKey.keyS) {
-        setTankDirection(Direction.down);
-      } else if (key == LogicalKeyboardKey.keyA) {
-        setTankDirection(Direction.left);
-      } else if (key == LogicalKeyboardKey.keyD) {
-        setTankDirection(Direction.right);
-      }
-      if (key == LogicalKeyboardKey.keyJ) {
-        fire();
-      }
-    } else if (event is KeyUpEvent) {
-      var key = event.logicalKey;
-      if (key == LogicalKeyboardKey.keyW ||
-          key == LogicalKeyboardKey.keyS ||
-          key == LogicalKeyboardKey.keyA ||
-          key == LogicalKeyboardKey.keyD) {
-        direction = Vector2.zero();
-      }
-    }
-    return false;
   }
 }
 

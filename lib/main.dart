@@ -5,15 +5,17 @@ import 'package:tank90/scene/splash_screen.dart' show SplashScreenGame;
 import 'package:flame/flame.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:tank90/utils/audio_utils.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
   if (!kIsWeb) {
     if (Platform.isAndroid || Platform.isIOS) {
-      WidgetsFlutterBinding.ensureInitialized();
-      Flame.device.fullScreen();
-      Flame.device.setLandscape();
+      await Flame.device.fullScreen();
+      await Flame.device.setLandscape();
     }
   }
+  await AudioUtils.preloadAll();
   runApp(MyApplicaption());
 }
 

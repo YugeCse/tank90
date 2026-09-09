@@ -23,7 +23,7 @@ class EnemyTankComponent extends BaseTankComponent {
 
   EnemyTankComponent._({
     super.speed,
-    super.direction,
+    super.facingDirection,
     super.position,
     super.type = TankType.enemy0,
   });
@@ -35,7 +35,7 @@ class EnemyTankComponent extends BaseTankComponent {
       _moveTimer ??= TimerComponent(
         period: 2.0,
         repeat: true,
-        onTick: () => setTankDirection(Direction.random()),
+        onTick: () => setFacingDirection(Direction.random()),
       ),
     );
     _randomFire(); //随机开火
@@ -66,7 +66,7 @@ class EnemyTankComponent extends BaseTankComponent {
       position: position,
       type: type,
       speed: type.initialSpeed,
-      direction: Direction.random(),
+      facingDirection: Direction.random(),
     );
   }
 

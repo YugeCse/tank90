@@ -5,12 +5,21 @@ import 'package:flame/components.dart'
     show KeyboardHandler, JoystickDirection, Vector2;
 import 'package:flame/input.dart' show JoystickComponent;
 import 'package:flutter/material.dart' show KeyEvent;
-import 'package:flutter/services.dart' show LogicalKeyboardKey;
+import 'package:flutter/services.dart'
+    show LogicalKeyboardKey, KeyDownEvent, KeyUpEvent;
 import 'base_tank_component.dart';
 
 /// 玩家坦克组件
 class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
+  double fireSpanTime = 0.5;
+
+  double _lastFireTime = 0;
+
+  /// 虚拟控制器
   JoystickComponent? joystick;
+
+  /// 记录被按下的按键
+  final Set<LogicalKeyboardKey> _pressedKeys = {};
 
   PlayerTankComponent({
     required this.joystick,
@@ -21,6 +30,7 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
   @override
   void update(double dt) {
     super.update(dt);
+    _updateTankAction(); //处理Tank行为
     _controlDirectionByJoystick(); //通过Joystick控制方向
   }
 
@@ -29,22 +39,55 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
     if (joystick != null) {
       var dir = joystick!.direction;
       if (dir == JoystickDirection.up) {
-        setTankDirection(Direction.up);
+        setFacingDirection(Direction.up);
       } else if (dir == JoystickDirection.down) {
-        setTankDirection(Direction.down);
+        setFacingDirection(Direction.down);
       } else if (dir == JoystickDirection.left) {
-        setTankDirection(Direction.left);
+        setFacingDirection(Direction.left);
       } else if (dir == JoystickDirection.right) {
-        setTankDirection(Direction.right);
+        setFacingDirection(Direction.right);
       } else if (dir == JoystickDirection.idle) {
-        direction = Vector2.zero();
+        velocity = Vector2.zero();
       }
+    }
+  }
+
+  /// 处理Tank行为
+  void _updateTankAction() {
+    if (_pressedKeys.contains(LogicalKeyboardKey.keyW)) {
+      setFacingDirection(Direction.up);
+    } else if (_pressedKeys.contains(LogicalKeyboardKey.keyS)) {
+      setFacingDirection(Direction.down);
+    } else if (_pressedKeys.contains(LogicalKeyboardKey.keyA)) {
+      setFacingDirection(Direction.left);
+    } else if (_pressedKeys.contains(LogicalKeyboardKey.keyD)) {
+      setFacingDirection(Direction.right);
+    } else {
+      velocity = Vector2.zero(); //方向速度归零
+    }
+    if (_pressedKeys.contains(LogicalKeyboardKey.keyJ)) {
+      var curTimeSec = DateTime.now().millisecondsSinceEpoch / 1000;
+      var diffTimeSec = curTimeSec - _lastFireTime;
+      if (diffTimeSec > fireSpanTime) {
+        _lastFireTime = curTimeSec;
+        fire(); //执行开火
+      }
+    }
+  }
+
+  /// 处理键盘事件，返回是否处理该事件
+  void handleKeyEvent(KeyEvent event) {
+    switch (event) {
+      case KeyDownEvent():
+        _pressedKeys.add(event.logicalKey);
+      case KeyUpEvent():
+        _pressedKeys.remove(event.logicalKey);
     }
   }
 
   @override
   bool onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
-    if (handleKeyEvent(event)) return true;
+    handleKeyEvent(event);
     return super.onKeyEvent(event, keysPressed);
   }
 

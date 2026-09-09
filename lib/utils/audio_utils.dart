@@ -7,8 +7,21 @@ class AudioUtils {
 
   static final _instance = AudioUtils._internal();
 
+  /// 预加载所有音效到缓存
+  static Future<void> preloadAll() async {
+    await Future.wait([
+      FlameAudio.audioCache.load('start.mp3'),
+      FlameAudio.audioCache.load('attack.mp3'),
+      FlameAudio.audioCache.load('move.mp3'),
+      FlameAudio.audioCache.load('bulletCrack.mp3'),
+      FlameAudio.audioCache.load('playerCrack.mp3'),
+      FlameAudio.audioCache.load('prop.mp3'),
+      FlameAudio.audioCache.load('tankCrack.mp3'),
+    ]);
+  }
+
   /// 是否允许播放声音
-  bool allowPlay = true;
+  bool allowPlay = false;
 
   /// 检测并播放声音
   void _checkAndPlay(void Function() next) {
