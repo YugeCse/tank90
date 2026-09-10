@@ -52,7 +52,7 @@ abstract class BaseTankComponent extends SpriteComponent
     );
     facingDirection = velocity;
     velocity = Vector2.zero();
-    add(hitbox = RectangleHitbox(size: size - Vector2.all(1.0)));
+    add(hitbox = RectangleHitbox(size: size));
     opacity = 0; //默认设置透明度为0
     hitbox.collisionType = CollisionType.inactive;
     game.addToWarMap(

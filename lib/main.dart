@@ -28,7 +28,7 @@ class MyApplicaption extends StatelessWidget {
       home: const SplashScreenGame(),
       builder: (_, child) => Listener(
         onPointerDown: (_) {
-          AudioUtils().allowPlay = false;
+          AudioUtils().allowPlay = true;
           SystemSound.play(SystemSoundType.click);
         },
         child: child!,
