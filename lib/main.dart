@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/services.dart' show SystemSound, SystemSoundType;
@@ -15,8 +16,9 @@ void main() async {
       await Flame.device.setLandscape();
     }
   }
-  await AudioUtils.preloadAll();
   runApp(MyApplicaption());
+  // 音频缓存不应阻塞 Web 首屏；浏览器资源加载失败也不影响游戏启动。
+  unawaited(AudioUtils.preloadAll());
 }
 
 class MyApplicaption extends StatelessWidget {
@@ -27,7 +29,10 @@ class MyApplicaption extends StatelessWidget {
     return MaterialApp(
       home: const SplashScreenGame(),
       builder: (_, child) => Listener(
-        onPointerDown: (_) => SystemSound.play(SystemSoundType.click),
+        onPointerDown: (_) {
+          AudioUtils().allowPlay = true;
+          SystemSound.play(SystemSoundType.click);
+        },
         child: child!,
       ),
       theme: ThemeData.dark(),
