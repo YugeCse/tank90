@@ -27,10 +27,9 @@ class SplashScreenGameState extends State<SplashScreenGame> {
     return Scaffold(
       backgroundColor: Colors.black,
       body: FlameSplashScreen(
-        showAfter: (BuildContext context) {
-          return const Text('90坦克大战');
-        },
         theme: FlameSplashTheme.dark,
+        showAfter: (BuildContext context) =>
+            const Text('90坦克大战', style: TextStyle(fontSize: 32)),
         onFinish: (context) => Navigator.pushReplacement<void, void>(
           context,
           PageRouteBuilder(
