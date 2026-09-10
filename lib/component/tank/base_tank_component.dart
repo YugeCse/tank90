@@ -96,8 +96,15 @@ abstract class BaseTankComponent extends SpriteComponent
 
   /// 碰撞盒处理并修正位置
   void _adjustPositionByHitbox(RectangleHitbox otherHitbox) {
-    const double epsilon = 0.5;
-    var selfRect = toAbsoluteRect();
+    // This value is measured in absolute pixels. Keep it very small: a large
+    // epsilon allows the tank to penetrate the obstacle before being corrected.
+    const double epsilon = 0.01;
+    // Collision rectangles are in absolute (screen) coordinates, while
+    // `position` is relative to the scaled WarMapComponent.  Use the actual
+    // hitbox for both sides, then convert the correction back to local units
+    // before changing position.  Applying an absolute correction directly to
+    // position makes the tank overshoot the wall whenever the map is scaled.
+    var selfRect = hitbox.toAbsoluteRect();
     var selfCenter = selfRect.center;
     var objRect = otherHitbox.toAbsoluteRect();
     var objCenter = objRect.center;
@@ -108,9 +115,11 @@ abstract class BaseTankComponent extends SpriteComponent
     final overlapY = nCollisionDy - diffCenter.dy.abs(); // 穿透深度
     if (overlapX > epsilon && overlapY > epsilon) {
       if (overlapX < overlapY) {
-        position.x += (diffCenter.dx < 0 ? -overlapX : overlapX); // 向左/右推开
+        final correction = diffCenter.dx < 0 ? -overlapX : overlapX;
+        position.x += correction / absoluteScale.x; // 绝对位移转局部位移
       } else {
-        position.y += (diffCenter.dy < 0 ? -overlapY : overlapY); // 向左/右推开
+        final correction = diffCenter.dy < 0 ? -overlapY : overlapY;
+        position.y += correction / absoluteScale.y; // 绝对位移转局部位移
       }
       velocity = Vector2.zero();
     }
