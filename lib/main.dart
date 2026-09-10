@@ -10,11 +10,9 @@ import 'package:tank90/utils/audio_utils.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (!kIsWeb) {
-    if (Platform.isAndroid || Platform.isIOS) {
-      await Flame.device.fullScreen();
-      await Flame.device.setLandscape();
-    }
+  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+    await Flame.device.fullScreen();
+    await Flame.device.setLandscape();
   }
   runApp(MyApplicaption());
   // 音频缓存不应阻塞 Web 首屏；浏览器资源加载失败也不影响游戏启动。
