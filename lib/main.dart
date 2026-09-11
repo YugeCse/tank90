@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/services.dart' show SystemSound, SystemSoundType;
-import 'package:tank90/scene/splash_screen.dart' show SplashScreenGame;
+import 'package:tank90/scene/splash_screen.dart' show SplashScreen;
 import 'package:flame/flame.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -25,7 +25,7 @@ class MyApplicaption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: const SplashScreenGame(),
+      home: const SplashScreen(),
       builder: (_, child) => Listener(
         onPointerDown: (_) {
           AudioUtils().allowPlay = true;

@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:tank90/scene/game_scene.dart' show GameScene;
+import 'package:tank90/scene/tank_war_game.dart' show TankWarGame;
 import 'package:flame/components.dart';
 
 /// 坦克出生组件
 class TankBornComponent extends SpriteAnimationComponent
-    with HasGameReference<GameScene> {
+    with HasGameReference<TankWarGame> {
   TankBornComponent({
     super.position,
     super.size,

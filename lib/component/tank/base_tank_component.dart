@@ -11,14 +11,14 @@ import 'package:tank90/component/tank/tank_born_component.dart';
 import 'package:tank90/data/map_constants.dart';
 import 'package:tank90/data/notifier/tank_bom_notifier.dart'
     show TankBomNotifier;
-import 'package:tank90/scene/game_scene.dart' show GameScene;
+import 'package:tank90/scene/tank_war_game.dart' show TankWarGame;
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:tank90/utils/audio_utils.dart';
 
 /// 坦克组件基类
 abstract class BaseTankComponent extends SpriteComponent
-    with HasGameReference<GameScene>, CollisionCallbacks, HitboxMixin {
+    with HasGameReference<TankWarGame>, CollisionCallbacks, HitboxMixin {
   /// 坦克类型
   TankType type;
 
@@ -55,15 +55,15 @@ abstract class BaseTankComponent extends SpriteComponent
     add(hitbox = RectangleHitbox(size: size));
     opacity = 0; //默认设置透明度为0
     hitbox.collisionType = CollisionType.inactive;
-    game.addToWarMap(
-      TankBornComponent(
-        position: position,
-        onAnimationFinished: () {
-          opacity = 1.0;
-          hitbox.collisionType = CollisionType.active;
-        },
-      ),
-    );
+    // game.addToWarMap(
+    //   TankBornComponent(
+    //     position: position,
+    //     onAnimationFinished: () {
+    //       opacity = 1.0;
+    //       hitbox.collisionType = CollisionType.active;
+    //     },
+    //   ),
+    // );
   }
 
   @override
@@ -172,16 +172,16 @@ abstract class BaseTankComponent extends SpriteComponent
 
   /// 开火
   void fire({void Function()? onFinished}) {
-    if (facingDirection != Vector2.zero()) {
-      game.addToWarMap(
-        BulletComponent.create(
-          ownerType: runtimeType,
-          direction: facingDirection,
-          position: position + facingDirection * size.x / 2,
-        ),
-      );
-      if (onFinished != null) onFinished();
-    }
+    // if (facingDirection != Vector2.zero()) {
+    //   game.addToWarMap(
+    //     BulletComponent.create(
+    //       ownerType: runtimeType,
+    //       direction: facingDirection,
+    //       position: position + facingDirection * size.x / 2,
+    //     ),
+    //   );
+    //   if (onFinished != null) onFinished();
+    // }
   }
 
   /// 被攻击
@@ -196,20 +196,20 @@ abstract class BaseTankComponent extends SpriteComponent
     } else {
       AudioUtils().playTankCrack();
     }
-    game.addToWarMap(
-      _TankBomEffectComponent(
-        position: position,
-        onFinished: () {
-          game.onReceiveNotifier(TankBomNotifier(type: type));
-        },
-      ),
-    );
+    // game.addToWarMap(
+    //   _TankBomEffectComponent(
+    //     position: position,
+    //     onFinished: () {
+    //       game.onReceiveNotifier(TankBomNotifier(type: type));
+    //     },
+    //   ),
+    // );
   }
 }
 
 /// 坦克爆炸的效果组件
 class _TankBomEffectComponent extends SpriteAnimationComponent
-    with HasGameReference<GameScene> {
+    with HasGameReference<TankWarGame> {
   final void Function() onFinished;
 
   _TankBomEffectComponent({super.position, required this.onFinished})

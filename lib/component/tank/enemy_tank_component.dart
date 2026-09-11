@@ -10,7 +10,7 @@ import 'package:tank90/component/tank/base_tank_component.dart'
 import 'package:flame/components.dart'
     show HasGameReference, PositionComponent, TimerComponent, Vector2;
 import 'package:tank90/data/map_constants.dart';
-import 'package:tank90/scene/game_scene.dart';
+import 'package:tank90/scene/tank_war_game.dart';
 
 /// 地方坦克组件
 class EnemyTankComponent extends BaseTankComponent {
@@ -80,7 +80,7 @@ class EnemyTankComponent extends BaseTankComponent {
 
 /// 敌方坦克工厂组件
 class EnemyTankFactory extends PositionComponent
-    with HasGameReference<GameScene> {
+    with HasGameReference<TankWarGame> {
   final List<TankType> tankTypes = [
     TankType.enemy0,
     TankType.enemy1,
@@ -122,49 +122,49 @@ class EnemyTankFactory extends PositionComponent
 
   /// 检查并生成坦克
   void _checkAndGenerateTanks() async {
-    if (_produceTankCount >= maxTotalTankCount) {
-      _factoryTimer.timer.stop();
-      _factoryTimer.removeFromParent();
-      debugPrint('所有坦克达到生产总数目：$maxTotalTankCount');
-      return;
-    }
-    if (_isGeneratingTank) return;
-    _isGeneratingTank = true;
-    var diffCount = maxPerTankCount - game.enemyTanks.length;
-    if (diffCount <= 0) {
-      _isGeneratingTank = false;
-      return;
-    }
-    debugPrint('将要要生产的坦克数目：$diffCount');
-    while (diffCount > 0) {
-      var tanks =
-          game.mapComponent?.children.whereType<BaseTankComponent>().toList() ??
-          [];
-      var addedTanks = <BaseTankComponent>[];
-      for (var j = 0; j < EnemyTankComponent.bornPositions.length; j++) {
-        var position = EnemyTankComponent.bornPositions[j];
-        var targetRect = Rect.fromCenter(
-          width: 32,
-          height: 32,
-          center: position.toOffset(),
-        );
-        if (tanks.any((e) => e.toRect().overlaps(targetRect)) ||
-            addedTanks.any((e) => e.toRect().overlaps(targetRect))) {
-          await Future.delayed(const Duration(milliseconds: 500));
-          continue;
-        }
-        var newTank = generate(position);
-        game.addToWarMap(newTank);
-        if (--diffCount <= 0) {
-          debugPrint('本批次所有坦克已经生产完成');
-          break; //所有坦克已经生产完成，需要跳出循环
-        }
-        await Future.delayed(const Duration(milliseconds: 120));
-        addedTanks.add(newTank); //记录这个新增的坦克
-        _produceTankCount++; //已经生成的坦克数量++
-      }
-    }
-    _isGeneratingTank = false; //标记上一次任务完成
+    // if (_produceTankCount >= maxTotalTankCount) {
+    //   _factoryTimer.timer.stop();
+    //   _factoryTimer.removeFromParent();
+    //   debugPrint('所有坦克达到生产总数目：$maxTotalTankCount');
+    //   return;
+    // }
+    // if (_isGeneratingTank) return;
+    // _isGeneratingTank = true;
+    // var diffCount = maxPerTankCount - game.enemyTanks.length;
+    // if (diffCount <= 0) {
+    //   _isGeneratingTank = false;
+    //   return;
+    // }
+    // debugPrint('将要要生产的坦克数目：$diffCount');
+    // while (diffCount > 0) {
+    //   var tanks =
+    //       game.mapComponent?.children.whereType<BaseTankComponent>().toList() ??
+    //       [];
+    //   var addedTanks = <BaseTankComponent>[];
+    //   for (var j = 0; j < EnemyTankComponent.bornPositions.length; j++) {
+    //     var position = EnemyTankComponent.bornPositions[j];
+    //     var targetRect = Rect.fromCenter(
+    //       width: 32,
+    //       height: 32,
+    //       center: position.toOffset(),
+    //     );
+    //     if (tanks.any((e) => e.toRect().overlaps(targetRect)) ||
+    //         addedTanks.any((e) => e.toRect().overlaps(targetRect))) {
+    //       await Future.delayed(const Duration(milliseconds: 500));
+    //       continue;
+    //     }
+    //     var newTank = generate(position);
+    //     game.addToWarMap(newTank);
+    //     if (--diffCount <= 0) {
+    //       debugPrint('本批次所有坦克已经生产完成');
+    //       break; //所有坦克已经生产完成，需要跳出循环
+    //     }
+    //     await Future.delayed(const Duration(milliseconds: 120));
+    //     addedTanks.add(newTank); //记录这个新增的坦克
+    //     _produceTankCount++; //已经生成的坦克数量++
+    //   }
+    // }
+    // _isGeneratingTank = false; //标记上一次任务完成
   }
 
   EnemyTankComponent generate(Vector2 targetPosition) {

@@ -1,4 +1,5 @@
-import 'package:tank90/scene/welcome_scene.dart';
+import 'package:flame/game.dart';
+import 'package:tank90/scene/tank_war_game.dart';
 import 'package:flame_splash_screen/flame_splash_screen.dart'
     show FlameSplashScreen, FlameSplashTheme;
 import 'package:flutter/cupertino.dart';
@@ -14,26 +15,25 @@ import 'package:flutter/material.dart'
         Widget;
 
 /// 启动界面
-class SplashScreenGame extends StatefulWidget {
-  const SplashScreenGame({super.key});
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
 
   @override
-  SplashScreenGameState createState() => SplashScreenGameState();
+  SplashScreenState createState() => SplashScreenState();
 }
 
-class SplashScreenGameState extends State<SplashScreenGame> {
+class SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
       body: FlameSplashScreen(
         theme: FlameSplashTheme.dark,
-        showAfter: (BuildContext context) =>
-            const Text('90坦克大战', style: TextStyle(fontSize: 32)),
         onFinish: (context) => Navigator.pushReplacement<void, void>(
           context,
           PageRouteBuilder(
-            pageBuilder: (_, _, _) => WelcomeScene(),
+            pageBuilder: (_, _, _) =>
+                GameWidget.controlled(gameFactory: TankWarGame.new),
             transitionsBuilder:
                 (context, animation, secondaryAnimation, child) =>
                     FadeTransition(opacity: animation, child: child),

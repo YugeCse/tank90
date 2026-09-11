@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:tank90/scene/game_scene.dart' show GameScene;
+import 'package:tank90/scene/tank_war_game.dart' show TankWarGame;
 import 'package:flame/components.dart';
 
 /// Boss组件
-class BossComponent extends SpriteComponent with HasGameReference<GameScene> {
+class BossComponent extends SpriteComponent with HasGameReference<TankWarGame> {
   /// 是否还存活
   bool isAlive;
 

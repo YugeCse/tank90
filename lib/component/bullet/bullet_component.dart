@@ -4,7 +4,7 @@ import 'package:tank90/component/base/map_cell_type.dart';
 import 'package:tank90/component/map/map_cell_component.dart';
 import 'package:tank90/component/tank/base_tank_component.dart';
 import 'package:tank90/data/map_constants.dart';
-import 'package:tank90/scene/game_scene.dart';
+import 'package:tank90/scene/tank_war_game.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart' hide Image;
@@ -12,7 +12,7 @@ import 'package:tank90/utils/audio_utils.dart' show AudioUtils;
 
 /// 子弹组件
 class BulletComponent extends SpriteComponent
-    with HasGameReference<GameScene>, CollisionCallbacks {
+    with HasGameReference<TankWarGame>, CollisionCallbacks {
   static final Vector2 _upOffset = Vector2(80, 96);
   static final Vector2 _downOffset = Vector2(86, 96);
   static final Vector2 _leftOffset = Vector2(92, 96);
@@ -96,7 +96,7 @@ class BulletComponent extends SpriteComponent
   void bomAndDestroy() {
     removeFromParent();
     hitbox.collisionType = CollisionType.inactive;
-    game.addToWarMap(_BulletBomEffectComponent(position: position.clone()));
+    // game.addToWarMap(_BulletBomEffectComponent(position: position.clone()));
   }
 
   /// 创建子弹组件
@@ -116,7 +116,7 @@ class BulletComponent extends SpriteComponent
 
 /// 子弹爆炸效果的组件
 class _BulletBomEffectComponent extends SpriteAnimationComponent
-    with HasGameReference<GameScene> {
+    with HasGameReference<TankWarGame> {
   _BulletBomEffectComponent({required super.position})
     : super(anchor: Anchor.center, removeOnFinish: true);
 

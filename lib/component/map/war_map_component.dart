@@ -7,12 +7,12 @@ import 'package:tank90/component/map/map_cell_component.dart'
     show MapCellComponent;
 import 'package:tank90/data/map_constants.dart';
 import 'package:tank90/data/map_stage_level.dart';
-import 'package:tank90/scene/game_scene.dart' show GameScene;
+import 'package:tank90/scene/tank_war_game.dart' show TankWarGame;
 import 'package:flame/components.dart';
 
 /// 战场地图组件
 class WarMapComponent extends PositionComponent
-    with HasGameReference<GameScene> {
+    with HasGameReference<TankWarGame> {
   /// 关卡数
   int stage = 0;
 
