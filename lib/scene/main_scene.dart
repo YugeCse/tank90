@@ -55,7 +55,17 @@ class MainScene extends Component with HasGameReference<TankWarGame> {
       );
     }
     add(EnemyTankFactory()); //添加敌方坦克工厂组件
-    addToWarMap(playerTank ??= PlayerTankComponent(joystick: joystick));
+    add(
+      TimerComponent(
+        period: 2.0,
+        removeOnFinish: true,
+        onTick: () => {
+          mapComponent?.add(
+            playerTank ??= PlayerTankComponent(joystick: joystick),
+          ),
+        },
+      ),
+    );
   }
 
   /// 接受消息事件
@@ -63,11 +73,10 @@ class MainScene extends Component with HasGameReference<TankWarGame> {
     if (event is TankBomNotifier) {
       if (event.type == TankType.player) {
         playerTank = null;
-        addToWarMap(playerTank ??= PlayerTankComponent(joystick: joystick));
+        mapComponent?.add(
+          playerTank ??= PlayerTankComponent(joystick: joystick),
+        );
       }
     }
   }
-
-  /// 添加到战场地图
-  void addToWarMap(PositionComponent comp) => mapComponent?.add(comp);
 }
