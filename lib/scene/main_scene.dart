@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:ui' show Image;
 
 import 'package:flame/components.dart';
 import 'package:flame/input.dart';

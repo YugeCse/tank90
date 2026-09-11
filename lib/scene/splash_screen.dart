@@ -11,7 +11,6 @@ import 'package:flutter/material.dart'
         Scaffold,
         State,
         StatefulWidget,
-        Text,
         Widget;
 
 /// 启动界面

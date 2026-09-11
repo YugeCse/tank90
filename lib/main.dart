@@ -9,18 +9,21 @@ import 'package:flutter/material.dart';
 import 'package:tank90/utils/audio_utils.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
-    await Flame.device.fullScreen();
-    await Flame.device.setLandscape();
-  }
+  await MyApplicaption.initialized();
   runApp(MyApplicaption());
-  // 音频缓存不应阻塞 Web 首屏；浏览器资源加载失败也不影响游戏启动。
-  unawaited(AudioUtils.preloadAll());
 }
 
 class MyApplicaption extends StatelessWidget {
   const MyApplicaption({super.key});
+
+  static Future<void> initialized() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+      await Flame.device.fullScreen();
+      await Flame.device.setLandscape();
+    }
+    await AudioUtils.preloadAll();
+  }
 
   @override
   Widget build(BuildContext context) {
