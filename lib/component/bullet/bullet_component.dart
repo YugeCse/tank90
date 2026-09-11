@@ -96,7 +96,9 @@ class BulletComponent extends SpriteComponent
   void bomAndDestroy() {
     removeFromParent();
     hitbox.collisionType = CollisionType.inactive;
-    // game.addToWarMap(_BulletBomEffectComponent(position: position.clone()));
+    game.warMapComponent?.add(
+      _BulletBomEffectComponent(position: position.clone()),
+    );
   }
 
   /// 创建子弹组件

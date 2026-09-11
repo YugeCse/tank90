@@ -22,9 +22,11 @@ import 'package:tank90/utils/audio_utils.dart';
 
 class MainScene extends Component with HasGameReference<TankWarGame> {
   WarMapComponent? mapComponent;
+
   PlayerTankComponent? playerTank;
 
   JoystickComponent? joystick;
+
   JoystickFireComponent? joystickFire;
 
   @override

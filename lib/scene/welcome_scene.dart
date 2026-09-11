@@ -3,7 +3,6 @@ import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/input.dart';
 import 'package:flutter/material.dart';
-import 'package:tank90/scene/settings_scene.dart';
 import 'package:tank90/scene/tank_war_game.dart';
 
 /// 还原场景

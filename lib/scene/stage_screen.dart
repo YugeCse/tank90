@@ -36,6 +36,7 @@ class StageScreen extends Component
     if (event is KeyDownEvent) {
       var key = event.logicalKey;
       if ({LogicalKeyboardKey.enter, LogicalKeyboardKey.space}.contains(key)) {
+        _changeToMainGameScene();
         debugPrint('点击了Enter键');
       } else if ({
         LogicalKeyboardKey.arrowUp,
@@ -58,5 +59,9 @@ class StageScreen extends Component
       }
     }
     return super.onKeyEvent(event, keysPressed);
+  }
+
+  void _changeToMainGameScene() {
+    game.router.pushReplacementNamed('Main');
   }
 }

@@ -11,6 +11,7 @@ import 'package:tank90/component/tank/tank_born_component.dart';
 import 'package:tank90/data/map_constants.dart';
 import 'package:tank90/data/notifier/tank_bom_notifier.dart'
     show TankBomNotifier;
+import 'package:tank90/scene/main_scene.dart';
 import 'package:tank90/scene/tank_war_game.dart' show TankWarGame;
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
@@ -55,15 +56,15 @@ abstract class BaseTankComponent extends SpriteComponent
     add(hitbox = RectangleHitbox(size: size));
     opacity = 0; //默认设置透明度为0
     hitbox.collisionType = CollisionType.inactive;
-    // game.addToWarMap(
-    //   TankBornComponent(
-    //     position: position,
-    //     onAnimationFinished: () {
-    //       opacity = 1.0;
-    //       hitbox.collisionType = CollisionType.active;
-    //     },
-    //   ),
-    // );
+    game.warMapComponent?.add(
+      TankBornComponent(
+        position: position,
+        onAnimationFinished: () {
+          opacity = 1.0;
+          hitbox.collisionType = CollisionType.active;
+        },
+      ),
+    );
   }
 
   @override
@@ -172,16 +173,16 @@ abstract class BaseTankComponent extends SpriteComponent
 
   /// 开火
   void fire({void Function()? onFinished}) {
-    // if (facingDirection != Vector2.zero()) {
-    //   game.addToWarMap(
-    //     BulletComponent.create(
-    //       ownerType: runtimeType,
-    //       direction: facingDirection,
-    //       position: position + facingDirection * size.x / 2,
-    //     ),
-    //   );
-    //   if (onFinished != null) onFinished();
-    // }
+    if (facingDirection != Vector2.zero()) {
+      game.warMapComponent?.add(
+        BulletComponent.create(
+          ownerType: runtimeType,
+          direction: facingDirection,
+          position: position + facingDirection * size.x / 2,
+        ),
+      );
+      if (onFinished != null) onFinished();
+    }
   }
 
   /// 被攻击
@@ -196,14 +197,18 @@ abstract class BaseTankComponent extends SpriteComponent
     } else {
       AudioUtils().playTankCrack();
     }
-    // game.addToWarMap(
-    //   _TankBomEffectComponent(
-    //     position: position,
-    //     onFinished: () {
-    //       game.onReceiveNotifier(TankBomNotifier(type: type));
-    //     },
-    //   ),
-    // );
+    game.warMapComponent?.add(
+      _TankBomEffectComponent(
+        position: position,
+        onFinished: () {
+          game
+              .descendants()
+              .whereType<MainScene>()
+              .firstOrNull
+              ?.onReceiveNotifier(TankBomNotifier(type: type));
+        },
+      ),
+    );
   }
 }
 
