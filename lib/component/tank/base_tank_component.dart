@@ -260,7 +260,9 @@ abstract class BaseTankComponent extends SpriteComponent
   }
 
   /// 被攻击
-  void hit() {}
+  void hit() {
+    bomAndDestroy(); //爆炸并损坏
+  }
 
   /// 爆炸并消灭
   void bomAndDestroy() {

@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flame/effects.dart';
 import 'package:flame/extensions.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:tank90/component/base/direction.dart' show Direction;
 import 'package:tank90/component/base/tank_type.dart' show TankType;
@@ -10,6 +12,7 @@ import 'package:tank90/component/tank/base_tank_component.dart'
 import 'package:flame/components.dart'
     show HasGameReference, PositionComponent, TimerComponent, Vector2;
 import 'package:tank90/data/map_constants.dart';
+import 'package:tank90/data/notifier/prop_tank_attack_notifier.dart';
 import 'package:tank90/scene/tank_war_game.dart';
 
 /// 地方坦克组件
@@ -17,20 +20,29 @@ class EnemyTankComponent extends BaseTankComponent {
   /// 移动定时器
   TimerComponent? _moveTimer;
 
+  /// 开火定时器
   TimerComponent? _fireTimer;
 
+  /// 随机数计算对象
   final Random _random = Random();
+
+  /// 红坦克闪烁计次，能挨几次攻击
+  int redFlickerCounter;
+
+  /// 是否闪烁状态
+  bool _isRedFlickerState = false;
 
   EnemyTankComponent._({
     super.speed,
     super.facingDirection,
     super.position,
     super.type = TankType.enemy0,
+    this.redFlickerCounter = 0,
   });
 
   @override
-  FutureOr<void> onLoad() {
-    super.onLoad();
+  FutureOr<void> onLoad() async {
+    await super.onLoad();
     add(
       _moveTimer ??= TimerComponent(
         period: 2.0,
@@ -39,6 +51,44 @@ class EnemyTankComponent extends BaseTankComponent {
       ),
     );
     _randomFire(); //随机开火
+  }
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    if (redFlickerCounter > 0 && !_isRedFlickerState) {
+      _isRedFlickerState = true;
+      _showRedFlickerEffect(); //显示红坦克特效
+    }
+  }
+
+  @override
+  void hit() {
+    if (redFlickerCounter <= 0) {
+      super.hit();
+    } else {
+      redFlickerCounter--;
+      game.mainScene?.onReceiveNotifier(PropTankAttackNotifier());
+    }
+  }
+
+  /// 显示红坦克特效
+  void _showRedFlickerEffect() {
+    add(
+      CombinedEffect(
+        [
+          ColorEffect(
+            Colors.red,
+            EffectController(duration: 1.0, infinite: true),
+          ),
+          OpacityEffect.fadeOut(
+            EffectController(duration: 1.0, infinite: true),
+          ),
+        ],
+        infinite: true,
+        alternate: true,
+      ),
+    );
   }
 
   // 随机开火
@@ -61,12 +111,14 @@ class EnemyTankComponent extends BaseTankComponent {
   static EnemyTankComponent create({
     TankType type = TankType.enemy0,
     Vector2? position,
+    int redFlickerCounter = 1,
   }) {
     return EnemyTankComponent._(
       position: position,
       type: type,
       speed: type.initialSpeed,
       facingDirection: Direction.random(),
+      redFlickerCounter: redFlickerCounter,
     );
   }
 

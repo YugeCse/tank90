@@ -90,7 +90,7 @@ class BulletComponent extends SpriteComponent
     } else if (other is BaseTankComponent && other.runtimeType != ownerType) {
       bomAndDestroy(); //爆炸并消失
       if (!other.isProtectedState) {
-        other.bomAndDestroy(); //爆炸并损坏
+        other.hit(); //被攻击
       }
     }
     AudioUtils().playBulletCrack();
