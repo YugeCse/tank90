@@ -4,13 +4,13 @@ import 'dart:math';
 import 'package:flame/effects.dart';
 import 'package:flame/extensions.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 import 'package:tank90/component/base/direction.dart' show Direction;
 import 'package:tank90/component/base/tank_type.dart' show TankType;
 import 'package:tank90/component/tank/base_tank_component.dart'
     show BaseTankComponent;
 import 'package:flame/components.dart'
     show HasGameReference, PositionComponent, TimerComponent, Vector2;
+import 'package:tank90/data/global_config.dart';
 import 'package:tank90/data/map_constants.dart';
 import 'package:tank90/data/notifier/prop_tank_attack_notifier.dart';
 import 'package:tank90/scene/tank_war_game.dart';
@@ -147,8 +147,8 @@ class EnemyTankFactory extends PositionComponent
   /// 最大生产数量
   final int maxTotalTankCount;
 
-  /// 统计生产了的数量
-  int _produceTankCount = 0;
+  /// 红色闪烁的坦克数量
+  int redFlickerTankCount = 0;
 
   /// 随机对象
   late Random _random;
@@ -156,10 +156,17 @@ class EnemyTankFactory extends PositionComponent
   /// 是否正在生产坦克
   bool _isGeneratingTank = false;
 
+  /// 生成坦克的数量
+  int _generateTankCount = 0;
+
   /// 生产坦克的定时器
   late TimerComponent _factoryTimer;
 
-  EnemyTankFactory({this.maxPerTankCount = 5, this.maxTotalTankCount = 20});
+  EnemyTankFactory({
+    this.maxPerTankCount = GlobalConfig.ENEMY_PER_WAR_COUNT,
+    this.maxTotalTankCount = GlobalConfig.ENEMEY_MAX_COUNT,
+    this.redFlickerTankCount = GlobalConfig.ENEMY_RED_FLICKER_COUNT,
+  });
 
   @override
   FutureOr<void> onLoad() {
@@ -174,7 +181,7 @@ class EnemyTankFactory extends PositionComponent
 
   /// 检查并生成坦克
   void _checkAndGenerateTanks() async {
-    if (_produceTankCount >= maxTotalTankCount) {
+    if (GlobalConfig.enemyCounts <= 0) {
       _factoryTimer.timer.stop();
       _factoryTimer.removeFromParent();
       debugPrint('所有坦克达到生产总数目：$maxTotalTankCount');
@@ -183,7 +190,7 @@ class EnemyTankFactory extends PositionComponent
     if (_isGeneratingTank) return;
     _isGeneratingTank = true;
     var diffCount = maxPerTankCount - (game.enemyTanks?.length ?? 0);
-    if (diffCount <= 0) {
+    if (diffCount <= 0 || GlobalConfig.enemyCounts <= 0) {
       _isGeneratingTank = false;
       return;
     }
@@ -207,23 +214,34 @@ class EnemyTankFactory extends PositionComponent
           await Future.delayed(const Duration(milliseconds: 500));
           continue;
         }
-        var newTank = generate(position);
+        var redFlickerCount = [4, 11, 17].contains(_generateTankCount)
+            ? _random.nextIntBetween(1, 3)
+            : 0;
+        var newTank = generate(position, redFlickerCount: redFlickerCount);
         game.warMapComponent?.add(newTank);
+        addedTanks.add(newTank); //记录这个新增的坦克
+        _generateTankCount++; //生成的坦克数量增加 1 次
+        GlobalConfig.enemyCounts--; //已经生成的坦克数量，总数量减少
         if (--diffCount <= 0) {
           debugPrint('本批次所有坦克已经生产完成');
           break; //所有坦克已经生产完成，需要跳出循环
         }
-        await Future.delayed(const Duration(milliseconds: 120));
-        addedTanks.add(newTank); //记录这个新增的坦克
-        _produceTankCount++; //已经生成的坦克数量++
+        await Future.delayed(
+          Duration(milliseconds: _random.nextIntBetween(500, 3000)),
+        );
       }
     }
     _isGeneratingTank = false; //标记上一次任务完成
   }
 
-  EnemyTankComponent generate(Vector2 targetPosition) {
+  /// 生成敌方坦克
+  EnemyTankComponent generate(
+    Vector2 targetPosition, {
+    int redFlickerCount = 0,
+  }) {
     return EnemyTankComponent.create(
       position: targetPosition,
+      redFlickerCounter: redFlickerCount,
       type: tankTypes[_random.nextIntBetween(0, tankTypes.length)],
     );
   }
