@@ -1,6 +1,15 @@
 /// 能力类
 sealed class Capability {}
 
+/// 休眠能力
+class SleepCapability extends Capability {
+  /// 休眠时长
+  int sleepTimeSec;
+
+  /// 构造函数
+  SleepCapability({this.sleepTimeSec = 60});
+}
+
 /// 被保护能力
 class ProtectedCapability extends Capability {
   /// 持续时间

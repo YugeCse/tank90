@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flame/effects.dart';
 import 'package:flame/extensions.dart';
 import 'package:flutter/material.dart';
+import 'package:tank90/component/base/capability.dart';
 import 'package:tank90/component/base/direction.dart' show Direction;
 import 'package:tank90/component/base/tank_type.dart' show TankType;
 import 'package:tank90/component/tank/base_tank_component.dart'
@@ -50,14 +51,8 @@ class EnemyTankComponent extends BaseTankComponent {
   @override
   FutureOr<void> onLoad() async {
     await super.onLoad();
-    add(
-      _moveTimer ??= TimerComponent(
-        period: 2.0,
-        repeat: true,
-        onTick: () => setFacingDirection(Direction.random()),
-      ),
-    );
-    _randomFire(); //随机开火
+    _startAutoMoveTimer(); //启动自动移动的定时器
+    _startRandomFireTimer(); //启动随机开火的定时器
   }
 
   @override
@@ -66,6 +61,11 @@ class EnemyTankComponent extends BaseTankComponent {
     if (redFlickerCounter <= 0 && _isRedFlickerState) {
       _isRedFlickerState = false;
       _removeRedFlickerEffect(); //移除红色闪烁效果
+    }
+    if (capabilities.containsKey(SleepCapability)) {
+      _removeAutoMoveTimer();
+    } else {
+      if (_fireTimer == null) _startAutoMoveTimer();
     }
   }
 
@@ -84,6 +84,25 @@ class EnemyTankComponent extends BaseTankComponent {
     } else {
       redFlickerCounter--;
       game.mainScene?.onReceiveNotifier(PropTankAttackNotifier());
+    }
+  }
+
+  /// 启动自动移动的定时器
+  void _startAutoMoveTimer() {
+    add(
+      _moveTimer ??= TimerComponent(
+        period: 2.0,
+        repeat: true,
+        onTick: () => setFacingDirection(Direction.random()),
+      ),
+    );
+  }
+
+  /// 移除自动移动的定时器
+  void _removeAutoMoveTimer() {
+    if (_moveTimer != null) {
+      _moveTimer?.removeFromParent();
+      _moveTimer = null;
     }
   }
 
@@ -124,14 +143,14 @@ class EnemyTankComponent extends BaseTankComponent {
     }
   }
 
-  // 随机开火
-  void _randomFire() {
+  // 启动随机开火的定时器
+  void _startRandomFireTimer() {
     add(
       _fireTimer ??= TimerComponent(
         onTick: () => fire(
           onFinished: () {
             _fireTimer = null;
-            _randomFire();
+            _startRandomFireTimer();
           },
         ),
         removeOnFinish: true,

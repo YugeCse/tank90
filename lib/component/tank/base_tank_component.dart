@@ -97,7 +97,9 @@ abstract class BaseTankComponent extends SpriteComponent
   @override
   void update(double dt) {
     super.update(dt);
-    position += velocity * speed * dt;
+    if (!capabilities.containsKey(SleepCapability)) {
+      position += velocity * speed * dt;
+    }
     _adjustLimitPosition(dt); //更新位置
   }
 
@@ -223,10 +225,7 @@ abstract class BaseTankComponent extends SpriteComponent
         GlobalConfig.enemyCounts += 1;
       }
     } else if (type is TimerPropType) {
-      if (this is PlayerTankComponent) {
-      } else {}
-
-      /// TODO 暂停玩家或敌人的行为能力
+      capabilities[SleepCapability] = SleepCapability();
     } else if (type is BossProtectPropType) {
       game.mainScene?.onReceiveNotifier(
         BossProtectedNotifier(
@@ -273,9 +272,7 @@ abstract class BaseTankComponent extends SpriteComponent
   }
 
   /// 被攻击
-  void hit() {
-    bomAndDestroy(); //爆炸并损坏
-  }
+  void hit() => bomAndDestroy(); //爆炸并损坏
 
   /// 爆炸并消灭
   void bomAndDestroy() {
