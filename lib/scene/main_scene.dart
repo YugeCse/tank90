@@ -6,6 +6,7 @@ import 'package:flame/components.dart';
 import 'package:flame/input.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Route, Image;
+import 'package:tank90/component/base/prop_type.dart';
 import 'package:tank90/component/base/tank_type.dart';
 import 'package:tank90/component/joystick/joystic_fire_component.dart'
     show JoystickFireComponent;
@@ -16,6 +17,7 @@ import 'package:tank90/component/map/war_map_component.dart'
 import 'package:tank90/component/tank/enemy_tank_component.dart';
 import 'package:tank90/component/tank/player_tank_component.dart'
     show PlayerTankComponent;
+import 'package:tank90/component/tank/prop_component.dart';
 import 'package:tank90/data/global_config.dart';
 import 'package:tank90/data/notifier/tank_bom_notifier.dart'
     show TankBomNotifier;
@@ -63,15 +65,11 @@ class MainScene extends Component with HasGameReference<TankWarGame> {
     }
     add(EnemyTankFactory()); //添加敌方坦克工厂组件
     add(
-      TimerComponent(
-        period: 2.0,
-        removeOnFinish: true,
-        onTick: () => {
-          mapComponent?.add(
-            playerTank ??= PlayerTankComponent(joystick: joystick),
-          ),
-        },
-      ),
+      TimerComponent(period: 1.0, removeOnFinish: true, onTick: _addPlayerTank),
+    );
+    mapComponent?.add(
+      PropComponent(propType: BoomPropType())
+        ..position = mapComponent!.size / 2.0,
     );
   }
 
@@ -79,11 +77,17 @@ class MainScene extends Component with HasGameReference<TankWarGame> {
   void onReceiveNotifier(dynamic event) {
     if (event is TankBomNotifier) {
       if (event.type == TankType.player) {
-        playerTank = null;
-        mapComponent?.add(
-          playerTank ??= PlayerTankComponent(joystick: joystick),
-        );
+        _addPlayerTank(); //添加玩家坦克
       }
     }
+  }
+
+  /// 添加玩家坦克
+  void _addPlayerTank() {
+    if (playerTank != null) {
+      playerTank?.removeFromParent();
+    }
+    playerTank = null;
+    mapComponent?.add(playerTank ??= PlayerTankComponent(joystick: joystick));
   }
 }

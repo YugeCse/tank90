@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:tank90/component/base/direction.dart' show Direction;
 import 'package:tank90/component/base/tank_type.dart' show TankType;
+import 'package:tank90/component/tank/tank_protect_component.dart';
 import 'package:tank90/data/map_constants.dart' show MapConstants;
 import 'package:flame/components.dart'
     show KeyboardHandler, JoystickDirection, Vector2;
@@ -28,6 +31,12 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
     super.speed,
     super.type = TankType.player,
   }) : super(position: defaultPosition);
+
+  @override
+  FutureOr<void> onLoad() async {
+    await super.onLoad();
+    add(TankProtectComponent());
+  }
 
   @override
   void update(double dt) {
@@ -69,19 +78,15 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
     if (_pressedKeys.contains(LogicalKeyboardKey.keyW)) {
       hasDirection = true;
       setFacingDirection(Direction.up);
-      debugPrint("up direction");
     } else if (_pressedKeys.contains(LogicalKeyboardKey.keyS)) {
       hasDirection = true;
       setFacingDirection(Direction.down);
-      debugPrint("down direction");
     } else if (_pressedKeys.contains(LogicalKeyboardKey.keyA)) {
       hasDirection = true;
       setFacingDirection(Direction.left);
-      debugPrint("left direction");
     } else if (_pressedKeys.contains(LogicalKeyboardKey.keyD)) {
       hasDirection = true;
       setFacingDirection(Direction.right);
-      debugPrint("right direction");
     }
     if (!hasDirection) {
       velocity = Vector2.zero(); //方向速度归零

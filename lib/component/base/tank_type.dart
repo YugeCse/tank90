@@ -1,6 +1,7 @@
 import 'package:tank90/component/base/direction.dart' show Direction;
 import 'package:flame/image_composition.dart';
 
+/// 坦克类型枚举
 enum TankType {
   player(0, 0, 100.0),
   enemy0(0, 32, 80.0),
