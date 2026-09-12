@@ -1,3 +1,5 @@
+import 'package:tank90/data/game_level.dart';
+
 class GlobalConfig {
   GlobalConfig._();
 
@@ -12,4 +14,7 @@ class GlobalConfig {
 
   /// 敌人数量
   static int enemyCounts = 20;
+
+  /// 游戏等级
+  static GameLevel gameLevel = GameLevel.easy;
 }

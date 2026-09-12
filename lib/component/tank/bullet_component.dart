@@ -89,8 +89,9 @@ class BulletComponent extends SpriteComponent
       bomAndDestroy(); //爆炸并消失
     } else if (other is BaseTankComponent && other.runtimeType != ownerType) {
       bomAndDestroy(); //爆炸并消失
-      // removeFromParent();
-      other.bomAndDestroy(); //爆炸并损坏
+      if (!other.isProtectedState) {
+        other.bomAndDestroy(); //爆炸并损坏
+      }
     }
     AudioUtils().playBulletCrack();
     super.onCollisionStart(intersectionPoints, other);

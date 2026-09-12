@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
-import 'package:flutter/foundation.dart';
 import 'package:tank90/component/base/prop_type.dart';
 import 'package:tank90/component/tank/enemy_tank_component.dart';
 import 'package:tank90/component/tank/player_tank_component.dart';
+import 'package:tank90/data/game_level.dart';
+import 'package:tank90/data/global_config.dart';
 import 'package:tank90/scene/tank_war_game.dart';
-import 'package:tank90/utils/audio_utils.dart';
 
 /// 装备组件类
 class PropComponent extends SpriteComponent
@@ -25,6 +25,9 @@ class PropComponent extends SpriteComponent
   /// 是否是闪烁状态
   bool _isFlickerState = false;
 
+  /// 撞击盒对象
+  late RectangleHitbox _hitbox;
+
   /// 构造函数
   PropComponent({
     required this.propType,
@@ -36,7 +39,7 @@ class PropComponent extends SpriteComponent
   FutureOr<void> onLoad() async {
     scale = Vector2.all(1.1);
     changePropType(propType);
-    add(RectangleHitbox(size: size, isSolid: true));
+    add(_hitbox = RectangleHitbox(size: size, isSolid: true));
   }
 
   @override
@@ -74,15 +77,18 @@ class PropComponent extends SpriteComponent
     Set<Vector2> intersectionPoints,
     PositionComponent other,
   ) {
-    super.onCollisionStart(intersectionPoints, other);
     if (other is PlayerTankComponent) {
+      _hitbox.collisionType = CollisionType.inactive;
       removeFromParent();
-      AudioUtils().playProp();
-      debugPrint('装备与玩家发生碰撞');
+      other.fetchProp(propType);
     } else if (other is EnemyTankComponent) {
-      removeFromParent();
-      AudioUtils().playProp();
-      debugPrint('装备与敌人发生碰撞');
+      // 只有困难等级才能让敌人获得装备
+      if (GlobalConfig.gameLevel == GameLevel.difficulty) {
+        _hitbox.collisionType = CollisionType.inactive;
+        removeFromParent();
+        other.fetchProp(propType);
+      }
     }
+    super.onCollisionStart(intersectionPoints, other);
   }
 }

@@ -1,9 +1,6 @@
-import 'dart:async';
-
 import 'package:flutter/widgets.dart';
 import 'package:tank90/component/base/direction.dart' show Direction;
 import 'package:tank90/component/base/tank_type.dart' show TankType;
-import 'package:tank90/component/tank/tank_protect_component.dart';
 import 'package:tank90/data/map_constants.dart' show MapConstants;
 import 'package:flame/components.dart'
     show KeyboardHandler, JoystickDirection, Vector2;
@@ -31,12 +28,6 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
     super.speed,
     super.type = TankType.player,
   }) : super(position: defaultPosition);
-
-  @override
-  FutureOr<void> onLoad() async {
-    await super.onLoad();
-    add(TankProtectComponent());
-  }
 
   @override
   void update(double dt) {
@@ -104,7 +95,9 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
 
   @override
   bool onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
-    handleKeyEvent(event);
+    if (!isBornState) {
+      handleKeyEvent(event);
+    }
     return super.onKeyEvent(event, keysPressed);
   }
 

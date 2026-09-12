@@ -1,17 +1,22 @@
 import 'dart:async';
+import 'dart:math';
 
+import 'package:tank90/component/base/capability.dart';
 import 'package:tank90/component/base/direction.dart';
 import 'package:tank90/component/base/hitbox_mixin.dart';
 import 'package:tank90/component/base/map_cell_type.dart';
+import 'package:tank90/component/base/prop_type.dart';
 import 'package:tank90/component/base/tank_type.dart';
 import 'package:tank90/component/tank/bullet_component.dart';
 import 'package:tank90/component/map/map_cell_component.dart';
 import 'package:tank90/component/tank/player_tank_component.dart';
 import 'package:tank90/component/tank/tank_born_component.dart';
+import 'package:tank90/component/tank/tank_protect_component.dart';
+import 'package:tank90/data/global_config.dart';
 import 'package:tank90/data/map_constants.dart';
+import 'package:tank90/data/notifier/boom_all_notifier.dart';
 import 'package:tank90/data/notifier/tank_bom_notifier.dart'
     show TankBomNotifier;
-import 'package:tank90/scene/main_scene.dart';
 import 'package:tank90/scene/tank_war_game.dart' show TankWarGame;
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
@@ -32,8 +37,23 @@ abstract class BaseTankComponent extends SpriteComponent
   /// 坦克有效的方向数据
   Vector2 facingDirection = Vector2.zero();
 
-  /// 碰撞对象集合
+  /// 是否是出生状态
+  bool isBornState = true;
+
+  /// 是否处理了碰撞逻辑
+  bool _isCollisionHandled = false;
+
+  /// 拥有的能力对象集合
+  final Map<Type, Capability> capabilities = {};
+
+  /// 碰撞对象集合, 方便计算碰撞数据
   final Set<Component> _collisionObjects = {};
+
+  /// 坦克保护组件，有时效性的
+  TankProtectComponent? _tankProtectComponent;
+
+  /// 是否是处理被保护状态
+  bool get isProtectedState => _tankProtectComponent != null;
 
   BaseTankComponent({
     required this.type,
@@ -61,6 +81,7 @@ abstract class BaseTankComponent extends SpriteComponent
         position: position,
         onAnimationFinished: () {
           opacity = 1.0;
+          isBornState = false;
           hitbox.collisionType = CollisionType.active;
         },
       ),
@@ -79,8 +100,6 @@ abstract class BaseTankComponent extends SpriteComponent
     _adjustCollisionPosition(); //调整碰撞位置信息
     position.clamp(Vector2.zero() + size / 2, MapConstants.mapSize - size / 2);
   }
-
-  var _isCollisionHandled = false;
 
   /// 调整碰撞位置信息
   void _adjustCollisionPosition() {
@@ -171,6 +190,57 @@ abstract class BaseTankComponent extends SpriteComponent
     }
   }
 
+  /// 添加保护效果
+  void showProtectEffect() {
+    if (_tankProtectComponent != null) {
+      _tankProtectComponent?.removeFromParent();
+      _tankProtectComponent = null;
+    }
+    add(_tankProtectComponent = TankProtectComponent());
+  }
+
+  /// 获得装备
+  void fetchProp(PropType type) {
+    if (type is TankPropType) {
+      AudioUtils().playProp();
+      if (this.type == TankType.player) {
+        GlobalConfig.playerLifes += 1;
+      } else {
+        if (GlobalConfig.enemyCounts >= 20) {
+          //敌人最多能拥有 20 个
+          return;
+        }
+        GlobalConfig.enemyCounts += 1;
+      }
+    } else if (type is TimerPropType) {
+      if (this is PlayerTankComponent) {
+      } else {}
+
+      /// TODO 暂停玩家或敌人的行为能力
+    } else if (type is BossProtectPropType) {
+      if (this is PlayerTankComponent) {
+      } else {}
+
+      ///TODO 在地图上对 BOSS 区域进行装饰
+    } else if (type is BoomPropType) {
+      game.mainScene?.onReceiveNotifier(
+        BoomAllNotifier(type: type, ownerType: this.type),
+      );
+    } else if (type is StarPropType) {
+      if (capabilities.containsKey(StrongFireCapability)) {
+        var capability =
+            capabilities[StrongFireCapability] as StrongFireCapability;
+        var level = max(capability.fireLevel + 1, 3);
+        capability.fireLevel = level;
+        capabilities[StrongFireCapability] = capability;
+      } else {
+        capabilities[StrongFireCapability] = StrongFireCapability(fireLevel: 2);
+      }
+    } else if (type is HatProtectPropType) {
+      showProtectEffect(); //如果没有保护效果的，则添加保护效果
+    }
+  }
+
   /// 开火
   void fire({void Function()? onFinished}) {
     if (facingDirection != Vector2.zero()) {
@@ -201,11 +271,7 @@ abstract class BaseTankComponent extends SpriteComponent
       _TankBomEffectComponent(
         position: position,
         onFinished: () {
-          game
-              .descendants()
-              .whereType<MainScene>()
-              .firstOrNull
-              ?.onReceiveNotifier(TankBomNotifier(type: type));
+          game.mainScene?.onReceiveNotifier(TankBomNotifier(type: type));
         },
       ),
     );

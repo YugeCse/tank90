@@ -19,6 +19,7 @@ import 'package:tank90/component/tank/player_tank_component.dart'
     show PlayerTankComponent;
 import 'package:tank90/component/tank/prop_component.dart';
 import 'package:tank90/data/global_config.dart';
+import 'package:tank90/data/notifier/boom_all_notifier.dart';
 import 'package:tank90/data/notifier/tank_bom_notifier.dart'
     show TankBomNotifier;
 import 'package:tank90/scene/tank_war_game.dart';
@@ -67,9 +68,11 @@ class MainScene extends Component with HasGameReference<TankWarGame> {
     add(
       TimerComponent(period: 1.0, removeOnFinish: true, onTick: _addPlayerTank),
     );
-    mapComponent?.add(
-      PropComponent(propType: BoomPropType())
-        ..position = mapComponent!.size / 2.0,
+    Future.delayed(
+      Duration(seconds: 1),
+      () => mapComponent?.add(
+        PropComponent(propType: BoomPropType())..position = game.size / 2.0,
+      ),
     );
   }
 
@@ -78,6 +81,31 @@ class MainScene extends Component with HasGameReference<TankWarGame> {
     if (event is TankBomNotifier) {
       if (event.type == TankType.player) {
         _addPlayerTank(); //添加玩家坦克
+      } else {
+        ///TODO 敌方坦克爆炸死亡
+      }
+    } else if (event is BoomAllNotifier) {
+      _boomAllTanks(event); //炸死所有坦克的通知
+    }
+  }
+
+  /// 炸死所有坦克的通知
+  void _boomAllTanks(BoomAllNotifier event) {
+    if (event.ownerType == TankType.player) {
+      var allEnemies = mapComponent
+          ?.descendants()
+          .whereType<EnemyTankComponent>();
+      if (allEnemies == null) return;
+      for (var enemy in allEnemies) {
+        enemy.bomAndDestroy(); //调用爆炸的方法
+      }
+    } else {
+      var allPlayers = mapComponent
+          ?.descendants()
+          .whereType<PlayerTankComponent>();
+      if (allPlayers == null) return;
+      for (var player in allPlayers) {
+        player.bomAndDestroy(); //调用爆炸的方法
       }
     }
   }

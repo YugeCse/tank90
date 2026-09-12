@@ -42,4 +42,7 @@ class TankWarGame extends FlameGame
   /// 获取游戏战场中所有的敌方坦克
   Set<EnemyTankComponent>? get enemyTanks =>
       descendants().whereType<EnemyTankComponent>().toSet();
+
+  /// 游戏主场景
+  MainScene? get mainScene => descendants().whereType<MainScene>().firstOrNull;
 }
