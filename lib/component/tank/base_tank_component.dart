@@ -10,6 +10,7 @@ import 'package:tank90/component/base/prop_type.dart';
 import 'package:tank90/component/base/tank_type.dart';
 import 'package:tank90/component/tank/bullet_component.dart';
 import 'package:tank90/component/map/map_cell_component.dart';
+import 'package:tank90/component/tank/enemy_tank_component.dart';
 import 'package:tank90/component/tank/player_tank_component.dart';
 import 'package:tank90/component/tank/tank_born_component.dart';
 import 'package:tank90/component/tank/tank_protect_component.dart';
@@ -99,6 +100,12 @@ abstract class BaseTankComponent extends SpriteComponent
     super.update(dt);
     if (!capabilities.containsKey(SleepCapability)) {
       position += velocity * speed * dt;
+    } else {
+      var capability = capabilities[SleepCapability] as SleepCapability;
+      capability.sleepTimeSec -= dt;
+      if (capability.sleepTimeSec <= 0.0) {
+        capabilities.remove(SleepCapability); //移除这个能力
+      }
     }
     _adjustLimitPosition(dt); //更新位置
   }
@@ -225,7 +232,11 @@ abstract class BaseTankComponent extends SpriteComponent
         GlobalConfig.enemyCounts += 1;
       }
     } else if (type is TimerPropType) {
-      capabilities[SleepCapability] = SleepCapability();
+      if (this is EnemyTankComponent) {
+        game.mainScene?.freezePlayerTank();
+      } else {
+        game.mainScene?.freezeEnemyTanks();
+      }
     } else if (type is BossProtectPropType) {
       game.mainScene?.onReceiveNotifier(
         BossProtectedNotifier(

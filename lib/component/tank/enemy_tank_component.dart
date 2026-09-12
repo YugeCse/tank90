@@ -64,8 +64,10 @@ class EnemyTankComponent extends BaseTankComponent {
     }
     if (capabilities.containsKey(SleepCapability)) {
       _removeAutoMoveTimer();
+      _removeRandomFireTime();
     } else {
-      if (_fireTimer == null) _startAutoMoveTimer();
+      if (_moveTimer == null) _startAutoMoveTimer();
+      if (_fireTimer == null) _startRandomFireTimer();
     }
   }
 
@@ -143,7 +145,7 @@ class EnemyTankComponent extends BaseTankComponent {
     }
   }
 
-  // 启动随机开火的定时器
+  /// 启动随机开火的定时器
   void _startRandomFireTimer() {
     add(
       _fireTimer ??= TimerComponent(
@@ -157,6 +159,14 @@ class EnemyTankComponent extends BaseTankComponent {
         period: _random.nextDouble() * 3 + 1,
       ),
     );
+  }
+
+  /// 移除随机开火的定时器
+  void _removeRandomFireTime() {
+    if (_fireTimer != null) {
+      _fireTimer?.removeFromParent();
+      _fireTimer = null;
+    }
   }
 
   /// 创建敌方坦克实例

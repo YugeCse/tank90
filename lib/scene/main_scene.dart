@@ -6,6 +6,7 @@ import 'package:flame/components.dart';
 import 'package:flame/input.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Route, Image;
+import 'package:tank90/component/base/capability.dart';
 import 'package:tank90/component/base/tank_type.dart';
 import 'package:tank90/component/joystick/joystic_fire_component.dart'
     show JoystickFireComponent;
@@ -138,5 +139,17 @@ class MainScene extends Component with HasGameReference<TankWarGame> {
     }
     playerTank = null;
     mapComponent?.add(playerTank ??= PlayerTankComponent(joystick: joystick));
+  }
+
+  /// 冻结敌方坦克
+  void freezeEnemyTanks() {
+    game.enemyTanks?.forEach((enemy) {
+      enemy.capabilities[SleepCapability] = SleepCapability();
+    });
+  }
+
+  /// 冻结玩家坦克
+  void freezePlayerTank() {
+    playerTank?.capabilities[SleepCapability] = SleepCapability();
   }
 }

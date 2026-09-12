@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:tank90/component/base/capability.dart';
 import 'package:tank90/component/base/direction.dart' show Direction;
 import 'package:tank90/component/base/tank_type.dart' show TankType;
 import 'package:tank90/data/map_constants.dart' show MapConstants;
@@ -95,7 +96,7 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
 
   @override
   bool onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
-    if (!isBornState) {
+    if (!isBornState && !capabilities.containsKey(SleepCapability)) {
       handleKeyEvent(event);
     }
     return super.onKeyEvent(event, keysPressed);
