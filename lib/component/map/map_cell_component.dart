@@ -29,7 +29,8 @@ class MapCellComponent extends SpriteComponent
     add(hitbox = RectangleHitbox(size: size - Vector2.all(2.0)));
   }
 
-  void setRemoveFromParent() {
+  /// 从父节点移除
+  void setWillRemoveFromParent() {
     removeFromParent();
     hitbox.collisionType = CollisionType.inactive;
   }

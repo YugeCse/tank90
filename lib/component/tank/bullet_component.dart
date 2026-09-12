@@ -41,6 +41,8 @@ class BulletComponent extends SpriteComponent
   /// 碰撞盒
   late RectangleHitbox hitbox;
 
+  bool _isShotOutWall = false;
+
   /// 构造函数
   BulletComponent({
     required this.ownerType,
@@ -64,13 +66,16 @@ class BulletComponent extends SpriteComponent
   @override
   void update(double dt) {
     super.update(dt);
-    if (!Rect.fromLTWH(
-      0,
-      0,
-      MapConstants.mapSize.x,
-      MapConstants.mapSize.y,
-    ).overlaps(toRect())) {
+    if (!_isShotOutWall &&
+        !Rect.fromLTWH(
+          0,
+          0,
+          MapConstants.mapSize.x,
+          MapConstants.mapSize.y,
+        ).overlaps(toRect())) {
+      _isShotOutWall = true;
       bomAndDestroy(); //从父节点中删除
+      AudioUtils().playBulletCrack(); //子弹射击到边界
     }
     position += velocity * speed * dt;
   }
@@ -83,17 +88,19 @@ class BulletComponent extends SpriteComponent
     if (other is MapCellComponent &&
         other.type != MapCellType.grass &&
         other.type != MapCellType.rive) {
+      AudioUtils().playBulletCrack();
       if (other.type == MapCellType.mudWall) {
-        other.setRemoveFromParent();
+        //如果是泥墙，直接移除
+        other.setWillRemoveFromParent();
       }
       bomAndDestroy(); //爆炸并消失
     } else if (other is BaseTankComponent && other.runtimeType != ownerType) {
-      bomAndDestroy(); //爆炸并消失
+      AudioUtils().playBulletCrack();
       if (!other.isProtectedState) {
         other.hit(); //被攻击
       }
+      bomAndDestroy(); //爆炸并消失
     }
-    AudioUtils().playBulletCrack();
     super.onCollisionStart(intersectionPoints, other);
   }
 

@@ -36,6 +36,7 @@ class PropComponent extends SpriteComponent
     required this.propType,
     super.position,
     this.stayTimeSec = 30.0,
+    super.priority = 9999, //道具应该绘制在最上层
   });
 
   @override

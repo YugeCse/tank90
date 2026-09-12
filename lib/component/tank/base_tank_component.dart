@@ -246,8 +246,12 @@ abstract class BaseTankComponent extends SpriteComponent
   }
 
   /// 开火
+  /// + [onFinished] - 开火完成的事件
   void fire({void Function()? onFinished}) {
     if (facingDirection != Vector2.zero()) {
+      if (this is PlayerTankComponent) {
+        AudioUtils().playAttack(); //播放玩家射击的声音
+      }
       game.warMapComponent?.add(
         BulletComponent.create(
           ownerType: runtimeType,

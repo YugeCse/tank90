@@ -81,17 +81,23 @@ class AudioUtils {
   void playStart() =>
       _checkAndPlay(() => FlameAudio.playLongAudio('start.mp3', volume: 0.5));
 
+  /// 播放子弹射击的声音
   void playAttack() => _checkAndPlayAudioPool(() => _attackPool.start());
 
+  /// 播放在冰上移动的声音
   void playMove() => _checkAndPlayAudioPool(() => _movePool.start());
 
+  /// 播放子弹撞击的声音
   void playBulletCrack() =>
       _checkAndPlayAudioPool(() => _bulletCrackPool.start());
 
+  /// 播放玩家被攻击的声音
   void playPlayerCrack() =>
       _checkAndPlayAudioPool(() => _playerCrackPool.start());
 
+  /// 播放获得道具的声音
   void playProp() => _checkAndPlayAudioPool(() => _propPool.start());
 
+  /// 播放坦克被攻击的声音
   void playTankCrack() => _checkAndPlayAudioPool(() => _tankCrackPool.start());
 }
