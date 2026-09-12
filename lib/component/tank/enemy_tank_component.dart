@@ -23,6 +23,13 @@ class EnemyTankComponent extends BaseTankComponent {
   /// 开火定时器
   TimerComponent? _fireTimer;
 
+  Color? _originalColor;
+
+  double? _originalOpacity;
+
+  /// 红色闪烁组件
+  CombinedEffect? _redFlickerEffect;
+
   /// 随机数计算对象
   final Random _random = Random();
 
@@ -56,6 +63,14 @@ class EnemyTankComponent extends BaseTankComponent {
   @override
   void update(double dt) {
     super.update(dt);
+    if (redFlickerCounter <= 0 && _isRedFlickerState) {
+      _isRedFlickerState = false;
+      _removeRedFlickerEffect(); //移除红色闪烁效果
+    }
+  }
+
+  @override
+  void onBornFinished() {
     if (redFlickerCounter > 0 && !_isRedFlickerState) {
       _isRedFlickerState = true;
       _showRedFlickerEffect(); //显示红坦克特效
@@ -74,21 +89,39 @@ class EnemyTankComponent extends BaseTankComponent {
 
   /// 显示红坦克特效
   void _showRedFlickerEffect() {
+    // 只在第一次记录初始状态
+    _originalColor ??= paint.color;
+    _originalOpacity ??= paint.color.a; // 0.0 - 1.0
     add(
-      CombinedEffect(
+      _redFlickerEffect ??= CombinedEffect(
         [
           ColorEffect(
             Colors.red,
-            EffectController(duration: 1.0, infinite: true),
+            EffectController(duration: 1.0, alternate: true),
           ),
           OpacityEffect.fadeOut(
-            EffectController(duration: 1.0, infinite: true),
+            EffectController(duration: 1.0, alternate: true),
           ),
         ],
-        infinite: true,
         alternate: true,
+        infinite: true,
       ),
     );
+  }
+
+  /// 移除红色闪烁特效
+  void _removeRedFlickerEffect() {
+    _redFlickerEffect?.removeFromParent();
+    _redFlickerEffect = null;
+    // 手动恢复初始状态
+    if (_originalColor != null) {
+      paint.color = _originalColor!;
+      _originalColor = null;
+    }
+    if (_originalOpacity != null) {
+      paint.color = paint.color.withValues(alpha: _originalOpacity!);
+      _originalOpacity = null;
+    }
   }
 
   // 随机开火

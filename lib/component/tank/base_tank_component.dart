@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:tank90/component/base/boss_wall_state.dart';
 import 'package:tank90/component/base/capability.dart';
 import 'package:tank90/component/base/direction.dart';
 import 'package:tank90/component/base/hitbox_mixin.dart';
@@ -15,6 +16,7 @@ import 'package:tank90/component/tank/tank_protect_component.dart';
 import 'package:tank90/data/global_config.dart';
 import 'package:tank90/data/map_constants.dart';
 import 'package:tank90/data/notifier/boom_all_notifier.dart';
+import 'package:tank90/data/notifier/boss_protected_notifier.dart';
 import 'package:tank90/data/notifier/tank_bom_notifier.dart'
     show TankBomNotifier;
 import 'package:tank90/scene/tank_war_game.dart' show TankWarGame;
@@ -64,6 +66,9 @@ abstract class BaseTankComponent extends SpriteComponent
        velocity = facingDirection ?? Direction.up,
        super(size: type.srcSize, anchor: Anchor.center, priority: 600);
 
+  /// 出生完成事件
+  void onBornFinished() {}
+
   @override
   FutureOr<void> onLoad() {
     sprite = Sprite(
@@ -83,6 +88,7 @@ abstract class BaseTankComponent extends SpriteComponent
           opacity = 1.0;
           isBornState = false;
           hitbox.collisionType = CollisionType.active;
+          onBornFinished(); //出生完成
         },
       ),
     );
@@ -222,10 +228,13 @@ abstract class BaseTankComponent extends SpriteComponent
 
       /// TODO 暂停玩家或敌人的行为能力
     } else if (type is BossProtectPropType) {
-      if (this is PlayerTankComponent) {
-      } else {}
-
-      ///TODO 在地图上对 BOSS 区域进行装饰
+      game.mainScene?.onReceiveNotifier(
+        BossProtectedNotifier(
+          state: this is PlayerTankComponent
+              ? SteelBossWallState()
+              : NoneBossWallState(),
+        ),
+      );
     } else if (type is BoomPropType) {
       game.mainScene?.onReceiveNotifier(
         BoomAllNotifier(type: type, ownerType: this.type),

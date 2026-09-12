@@ -29,6 +29,16 @@ class MapCellComponent extends SpriteComponent
     add(hitbox = RectangleHitbox(size: size - Vector2.all(2.0)));
   }
 
+  /// 修改类型
+  void changeType(MapCellType type) {
+    this.type = type;
+    sprite = Sprite(
+      game.assetImage,
+      srcSize: MapCellType.size,
+      srcPosition: type.srcPosition,
+    );
+  }
+
   /// 从父节点移除
   void setWillRemoveFromParent() {
     removeFromParent();

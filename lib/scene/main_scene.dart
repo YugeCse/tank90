@@ -19,6 +19,7 @@ import 'package:tank90/component/tank/player_tank_component.dart'
 import 'package:tank90/component/tank/prop_component.dart';
 import 'package:tank90/data/global_config.dart';
 import 'package:tank90/data/notifier/boom_all_notifier.dart';
+import 'package:tank90/data/notifier/boss_protected_notifier.dart';
 import 'package:tank90/data/notifier/prop_tank_attack_notifier.dart';
 import 'package:tank90/data/notifier/tank_bom_notifier.dart'
     show TankBomNotifier;
@@ -89,16 +90,23 @@ class MainScene extends Component with HasGameReference<TankWarGame> {
   void onReceiveNotifier(dynamic event) {
     if (event is TankBomNotifier) {
       if (event.type == TankType.player) {
-        if (GlobalConfig.playerLifes > 0) {
+        if (--GlobalConfig.playerLifes > 0) {
           _addPlayerTank(); //添加玩家坦克
-        } else {}
+        } else {
+          ///TODO Game Over !
+        }
       } else {
-        ///TODO 敌方坦克爆炸死亡
+        if (GlobalConfig.enemyCounts == 0 &&
+            (game.enemyTanks?.isEmpty ?? true)) {
+          ///TODO Jump To Next Stage Level
+        }
       }
     } else if (event is BoomAllNotifier) {
       _boomAllTanks(event); //炸死所有坦克的通知
     } else if (event is PropTankAttackNotifier) {
       _propFactoryComponent?.generateProp(); //生成道具组件
+    } else if (event is BossProtectedNotifier) {
+      mapComponent?.changeBossWallState(event.state);
     }
   }
 
