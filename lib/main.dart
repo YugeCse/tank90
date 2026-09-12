@@ -22,7 +22,7 @@ class MyApplicaption extends StatelessWidget {
       await Flame.device.fullScreen();
       await Flame.device.setLandscape();
     }
-    await AudioUtils.preloadAll();
+    AudioUtils().preload(); //加载音频数据
   }
 
   @override

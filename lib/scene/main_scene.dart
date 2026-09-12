@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' show max;
 
 import 'package:flame/components.dart';
 import 'package:flame/input.dart';
@@ -15,11 +16,13 @@ import 'package:tank90/component/map/war_map_component.dart'
 import 'package:tank90/component/tank/enemy_tank_component.dart';
 import 'package:tank90/component/tank/player_tank_component.dart'
     show PlayerTankComponent;
+import 'package:tank90/data/global_config.dart';
 import 'package:tank90/data/notifier/tank_bom_notifier.dart'
     show TankBomNotifier;
 import 'package:tank90/scene/tank_war_game.dart';
 import 'package:tank90/utils/audio_utils.dart';
 
+/// 主场景
 class MainScene extends Component with HasGameReference<TankWarGame> {
   WarMapComponent? mapComponent;
 
@@ -32,7 +35,11 @@ class MainScene extends Component with HasGameReference<TankWarGame> {
   @override
   FutureOr<void> onLoad() async {
     AudioUtils().playStart(); //播放开始的声音
-    add(mapComponent ??= WarMapComponent(stage: 1));
+    add(
+      mapComponent ??= WarMapComponent(
+        stage: max(GlobalConfig.stageLevel - 1, 0),
+      ),
+    );
     if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
       add(
         joystick = JoystickComponent(

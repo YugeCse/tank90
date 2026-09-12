@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flame_audio/flame_audio.dart';
 
+/// 音频播放控制类
 class AudioUtils {
   AudioUtils._internal();
 
@@ -9,28 +10,35 @@ class AudioUtils {
 
   static final _instance = AudioUtils._internal();
 
-  /// 预加载所有音效到缓存
-  static Future<void> preloadAll() async {
-    final files = [
-      'start.mp3',
-      'attack.mp3',
-      'move.mp3',
-      'bulletCrack.mp3',
-      'playerCrack.mp3',
-      'prop.mp3',
-      'tankCrack.mp3',
-    ];
+  late AudioPool _attackPool;
 
-    // 一个音频资源失败不能阻止游戏启动，尤其是 Web 端的资源加载。
-    await Future.wait(
-      files.map((file) async {
-        try {
-          await FlameAudio.audioCache.load(file);
-        } catch (_) {
-          // 播放时还会再次尝试，预加载失败不影响游戏运行。
-        }
-      }),
+  late AudioPool _movePool;
+
+  late AudioPool _bulletCrackPool;
+
+  late AudioPool _playerCrackPool;
+
+  late AudioPool _propPool;
+
+  late AudioPool _tankCrackPool;
+
+  /// 预加载所有音效到缓存
+  Future<void> preload() async {
+    _attackPool = await FlameAudio.createPool('attack.mp3', maxPlayers: 5);
+    _movePool = await FlameAudio.createPool('move.mp3', maxPlayers: 5);
+    _bulletCrackPool = await FlameAudio.createPool(
+      'bulletCrack.mp3',
+      maxPlayers: 5,
     );
+    _playerCrackPool = await FlameAudio.createPool(
+      'playerCrack.mp3',
+      maxPlayers: 5,
+    );
+    _tankCrackPool = await FlameAudio.createPool(
+      'tankCrack.mp3',
+      maxPlayers: 5,
+    );
+    _propPool = await FlameAudio.createPool('prop.mp3', maxPlayers: 5);
   }
 
   /// 是否允许播放声音
@@ -52,21 +60,38 @@ class AudioUtils {
     }
   }
 
+  void _checkAndPlayAudioPool(Future<Future<void> Function()> Function() next) {
+    if (allowPlay) {
+      // Web 浏览器可能因为自动播放策略拒绝 play，不能让异常冒泡到游戏主循环。
+      unawaited(_playSafely2(next));
+    }
+  }
+
+  Future<void> _playSafely2(
+    Future<Future<void> Function()> Function() next,
+  ) async {
+    try {
+      await next();
+    } catch (_) {
+      // 音频失败不应影响游戏逻辑。
+    }
+  }
+
   /// 播放开始音乐
   void playStart() =>
       _checkAndPlay(() => FlameAudio.playLongAudio('start.mp3', volume: 0.5));
 
-  void playAttack() => _checkAndPlay(() => FlameAudio.play('attack.mp3'));
+  void playAttack() => _checkAndPlayAudioPool(() => _attackPool.start());
 
-  void playMove() => _checkAndPlay(() => FlameAudio.play('move.mp3'));
+  void playMove() => _checkAndPlayAudioPool(() => _movePool.start());
 
   void playBulletCrack() =>
-      _checkAndPlay(() => FlameAudio.play('bulletCrack.mp3'));
+      _checkAndPlayAudioPool(() => _bulletCrackPool.start());
 
   void playPlayerCrack() =>
-      _checkAndPlay(() => FlameAudio.play('playerCrack.mp3'));
+      _checkAndPlayAudioPool(() => _playerCrackPool.start());
 
-  void playProp() => _checkAndPlay(() => FlameAudio.play('prop.mp3'));
+  void playProp() => _checkAndPlayAudioPool(() => _propPool.start());
 
-  void playTankCrack() => _checkAndPlay(() => FlameAudio.play('tankCrack.mp3'));
+  void playTankCrack() => _checkAndPlayAudioPool(() => _tankCrackPool.start());
 }

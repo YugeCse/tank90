@@ -4,7 +4,7 @@ import 'package:tank90/component/base/direction.dart';
 import 'package:tank90/component/base/hitbox_mixin.dart';
 import 'package:tank90/component/base/map_cell_type.dart';
 import 'package:tank90/component/base/tank_type.dart';
-import 'package:tank90/component/bullet/bullet_component.dart';
+import 'package:tank90/component/tank/bullet_component.dart';
 import 'package:tank90/component/map/map_cell_component.dart';
 import 'package:tank90/component/tank/player_tank_component.dart';
 import 'package:tank90/component/tank/tank_born_component.dart';
@@ -26,7 +26,7 @@ abstract class BaseTankComponent extends SpriteComponent
   /// 移动速度
   double speed;
 
-  /// 坦克的向量速度
+  /// 坦克的单位速度向量
   Vector2 velocity;
 
   /// 坦克有效的方向数据
@@ -177,7 +177,7 @@ abstract class BaseTankComponent extends SpriteComponent
       game.warMapComponent?.add(
         BulletComponent.create(
           ownerType: runtimeType,
-          direction: facingDirection,
+          velocity: facingDirection,
           position: position + facingDirection * size.x / 2,
         ),
       );

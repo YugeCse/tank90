@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show KeyDownEvent, LogicalKeyboardKey;
+import 'package:tank90/data/global_config.dart';
 import 'package:tank90/data/map_stage_level.dart';
 import 'package:tank90/scene/tank_war_game.dart';
 
@@ -15,6 +16,7 @@ class StageScreen extends Component
 
   @override
   FutureOr<void> onLoad() async {
+    _stageLevel = GlobalConfig.stageLevel;
     add(
       _stageComponent = TextComponent(
         text: 'STAGE $_stageLevel',
@@ -46,6 +48,7 @@ class StageScreen extends Component
         if (_stageLevel <= 1) {
           _stageLevel = MapStageLevel.maps.length;
         }
+        GlobalConfig.stageLevel = _stageLevel;
         _stageComponent.text = "STAGE $_stageLevel";
       } else if ({
         LogicalKeyboardKey.arrowDown,
@@ -55,6 +58,7 @@ class StageScreen extends Component
         if (_stageLevel > MapStageLevel.maps.length) {
           _stageLevel = 1;
         }
+        GlobalConfig.stageLevel = _stageLevel;
         _stageComponent.text = "STAGE $_stageLevel";
       }
     }

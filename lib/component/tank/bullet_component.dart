@@ -29,18 +29,23 @@ class BulletComponent extends SpriteComponent
     return _rightOffset;
   }
 
+  /// 单位速度向量
+  Vector2 velocity;
+
+  /// 运行速度
   final double speed;
 
-  final Vector2 direction;
-
-  late RectangleHitbox hitbox;
-
+  /// 拥有者类型
   final Type ownerType;
 
+  /// 碰撞盒
+  late RectangleHitbox hitbox;
+
+  /// 构造函数
   BulletComponent({
     required this.ownerType,
     this.speed = 150.0,
-    required this.direction,
+    required this.velocity,
   }) : super(size: Vector2.all(6.0), priority: 700) {
     add(hitbox = RectangleHitbox(size: Vector2.all(5.0)));
   }
@@ -52,7 +57,7 @@ class BulletComponent extends SpriteComponent
     sprite = Sprite(
       game.assetImage,
       srcSize: Vector2.all(6.0),
-      srcPosition: _getSrcOffset(direction),
+      srcPosition: _getSrcOffset(velocity),
     );
   }
 
@@ -67,7 +72,7 @@ class BulletComponent extends SpriteComponent
     ).overlaps(toRect())) {
       bomAndDestroy(); //从父节点中删除
     }
-    position += direction * speed * dt;
+    position += velocity * speed * dt;
   }
 
   @override
@@ -75,7 +80,6 @@ class BulletComponent extends SpriteComponent
     Set<Vector2> intersectionPoints,
     PositionComponent other,
   ) {
-    if (intersectionPoints.isEmpty) return;
     if (other is MapCellComponent &&
         other.type != MapCellType.grass &&
         other.type != MapCellType.rive) {
@@ -94,7 +98,8 @@ class BulletComponent extends SpriteComponent
 
   /// 爆炸并消失
   void bomAndDestroy() {
-    removeFromParent();
+    velocity = Vector2.zero();
+    removeFromParent(); //下一帧从父节点删除
     hitbox.collisionType = CollisionType.inactive;
     game.warMapComponent?.add(
       _BulletBomEffectComponent(position: position.clone()),
@@ -105,12 +110,12 @@ class BulletComponent extends SpriteComponent
   static BulletComponent create({
     required Type ownerType,
     double speed = 150.0,
-    required Vector2 direction,
+    required Vector2 velocity,
     Vector2? position,
   }) {
     return BulletComponent(
       ownerType: ownerType,
-      direction: direction,
+      velocity: velocity,
       speed: speed,
     )..position = position ?? Vector2.zero();
   }
