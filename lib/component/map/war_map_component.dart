@@ -16,8 +16,10 @@ class WarMapComponent extends PositionComponent
   /// 关卡数
   int stage = 0;
 
+  /// boss 表格坐标
   Vector2? _bossGridPosition;
 
+  /// boss 组件对象
   BossComponent? bossComponent;
 
   /// 当前关卡数据
@@ -26,6 +28,7 @@ class WarMapComponent extends PositionComponent
   /// 当前关卡组件集合
   List<List<MapCellComponent?>>? mapCells;
 
+  /// 构造方法
   WarMapComponent({required this.stage, super.position});
 
   @override

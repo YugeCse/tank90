@@ -10,12 +10,12 @@ class GameCellComponent extends CustomPainterComponent {
   void render(Canvas canvas) {
     super.render(canvas);
     canvas.save();
-    var paint = Paint()..color = const Color.fromARGB(255, 129, 128, 128);
+    var paint = Paint()..color = const Color.fromARGB(255, 0, 0, 0);
     canvas.drawRect(
       Rect.fromLTWH(0, 0, MapConstants.mapSize.x, MapConstants.mapSize.y),
       paint,
     );
-    paint.color = const Color.fromARGB(255, 118, 117, 117);
+    paint.color = const Color.fromARGB(255, 21, 21, 21);
     for (var i = 0; i < MapConstants.mapGridSize.x; i++) {
       canvas.drawLine(Offset(16.0 * i, 0), Offset(16.0 * i, 416), paint);
     }

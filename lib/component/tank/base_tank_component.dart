@@ -196,7 +196,11 @@ abstract class BaseTankComponent extends SpriteComponent
       _tankProtectComponent?.removeFromParent();
       _tankProtectComponent = null;
     }
-    add(_tankProtectComponent = TankProtectComponent());
+    add(
+      _tankProtectComponent = TankProtectComponent(
+        onDestroy: () => _tankProtectComponent = null,
+      ),
+    );
   }
 
   /// 获得装备

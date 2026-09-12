@@ -6,7 +6,6 @@ import 'package:flame/components.dart';
 import 'package:flame/input.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Route, Image;
-import 'package:tank90/component/base/prop_type.dart';
 import 'package:tank90/component/base/tank_type.dart';
 import 'package:tank90/component/joystick/joystic_fire_component.dart'
     show JoystickFireComponent;
@@ -20,6 +19,7 @@ import 'package:tank90/component/tank/player_tank_component.dart'
 import 'package:tank90/component/tank/prop_component.dart';
 import 'package:tank90/data/global_config.dart';
 import 'package:tank90/data/notifier/boom_all_notifier.dart';
+import 'package:tank90/data/notifier/prop_tank_attack_notifier.dart';
 import 'package:tank90/data/notifier/tank_bom_notifier.dart'
     show TankBomNotifier;
 import 'package:tank90/scene/tank_war_game.dart';
@@ -27,12 +27,19 @@ import 'package:tank90/utils/audio_utils.dart';
 
 /// 主场景
 class MainScene extends Component with HasGameReference<TankWarGame> {
+  /// 游戏地图对象
   WarMapComponent? mapComponent;
 
+  /// 道具工厂对象
+  PropFactoryComponent? _propFactoryComponent;
+
+  /// 玩家坦克对象
   PlayerTankComponent? playerTank;
 
+  /// 虚拟方向操作组件
   JoystickComponent? joystick;
 
+  /// 虚拟开火组件
   JoystickFireComponent? joystickFire;
 
   @override
@@ -64,28 +71,34 @@ class MainScene extends Component with HasGameReference<TankWarGame> {
         ),
       );
     }
-    add(EnemyTankFactory()); //添加敌方坦克工厂组件
     add(
-      TimerComponent(period: 1.0, removeOnFinish: true, onTick: _addPlayerTank),
-    );
-    Future.delayed(
-      Duration(seconds: 1),
-      () => mapComponent?.add(
-        PropComponent(propType: BoomPropType())..position = game.size / 2.0,
+      TimerComponent(
+        period: 1.0,
+        repeat: false,
+        removeOnFinish: true,
+        onTick: _addPlayerTank,
       ),
     );
+    mapComponent?.add(
+      _propFactoryComponent = PropFactoryComponent(),
+    ); //添加装备道具工厂组件
+    mapComponent?.add(EnemyTankFactory()); //添加敌方坦克工厂组件
   }
 
   /// 接受消息事件
   void onReceiveNotifier(dynamic event) {
     if (event is TankBomNotifier) {
       if (event.type == TankType.player) {
-        _addPlayerTank(); //添加玩家坦克
+        if (GlobalConfig.playerLifes > 0) {
+          _addPlayerTank(); //添加玩家坦克
+        } else {}
       } else {
         ///TODO 敌方坦克爆炸死亡
       }
     } else if (event is BoomAllNotifier) {
       _boomAllTanks(event); //炸死所有坦克的通知
+    } else if (event is PropTankAttackNotifier) {
+      _propFactoryComponent?.generateProp(); //生成道具组件
     }
   }
 

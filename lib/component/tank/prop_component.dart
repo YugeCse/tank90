@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
+import 'package:flame/extensions.dart';
 import 'package:tank90/component/base/prop_type.dart';
 import 'package:tank90/component/tank/enemy_tank_component.dart';
 import 'package:tank90/component/tank/player_tank_component.dart';
@@ -90,5 +92,40 @@ class PropComponent extends SpriteComponent
       }
     }
     super.onCollisionStart(intersectionPoints, other);
+  }
+}
+
+/// 装备道具工厂组件
+class PropFactoryComponent extends Component
+    with HasGameReference<TankWarGame> {
+  final Random _rand = Random();
+
+  /// 道具组件
+  PropComponent? _propComponent;
+
+  /// 生成道具
+  void generateProp() {
+    removeProps();
+    var gameWarMapSize = game.warMapComponent?.size;
+    if (gameWarMapSize == null) return;
+    add(_propComponent = PropComponent(propType: HatProtectPropType()));
+    var propSize = _propComponent!.size;
+    var randX = _rand
+        .nextIntBetween(0, (gameWarMapSize.x - propSize.x).toInt())
+        .toDouble();
+    var randY = _rand
+        .nextIntBetween(0, (gameWarMapSize.y - propSize.y).toInt())
+        .toDouble();
+    var randPosition = Vector2(randX, randY);
+    randPosition.clamp(Vector2.zero(), gameWarMapSize - propSize);
+    _propComponent?.position = randPosition;
+  }
+
+  /// 删除道具
+  void removeProps() {
+    if (_propComponent != null) {
+      _propComponent?.removeFromParent();
+      _propComponent = null;
+    }
   }
 }
