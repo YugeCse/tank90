@@ -225,6 +225,10 @@ abstract class BaseTankComponent extends SpriteComponent
   void fetchProp(PropType type) {
     if (type is TankPropType) {
       AudioUtils().playProp();
+    } else {
+      AudioUtils().playGetProp();
+    }
+    if (type is TankPropType) {
       if (this.type == TankType.player) {
         GlobalConfig.playerLifes += 1;
       } else {

@@ -13,6 +13,7 @@ import 'package:tank90/component/joystick/joystic_fire_component.dart'
 import 'package:tank90/component/joystick/joystick_bg_component.dart';
 import 'package:tank90/component/joystick/joystick_knob_component.dart';
 import 'package:tank90/component/map/game_over_component.dart';
+import 'package:tank90/component/map/sidebar_component.dart';
 import 'package:tank90/component/map/war_map_component.dart'
     show WarMapComponent;
 import 'package:tank90/component/tank/enemy_tank_component.dart';
@@ -90,6 +91,7 @@ class MainScene extends Component with HasGameReference<TankWarGame> {
       _propFactoryComponent = PropFactoryComponent(),
     ); //添加装备道具工厂组件
     mapComponent?.add(EnemyTankFactory()); //添加敌方坦克工厂组件
+    add(SidebarComponent());
   }
 
   /// 接受消息事件

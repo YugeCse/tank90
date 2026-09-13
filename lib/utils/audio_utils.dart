@@ -22,6 +22,8 @@ class AudioUtils {
 
   late AudioPool _tankCrackPool;
 
+  late AudioPool _getPropPool;
+
   /// 预加载所有音效到缓存
   Future<void> preload() async {
     _attackPool = await FlameAudio.createPool('attack.mp3', maxPlayers: 5);
@@ -39,6 +41,7 @@ class AudioUtils {
       maxPlayers: 5,
     );
     _propPool = await FlameAudio.createPool('prop.mp3', maxPlayers: 5);
+    _getPropPool = await FlameAudio.createPool('getProp.mp3', maxPlayers: 2);
   }
 
   /// 是否允许播放声音
@@ -100,4 +103,7 @@ class AudioUtils {
 
   /// 播放坦克被攻击的声音
   void playTankCrack() => _checkAndPlayAudioPool(() => _tankCrackPool.start());
+
+  /// 获得道具
+  void playGetProp() => _checkAndPlayAudioPool(() => _getPropPool.start());
 }
