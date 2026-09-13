@@ -8,6 +8,7 @@ import 'package:tank90/component/base/hitbox_mixin.dart';
 import 'package:tank90/component/base/map_cell_type.dart';
 import 'package:tank90/component/base/prop_type.dart';
 import 'package:tank90/component/base/tank_type.dart';
+import 'package:tank90/component/map/boss_component.dart';
 import 'package:tank90/component/tank/bullet_component.dart';
 import 'package:tank90/component/map/map_cell_component.dart';
 import 'package:tank90/component/tank/enemy_tank_component.dart';
@@ -166,7 +167,8 @@ abstract class BaseTankComponent extends SpriteComponent
     PositionComponent other,
   ) {
     if ((other is MapCellComponent && other.type != MapCellType.grass) ||
-        other is BaseTankComponent) {
+        other is BaseTankComponent ||
+        other is BossComponent) {
       _collisionObjects.add(other);
     }
     super.onCollisionStart(intersectionPoints, other);
@@ -175,7 +177,8 @@ abstract class BaseTankComponent extends SpriteComponent
   @override
   void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
     if ((other is MapCellComponent && other.type != MapCellType.grass) ||
-        other is BaseTankComponent) {
+        other is BaseTankComponent ||
+        other is BossComponent) {
       _collisionObjects.add(other);
     }
     super.onCollision(intersectionPoints, other);

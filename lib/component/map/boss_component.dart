@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flame/collisions.dart';
 import 'package:tank90/data/notifier/game_over_notifier.dart';
 import 'package:tank90/scene/tank_war_game.dart' show TankWarGame;
 import 'package:flame/components.dart';
@@ -10,6 +11,9 @@ class BossComponent extends SpriteComponent with HasGameReference<TankWarGame> {
   /// 是否还存活
   bool _isAlive;
 
+  /// 碰撞盒
+  late RectangleHitbox hitbox;
+
   /// 爆炸物组件
   late SpriteAnimationComponent _boomComponent;
 
@@ -19,7 +23,9 @@ class BossComponent extends SpriteComponent with HasGameReference<TankWarGame> {
   @override
   FutureOr<void> onLoad() {
     _setSpriteByState(_isAlive); //设置精灵状态
+    add(hitbox = RectangleHitbox(size: size));
     _boomComponent = SpriteAnimationComponent(
+      anchor: Anchor.center,
       animation: SpriteAnimation.spriteList([
         Sprite(
           game.assetImage,
@@ -45,6 +51,7 @@ class BossComponent extends SpriteComponent with HasGameReference<TankWarGame> {
 
   /// 设置精灵状态
   void _setSpriteByState(bool isAlive) {
+    size = Vector2.all(32);
     sprite = Sprite(
       game.assetImage,
       srcSize: Vector2.all(32),
@@ -54,8 +61,9 @@ class BossComponent extends SpriteComponent with HasGameReference<TankWarGame> {
 
   /// 显示被破坏的特效
   void _showDestroyEffect() {
+    hitbox.collisionType = CollisionType.inactive;
     AudioUtils().playPlayerCrack();
-    game.warMapComponent?.add(_boomComponent);
+    game.warMapComponent?.add(_boomComponent..position = center);
   }
 
   /// 设置为死亡状态

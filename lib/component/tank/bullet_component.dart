@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:tank90/component/base/direction.dart';
 import 'package:tank90/component/base/map_cell_type.dart';
+import 'package:tank90/component/map/boss_component.dart';
 import 'package:tank90/component/map/map_cell_component.dart';
 import 'package:tank90/component/tank/base_tank_component.dart';
 import 'package:tank90/data/map_constants.dart';
@@ -100,6 +101,8 @@ class BulletComponent extends SpriteComponent
         other.hit(); //被攻击
       }
       bomAndDestroy(); //爆炸并消失
+    } else if (other is BossComponent) {
+      other.setDeathState(); //boss 爆炸死亡
     }
     super.onCollisionStart(intersectionPoints, other);
   }
