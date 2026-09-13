@@ -12,6 +12,7 @@ import 'package:tank90/component/joystick/joystic_fire_component.dart'
     show JoystickFireComponent;
 import 'package:tank90/component/joystick/joystick_bg_component.dart';
 import 'package:tank90/component/joystick/joystick_knob_component.dart';
+import 'package:tank90/component/map/game_over_component.dart';
 import 'package:tank90/component/map/war_map_component.dart'
     show WarMapComponent;
 import 'package:tank90/component/tank/enemy_tank_component.dart';
@@ -21,6 +22,7 @@ import 'package:tank90/component/tank/prop_component.dart';
 import 'package:tank90/data/global_config.dart';
 import 'package:tank90/data/notifier/boom_all_notifier.dart';
 import 'package:tank90/data/notifier/boss_protected_notifier.dart';
+import 'package:tank90/data/notifier/game_over_notifier.dart';
 import 'package:tank90/data/notifier/prop_tank_attack_notifier.dart';
 import 'package:tank90/data/notifier/tank_bom_notifier.dart'
     show TankBomNotifier;
@@ -37,6 +39,9 @@ class MainScene extends Component with HasGameReference<TankWarGame> {
 
   /// 玩家坦克对象
   PlayerTankComponent? playerTank;
+
+  /// 游戏结束的事件
+  GameOverComponent? _gameOverComponent;
 
   /// 虚拟方向操作组件
   JoystickComponent? joystick;
@@ -89,12 +94,15 @@ class MainScene extends Component with HasGameReference<TankWarGame> {
 
   /// 接受消息事件
   void onReceiveNotifier(dynamic event) {
-    if (event is TankBomNotifier) {
+    if (event is GameOverNotifier) {
+      showGameOver(); //显示游戏结束的界面
+    } else if (event is TankBomNotifier) {
       if (event.type == TankType.player) {
         if (--GlobalConfig.playerLifes > 0) {
           _addPlayerTank(); //添加玩家坦克
         } else {
-          ///TODO Game Over !
+          GlobalConfig.playerLifes = 0;
+          showGameOver(); //显示游戏结束的界面
         }
       } else {
         if (GlobalConfig.enemyCounts == 0 &&
@@ -151,5 +159,11 @@ class MainScene extends Component with HasGameReference<TankWarGame> {
   /// 冻结玩家坦克
   void freezePlayerTank() {
     playerTank?.capabilities[SleepCapability] = SleepCapability();
+  }
+
+  /// 显示游戏失效的界面
+  void showGameOver() {
+    if (_gameOverComponent != null) return;
+    add(_gameOverComponent ??= GameOverComponent()..position = game.size / 2.0);
   }
 }

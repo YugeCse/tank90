@@ -110,6 +110,7 @@ class EnemyTankComponent extends BaseTankComponent {
 
   /// 显示红坦克特效
   void _showRedFlickerEffect() {
+    if (_redFlickerEffect != null) return;
     // 只在第一次记录初始状态
     _originalColor ??= paint.color;
     _originalOpacity ??= paint.color.a; // 0.0 - 1.0
@@ -132,8 +133,10 @@ class EnemyTankComponent extends BaseTankComponent {
 
   /// 移除红色闪烁特效
   void _removeRedFlickerEffect() {
-    _redFlickerEffect?.removeFromParent();
-    _redFlickerEffect = null;
+    if (_redFlickerEffect != null) {
+      _redFlickerEffect?.removeFromParent();
+      _redFlickerEffect = null;
+    }
     // 手动恢复初始状态
     if (_originalColor != null) {
       paint.color = _originalColor!;
