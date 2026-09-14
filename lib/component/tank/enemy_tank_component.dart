@@ -85,7 +85,7 @@ class EnemyTankComponent extends BaseTankComponent {
       super.hit();
     } else {
       redFlickerCounter--;
-      game.mainScene?.onReceiveNotifier(PropTankAttackNotifier());
+      findMainScene()?.onReceiveNotifier(PropTankAttackNotifier());
     }
   }
 

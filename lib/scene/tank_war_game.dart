@@ -1,8 +1,8 @@
 import 'dart:async';
-import 'dart:ui' show Image;
 
 import 'package:flame/game.dart';
 import 'package:flame/input.dart';
+import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:tank90/component/map/war_map_component.dart';
 import 'package:tank90/component/tank/enemy_tank_component.dart';
 import 'package:tank90/scene/main_scene.dart';
@@ -12,16 +12,16 @@ import 'package:tank90/scene/welcome_scene.dart';
 
 /// 游戏主场景
 class TankWarGame extends FlameGame
-    with HasKeyboardHandlerComponents, HasCollisionDetection {
-  /// 资源图片对象
-  late Image assetImage;
-
-  /// 页面路由对象
+    with
+        HasKeyboardHandlerComponents,
+        HasCollisionDetection,
+        RiverpodGameMixin {
+  /// 页面路由对象，跳转到支持的场景
   late final RouterComponent router;
 
   @override
   FutureOr<void> load() async {
-    assetImage = await images.load('tankAll.png');
+    await images.load('tankAll.png');
     add(
       router = RouterComponent(
         initialRoute: 'Welcome',
@@ -30,7 +30,7 @@ class TankWarGame extends FlameGame
           'Stage': Route(StageScreen.new),
           'Welcome': Route(WelcomeScene.new),
           'Settings': OverlayRoute(
-            (context, game) => SettingsScene(game: game as TankWarGame),
+            (_, game) => SettingsScene(game: game as TankWarGame),
           ),
         },
       ),

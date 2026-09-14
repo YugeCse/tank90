@@ -1,11 +1,10 @@
 import 'dart:async';
 
 import 'package:flame/components.dart';
-import 'package:tank90/scene/tank_war_game.dart';
+import 'package:tank90/utils/res_img_utils.dart';
 
 /// 坦克护甲组件
-class TankProtectComponent extends SpriteAnimationComponent
-    with HasGameReference<TankWarGame> {
+class TankProtectComponent extends SpriteAnimationComponent {
   /// 失效时长
   final double disableTimeSec;
 
@@ -30,7 +29,7 @@ class TankProtectComponent extends SpriteAnimationComponent
     List<SpriteAnimationFrame> imageFrames = [
       SpriteAnimationFrame(
         Sprite(
-          game.assetImage,
+          assetImage,
           srcPosition: Vector2(160.0, 96.0),
           srcSize: Vector2(32.0, 32.0),
         ),
@@ -38,7 +37,7 @@ class TankProtectComponent extends SpriteAnimationComponent
       ),
       SpriteAnimationFrame(
         Sprite(
-          game.assetImage,
+          assetImage,
           srcPosition: Vector2(160.0, 128.0),
           srcSize: Vector2(32.0, 32.0),
         ),

@@ -9,6 +9,7 @@ import 'package:tank90/component/base/map_cell_type.dart';
 import 'package:tank90/component/base/prop_type.dart';
 import 'package:tank90/component/base/tank_type.dart';
 import 'package:tank90/component/map/boss_component.dart';
+import 'package:tank90/component/map/war_map_component.dart';
 import 'package:tank90/component/tank/bullet_component.dart';
 import 'package:tank90/component/map/map_cell_component.dart';
 import 'package:tank90/component/tank/enemy_tank_component.dart';
@@ -21,14 +22,16 @@ import 'package:tank90/data/notifier/boom_all_notifier.dart';
 import 'package:tank90/data/notifier/boss_protected_notifier.dart';
 import 'package:tank90/data/notifier/tank_bom_notifier.dart'
     show TankBomNotifier;
+import 'package:tank90/scene/main_scene.dart';
 import 'package:tank90/scene/tank_war_game.dart' show TankWarGame;
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:tank90/utils/audio_utils.dart';
+import 'package:tank90/utils/res_img_utils.dart';
 
 /// 坦克组件基类
 abstract class BaseTankComponent extends SpriteComponent
-    with HasGameReference<TankWarGame>, CollisionCallbacks, HitboxMixin {
+    with CollisionCallbacks, HitboxMixin, MainSceneMixin, WarMapComponentMixin {
   /// 坦克类型
   TankType type;
 
@@ -74,7 +77,7 @@ abstract class BaseTankComponent extends SpriteComponent
   @override
   FutureOr<void> onLoad() {
     sprite = Sprite(
-      game.assetImage,
+      assetImage,
       srcSize: type.srcSize,
       srcPosition: type.getSrcPosition(velocity),
     );
@@ -83,15 +86,10 @@ abstract class BaseTankComponent extends SpriteComponent
     add(hitbox = RectangleHitbox(size: size));
     opacity = 0; //默认设置透明度为0
     hitbox.collisionType = CollisionType.inactive;
-    game.warMapComponent?.add(
+    findWarMapComponent()?.add(
       TankBornComponent(
-        position: position,
-        onAnimationFinished: () {
-          opacity = 1.0;
-          isBornState = false;
-          hitbox.collisionType = CollisionType.active;
-          onBornFinished(); //出生完成
-        },
+        position: center,
+        onAnimationFinished: _onBornAnimationFinished,
       ),
     );
   }
@@ -196,12 +194,20 @@ abstract class BaseTankComponent extends SpriteComponent
     super.onCollisionEnd(other);
   }
 
+  /// 出生动画完成事件
+  void _onBornAnimationFinished() {
+    opacity = 1.0;
+    isBornState = false;
+    hitbox.collisionType = CollisionType.active;
+    onBornFinished(); //出生完成
+  }
+
   /// 改变坦克方向并更新精灵
   void setFacingDirection(Vector2 facingDirection) {
     if (facingDirection != Vector2.zero()) {
       if (velocity != facingDirection) {
         sprite = Sprite(
-          game.assetImage,
+          assetImage,
           srcSize: type.srcSize,
           srcPosition: type.getSrcPosition(facingDirection),
         );
@@ -242,13 +248,14 @@ abstract class BaseTankComponent extends SpriteComponent
         GlobalConfig.enemyCounts += 1;
       }
     } else if (type is TimerPropType) {
+      var mainScene = findMainScene();
       if (this is EnemyTankComponent) {
-        game.mainScene?.freezePlayerTank();
+        mainScene?.freezePlayerTank();
       } else {
-        game.mainScene?.freezeEnemyTanks();
+        mainScene?.freezeEnemyTanks();
       }
     } else if (type is BossProtectPropType) {
-      game.mainScene?.onReceiveNotifier(
+      findMainScene()?.onReceiveNotifier(
         BossProtectedNotifier(
           state: this is PlayerTankComponent
               ? SteelBossWallState()
@@ -256,7 +263,7 @@ abstract class BaseTankComponent extends SpriteComponent
         ),
       );
     } else if (type is BoomPropType) {
-      game.mainScene?.onReceiveNotifier(
+      findMainScene()?.onReceiveNotifier(
         BoomAllNotifier(type: type, ownerType: this.type),
       );
     } else if (type is StarPropType) {
@@ -281,7 +288,7 @@ abstract class BaseTankComponent extends SpriteComponent
       if (this is PlayerTankComponent) {
         AudioUtils().playAttack(); //播放玩家射击的声音
       }
-      game.warMapComponent?.add(
+      findWarMapComponent()?.add(
         BulletComponent.create(
           ownerType: type,
           velocity: facingDirection,
@@ -304,12 +311,11 @@ abstract class BaseTankComponent extends SpriteComponent
     } else {
       AudioUtils().playTankCrack();
     }
-    game.warMapComponent?.add(
+    findWarMapComponent()?.add(
       _TankBomEffectComponent(
         position: position,
-        onFinished: () {
-          game.mainScene?.onReceiveNotifier(TankBomNotifier(type: type));
-        },
+        onFinished: () =>
+            findMainScene()?.onReceiveNotifier(TankBomNotifier(type: type)),
       ),
     );
   }

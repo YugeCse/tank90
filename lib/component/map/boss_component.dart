@@ -6,6 +6,7 @@ import 'package:tank90/data/notifier/game_over_notifier.dart';
 import 'package:tank90/scene/tank_war_game.dart' show TankWarGame;
 import 'package:flame/components.dart';
 import 'package:tank90/utils/audio_utils.dart';
+import 'package:tank90/utils/res_img_utils.dart';
 
 /// Boss组件
 class BossComponent extends SpriteComponent
@@ -30,7 +31,7 @@ class BossComponent extends SpriteComponent
   void _setSpriteByState(bool isAlive) {
     size = Vector2.all(32);
     sprite = Sprite(
-      game.assetImage,
+      assetImage,
       srcSize: Vector2.all(32),
       srcPosition: Vector2(256 + (isAlive ? 0 : 32), 0),
     );

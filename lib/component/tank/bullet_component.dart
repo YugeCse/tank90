@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:tank90/component/base/direction.dart';
 import 'package:tank90/component/base/map_cell_type.dart';
 import 'package:tank90/component/base/tank_type.dart';
@@ -6,31 +7,15 @@ import 'package:tank90/component/map/boss_component.dart';
 import 'package:tank90/component/map/map_cell_component.dart';
 import 'package:tank90/component/tank/base_tank_component.dart';
 import 'package:tank90/data/game_constants.dart';
-import 'package:tank90/scene/tank_war_game.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart' hide Image;
 import 'package:tank90/utils/audio_utils.dart' show AudioUtils;
+import 'package:tank90/utils/res_img_utils.dart';
 
 /// 子弹组件
 class BulletComponent extends SpriteComponent
-    with HasGameReference<TankWarGame>, CollisionCallbacks {
-  static final Vector2 _upOffset = Vector2(80, 96);
-  static final Vector2 _downOffset = Vector2(86, 96);
-  static final Vector2 _leftOffset = Vector2(92, 96);
-  static final Vector2 _rightOffset = Vector2(98, 96);
-
-  static Vector2 _getSrcOffset(Vector2 direction) {
-    if (direction == Direction.up) {
-      return _upOffset;
-    } else if (direction == Direction.down) {
-      return _downOffset;
-    } else if (direction == Direction.left) {
-      return _leftOffset;
-    }
-    return _rightOffset;
-  }
-
+    with CollisionCallbacks, RiverpodComponentMixin {
   /// 单位速度向量
   Vector2 velocity;
 
@@ -43,6 +28,7 @@ class BulletComponent extends SpriteComponent
   /// 碰撞盒
   late RectangleHitbox hitbox;
 
+  /// 是否出墙了，默认：false
   bool _isShotOutWall = false;
 
   /// 构造函数
@@ -59,7 +45,7 @@ class BulletComponent extends SpriteComponent
     super.onLoad();
     anchor = Anchor.center;
     sprite = Sprite(
-      game.assetImage,
+      assetImage,
       srcSize: Vector2.all(6.0),
       srcPosition: _getSrcOffset(velocity),
     );
@@ -108,14 +94,24 @@ class BulletComponent extends SpriteComponent
     super.onCollisionStart(intersectionPoints, other);
   }
 
+  /// 获取资源所在的坐标信息
+  Vector2 _getSrcOffset(Vector2 direction) {
+    if (direction == Direction.up) {
+      return Vector2(80.0, 96.0);
+    } else if (direction == Direction.down) {
+      return Vector2(86.0, 96.0);
+    } else if (direction == Direction.left) {
+      return Vector2(92.0, 96.0);
+    }
+    return Vector2(98.0, 96.0);
+  }
+
   /// 爆炸并消失
   void bomAndDestroy() {
     velocity = Vector2.zero();
     removeFromParent(); //下一帧从父节点删除
     hitbox.collisionType = CollisionType.inactive;
-    game.warMapComponent?.add(
-      _BulletBomEffectComponent(position: position.clone()),
-    );
+    parent?.add(_BulletBomEffectComponent(position: position.clone()));
   }
 
   /// 创建子弹组件
@@ -134,8 +130,7 @@ class BulletComponent extends SpriteComponent
 }
 
 /// 子弹爆炸效果的组件
-class _BulletBomEffectComponent extends SpriteAnimationComponent
-    with HasGameReference<TankWarGame> {
+class _BulletBomEffectComponent extends SpriteAnimationComponent {
   _BulletBomEffectComponent({required super.position})
     : super(anchor: Anchor.center, removeOnFinish: true);
 
@@ -144,17 +139,17 @@ class _BulletBomEffectComponent extends SpriteAnimationComponent
     animation = SpriteAnimation.spriteList(
       [
         Sprite(
-          game.assetImage,
+          assetImage,
           srcPosition: Vector2(320, 0),
           srcSize: Vector2.all(32.0),
         ),
         Sprite(
-          game.assetImage,
+          assetImage,
           srcPosition: Vector2(352, 0),
           srcSize: Vector2.all(32.0),
         ),
         Sprite(
-          game.assetImage,
+          assetImage,
           srcPosition: Vector2(384, 0),
           srcSize: Vector2.all(32.0),
         ),

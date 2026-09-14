@@ -4,6 +4,7 @@ import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
 import 'package:tank90/scene/tank_war_game.dart';
+import 'package:tank90/utils/res_img_utils.dart';
 
 /// 游戏结束的组件
 class GameOverComponent extends SpriteComponent
@@ -14,7 +15,7 @@ class GameOverComponent extends SpriteComponent
     scale = Vector2.all(3.0);
     anchor = Anchor.center;
     sprite = Sprite(
-      game.assetImage,
+      assetImage,
       srcSize: Vector2(64, 34),
       srcPosition: Vector2(382, 62),
     );

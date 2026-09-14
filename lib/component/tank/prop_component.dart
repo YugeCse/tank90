@@ -12,6 +12,7 @@ import 'package:tank90/data/game_level.dart';
 import 'package:tank90/data/global_config.dart';
 import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/scene/tank_war_game.dart';
+import 'package:tank90/utils/res_img_utils.dart';
 
 /// 装备组件类
 class PropComponent extends SpriteComponent
@@ -60,7 +61,7 @@ class PropComponent extends SpriteComponent
   void changePropType(PropType type) {
     propType = type;
     sprite = Sprite(
-      game.assetImage,
+      assetImage,
       srcSize: propType.srcSize,
       srcPosition: propType.srcPosition,
     );

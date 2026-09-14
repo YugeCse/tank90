@@ -3,6 +3,7 @@ import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/scene/tank_war_game.dart';
+import 'package:tank90/utils/res_img_utils.dart';
 
 /// 侧边栏组件
 class SidebarComponent extends PositionComponent
@@ -36,7 +37,7 @@ class SidebarComponent extends PositionComponent
     var row = index / 2 + ((index % 2 == 0) ? 1 : 0);
     return SpriteComponent(
       sprite: Sprite(
-        game.assetImage,
+        assetImage,
         srcSize: Vector2.all(14.0),
         srcPosition: Vector2(92, 112),
       ),

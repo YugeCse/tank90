@@ -5,6 +5,7 @@ import 'package:tank90/component/base/map_cell_type.dart' show MapCellType;
 import 'package:tank90/scene/tank_war_game.dart' show TankWarGame;
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
+import 'package:tank90/utils/res_img_utils.dart';
 
 /// 地图单元组件
 class MapCellComponent extends SpriteComponent
@@ -22,7 +23,7 @@ class MapCellComponent extends SpriteComponent
       priority = 900;
     }
     sprite = Sprite(
-      game.assetImage,
+      assetImage,
       srcSize: MapCellType.size,
       srcPosition: type.srcPosition,
     );

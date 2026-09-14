@@ -6,6 +6,9 @@ import 'package:flame/game.dart';
 class GameConstants {
   GameConstants._();
 
+  /// 资源图片名称
+  static const RES_IMG_NAME = 'tankAll.png';
+
   /// 敌人最大数量: 20
   static const ENEMEY_MAX_COUNT = 20;
 

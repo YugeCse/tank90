@@ -1,11 +1,10 @@
 import 'dart:async';
 
-import 'package:tank90/scene/tank_war_game.dart' show TankWarGame;
 import 'package:flame/components.dart';
+import 'package:tank90/utils/res_img_utils.dart';
 
 /// 坦克出生组件
-class TankBornComponent extends SpriteAnimationComponent
-    with HasGameReference<TankWarGame> {
+class TankBornComponent extends SpriteAnimationComponent {
   TankBornComponent({
     super.position,
     super.size,
@@ -17,7 +16,6 @@ class TankBornComponent extends SpriteAnimationComponent
   @override
   FutureOr<void> onLoad() {
     removeOnFinish = true;
-    var assetImage = game.assetImage;
     var spriteImages = <Sprite>[];
     for (var i = 0; i < 7; i++) {
       spriteImages.add(

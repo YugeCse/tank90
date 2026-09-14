@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/widgets.dart';
 import 'package:tank90/component/base/boss_wall_state.dart';
+import 'package:tank90/component/base/find_type.dart';
 import 'package:tank90/component/base/map_cell_type.dart' show MapCellType;
 import 'package:tank90/component/map/boss_component.dart';
 import 'package:tank90/component/map/game_cell_component.dart';
@@ -269,5 +270,16 @@ class WarMapComponent extends PositionComponent
     } else if (state is FlickerBossWallState) {
       _execBossWallFlickerTimer(); //执行闪烁的保护状态强
     }
+  }
+}
+
+/// WarMapComponent的Mixin类
+mixin WarMapComponentMixin on Component {
+  /// 从节点中查询WarMapComponent对象
+  /// + [type] - 查找方式，默认：往上查找
+  WarMapComponent? findWarMapComponent({FindType type = FindType.ancestors}) {
+    return (type == FindType.ancestors ? ancestors() : descendants())
+        .whereType<WarMapComponent>()
+        .firstOrNull;
   }
 }

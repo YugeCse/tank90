@@ -7,6 +7,7 @@ import 'package:flame/input.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Route, Image;
 import 'package:tank90/component/base/capability.dart';
+import 'package:tank90/component/base/find_type.dart';
 import 'package:tank90/component/base/tank_type.dart';
 import 'package:tank90/component/joystick/joystic_fire_component.dart'
     show JoystickFireComponent;
@@ -178,5 +179,16 @@ class MainScene extends Component with HasGameReference<TankWarGame> {
   void showGameOver() {
     if (_gameOverComponent != null) return;
     add(_gameOverComponent ??= GameOverComponent()..position = game.size / 2.0);
+  }
+}
+
+/// 主场景混淆类
+mixin MainSceneMixin on Component {
+  /// 查找主场景对象
+  /// + [type] - 查找方式，默认：向上查找
+  MainScene? findMainScene({FindType type = FindType.ancestors}) {
+    return (type == FindType.ancestors ? ancestors() : descendants())
+        .whereType<MainScene>()
+        .firstOrNull;
   }
 }
