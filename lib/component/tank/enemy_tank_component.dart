@@ -253,12 +253,8 @@ class EnemyTankFactory extends PositionComponent
     }
     debugPrint('将要要生产的坦克数目：$diffCount');
     while (diffCount > 0) {
-      var tanks =
-          game.warMapComponent?.children
-              .whereType<BaseTankComponent>()
-              .toList() ??
-          [];
-      var addedTanks = <BaseTankComponent>[];
+      var allTanks = game.allTanks ?? {};
+      var addedTanks = <BaseTankComponent>{};
       for (var j = 0; j < EnemyTankComponent.bornPositions.length; j++) {
         var position = EnemyTankComponent.bornPositions[j];
         var targetRect = Rect.fromCenter(
@@ -266,7 +262,7 @@ class EnemyTankFactory extends PositionComponent
           height: 32,
           center: position.toOffset(),
         );
-        if (tanks.any((e) => e.toRect().overlaps(targetRect)) ||
+        if (allTanks.any((e) => e.toRect().overlaps(targetRect)) ||
             addedTanks.any((e) => e.toRect().overlaps(targetRect))) {
           await Future.delayed(const Duration(milliseconds: 500));
           continue;
@@ -278,7 +274,9 @@ class EnemyTankFactory extends PositionComponent
         game.warMapComponent?.add(newTank);
         addedTanks.add(newTank); //记录这个新增的坦克
         _generateTankCount++; //生成的坦克数量增加 1 次
-        GlobalConfig.enemyCounts--; //已经生成的坦克数量，总数量减少
+        if (GlobalConfig.enemyCounts > 0) {
+          GlobalConfig.enemyCounts--; //已经生成的坦克数量，总数量减少
+        }
         if (--diffCount <= 0) {
           debugPrint('本批次所有坦克已经生产完成');
           break; //所有坦克已经生产完成，需要跳出循环
@@ -286,7 +284,7 @@ class EnemyTankFactory extends PositionComponent
         await Future.delayed(
           Duration(
             milliseconds: _generateTankCount < 5
-                ? 500
+                ? 200
                 : _random.nextIntBetween(500, 3000),
           ),
         );

@@ -4,6 +4,7 @@ import 'package:flame/game.dart';
 import 'package:flame/input.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:tank90/component/map/war_map_component.dart';
+import 'package:tank90/component/tank/base_tank_component.dart';
 import 'package:tank90/component/tank/enemy_tank_component.dart';
 import 'package:tank90/scene/main_scene.dart';
 import 'package:tank90/scene/settings_scene.dart';
@@ -41,7 +42,11 @@ class TankWarGame extends FlameGame
   WarMapComponent? get warMapComponent =>
       descendants().whereType<WarMapComponent>().firstOrNull;
 
-  /// 获取游戏战场中所有的敌方坦克
+  /// 获取游戏战场中所有的坦克集合
+  Set<BaseTankComponent>? get allTanks =>
+      descendants().whereType<BaseTankComponent>().toSet();
+
+  /// 获取游戏战场中所有的敌方坦克集合
   Set<EnemyTankComponent>? get enemyTanks =>
       descendants().whereType<EnemyTankComponent>().toSet();
 

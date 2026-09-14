@@ -23,11 +23,11 @@ class GameOverComponent extends SpriteComponent
     _showGameOverEffect(); //显示游戏结束的特效
   }
 
-  @override
-  void onGameResize(Vector2 size) {
-    super.onGameResize(size);
-    position = Vector2(game.size.x / 2.0, game.size.y + 34.0 / 2.0);
-  }
+  // @override
+  // void onGameResize(Vector2 size) {
+  //   super.onGameResize(size);
+  //   position = Vector2(game.size.x / 2.0, game.size.y + 34.0 / 2.0);
+  // }
 
   /// 显示游戏结束的特效
   void _showGameOverEffect() {

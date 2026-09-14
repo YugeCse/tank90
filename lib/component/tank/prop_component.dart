@@ -8,7 +8,7 @@ import 'package:flame/extensions.dart';
 import 'package:tank90/component/base/prop_type.dart';
 import 'package:tank90/component/tank/enemy_tank_component.dart';
 import 'package:tank90/component/tank/player_tank_component.dart';
-import 'package:tank90/data/game_level.dart';
+import 'package:tank90/data/game_properties.dart';
 import 'package:tank90/data/global_config.dart';
 import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/scene/tank_war_game.dart';

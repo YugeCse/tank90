@@ -15,13 +15,13 @@ import 'package:tank90/component/joystick/joystic_fire_component.dart'
 import 'package:tank90/component/joystick/joystick_bg_component.dart';
 import 'package:tank90/component/joystick/joystick_knob_component.dart';
 import 'package:tank90/component/map/game_over_component.dart';
-import 'package:tank90/component/map/sidebar_component.dart';
 import 'package:tank90/component/map/war_map_component.dart'
     show WarMapComponent;
 import 'package:tank90/component/tank/enemy_tank_component.dart';
 import 'package:tank90/component/tank/player_tank_component.dart'
     show PlayerTankComponent;
 import 'package:tank90/component/tank/prop_component.dart';
+import 'package:tank90/data/game_properties.dart';
 import 'package:tank90/data/global_config.dart';
 import 'package:tank90/data/map_stage_level.dart';
 import 'package:tank90/data/notifier/boom_all_notifier.dart';
@@ -58,6 +58,7 @@ class MainScene extends Component
 
   @override
   FutureOr<void> onLoad() async {
+    GlobalConfig.state = GameState.playing;
     AudioUtils().playStart(); //播放开始的声音
     add(
       mapComponent ??= WarMapComponent(
@@ -98,11 +99,10 @@ class MainScene extends Component
       _propFactoryComponent = PropFactoryComponent(),
     ); //添加装备道具工厂组件
     mapComponent?.add(EnemyTankFactory()); //添加敌方坦克工厂组件
-    // add(SidebarComponent());
   }
 
   /// 接受消息事件
-  void onReceiveNotifier(dynamic event) {
+  void onReceiveNotifier(dynamic event) async {
     debugPrint('onReceiveNotifier 接收到事件：$event');
     if (event is GameOverNotifier) {
       showGameOver(); //显示游戏结束的界面
@@ -118,12 +118,14 @@ class MainScene extends Component
         /// TODO 需要添加对应的成就得分
         var statisticsInfo = ScoreStatisticsInfo(type: event.type);
         ref.read(scoreStatisticsProvider.notifier).add(statisticsInfo);
-        if (GlobalConfig.enemyCounts == 0 &&
-            (game.enemyTanks?.isEmpty ?? true)) {
+        var isGameWin =
+            GlobalConfig.enemyCounts <= 0 && (game.enemyTanks?.isEmpty ?? true);
+        if (isGameWin) {
           GlobalConfig.stageLevel = (GlobalConfig.stageLevel + 1).clamp(
             1,
             MapStageLevel.maps.length + 1,
           );
+          debugPrint('玩家已经通关！！！');
 
           /// TODO 实际上应该跳转到结算页面，需要结算数据
           game.router.pushReplacementNamed('Main'); //跳转新的界面
@@ -183,7 +185,8 @@ class MainScene extends Component
   /// 显示游戏失效的界面
   void showGameOver() {
     if (_gameOverComponent != null) return;
-    add(_gameOverComponent ??= GameOverComponent()..position = game.size / 2.0);
+    GlobalConfig.state = GameState.gameOver;
+    add(_gameOverComponent ??= GameOverComponent());
   }
 }
 

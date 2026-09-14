@@ -1,11 +1,14 @@
 // ignore_for_file: constant_identifier_names
 
 import 'package:tank90/data/game_constants.dart';
-import 'package:tank90/data/game_level.dart';
+import 'package:tank90/data/game_properties.dart';
 
 /// 全局配置类
 class GlobalConfig {
   GlobalConfig._();
+
+  /// 游戏状态
+  static GameState state = GameState.playing;
 
   /// 游戏等级
   static GameLevel gameLevel = GameLevel.easy;
