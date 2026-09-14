@@ -26,7 +26,7 @@ class MapCellComponent extends SpriteComponent with HitboxMixin {
       srcSize: MapCellType.size,
       srcPosition: type.srcPosition,
     );
-    add(hitbox = RectangleHitbox(size: size - Vector2.all(2.0)));
+    add(hitbox = RectangleHitbox(size: size - Vector2.all(0.5)));
   }
 
   /// 修改类型
