@@ -15,15 +15,7 @@ class SettingsScene extends StatefulWidget {
 }
 
 class _SettingsSceneState extends State<SettingsScene> {
-  bool _isSoundOpen = false;
-
-  @override
-  void initState() {
-    super.initState();
-    Future.microtask(
-      () => setState(() => _isSoundOpen = AudioUtils().allowPlay),
-    );
-  }
+  bool _isSoundOpen = AudioUtils().allowPlay;
 
   @override
   Widget build(BuildContext context) {

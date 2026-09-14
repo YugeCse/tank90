@@ -40,6 +40,7 @@ class WelcomeScene extends Component with HasGameReference<TankWarGame> {
     );
     add(
       _startButtonComponent = ButtonComponent(
+        anchor: Anchor.center,
         button: TextComponent(
           text: 'START GAME',
           textRenderer: TextPaint(
@@ -65,8 +66,8 @@ class WelcomeScene extends Component with HasGameReference<TankWarGame> {
       _welcomeComponent?.position = (game.size - _welcomeComponent!.size) / 2.0;
       if (_startButtonComponent != null) {
         _startButtonComponent?.position = Vector2(
-          (game.size.x - _startButtonComponent!.x) / 2.0,
-          _welcomeComponent!.y + _welcomeComponent!.size.y + 30.0,
+          game.size.x / 2.0,
+          _welcomeComponent!.toRect().bottom + 50.0,
         );
       }
     }
