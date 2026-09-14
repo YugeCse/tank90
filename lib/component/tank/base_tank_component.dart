@@ -16,7 +16,7 @@ import 'package:tank90/component/tank/player_tank_component.dart';
 import 'package:tank90/component/tank/tank_born_component.dart';
 import 'package:tank90/component/tank/tank_protect_component.dart';
 import 'package:tank90/data/global_config.dart';
-import 'package:tank90/data/map_constants.dart';
+import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/data/notifier/boom_all_notifier.dart';
 import 'package:tank90/data/notifier/boss_protected_notifier.dart';
 import 'package:tank90/data/notifier/tank_bom_notifier.dart'
@@ -114,7 +114,10 @@ abstract class BaseTankComponent extends SpriteComponent
   /// 更新限制位置信息
   void _adjustLimitPosition(double dt) {
     _adjustCollisionPosition(); //调整碰撞位置信息
-    position.clamp(Vector2.zero() + size / 2, MapConstants.mapSize - size / 2);
+    position.clamp(
+      Vector2.zero() + size / 2,
+      GameConstants.MAP_SIZE - size / 2,
+    );
   }
 
   /// 调整碰撞位置信息

@@ -8,7 +8,7 @@ import 'package:tank90/component/map/boss_component.dart';
 import 'package:tank90/component/map/game_cell_component.dart';
 import 'package:tank90/component/map/map_cell_component.dart'
     show MapCellComponent;
-import 'package:tank90/data/map_constants.dart';
+import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/data/map_stage_level.dart';
 import 'package:tank90/scene/tank_war_game.dart' show TankWarGame;
 import 'package:flame/components.dart';
@@ -65,8 +65,8 @@ class WarMapComponent extends PositionComponent
 
   /// 调整地图位置
   void _setMapLocation() {
-    var mapWidth = MapConstants.mapSize.x;
-    var mapHeight = MapConstants.mapSize.y;
+    var mapWidth = GameConstants.MAP_SIZE.x;
+    var mapHeight = GameConstants.MAP_SIZE.y;
     var scaleX = game.size.x / mapWidth;
     var scaleY = game.size.y / mapHeight;
     var scaleV = min(scaleX, scaleY);

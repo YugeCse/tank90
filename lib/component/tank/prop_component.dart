@@ -10,7 +10,7 @@ import 'package:tank90/component/tank/enemy_tank_component.dart';
 import 'package:tank90/component/tank/player_tank_component.dart';
 import 'package:tank90/data/game_level.dart';
 import 'package:tank90/data/global_config.dart';
-import 'package:tank90/data/map_constants.dart';
+import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/scene/tank_war_game.dart';
 
 /// 装备组件类
@@ -124,7 +124,7 @@ class PropFactoryComponent extends Component
     var targetPropType = _propGenerateRandom.pick();
     if (targetPropType == null) return;
     removeProps();
-    var gameWarMapSize = MapConstants.mapSize;
+    var gameWarMapSize = GameConstants.MAP_SIZE;
     game.warMapComponent?.add(
       _propComponent = PropComponent(propType: targetPropType),
     );

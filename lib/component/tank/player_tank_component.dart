@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:tank90/component/base/capability.dart';
 import 'package:tank90/component/base/direction.dart' show Direction;
 import 'package:tank90/component/base/tank_type.dart' show TankType;
-import 'package:tank90/data/map_constants.dart' show MapConstants;
+import 'package:tank90/data/game_constants.dart' show GameConstants;
 import 'package:flame/components.dart'
     show KeyboardHandler, JoystickDirection, Vector2;
 import 'package:flame/input.dart' show JoystickComponent;
@@ -104,7 +104,7 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
 
   /// 默认位置
   static Vector2 defaultPosition = Vector2(
-    MapConstants.mapSize.x / 2 - MapConstants.mapCellSize.x * 4,
-    MapConstants.mapSize.y - MapConstants.mapCellSize.x,
+    GameConstants.MAP_SIZE.x / 2 - GameConstants.MAP_CELL_SIZE.x * 4,
+    GameConstants.MAP_SIZE.y - GameConstants.MAP_CELL_SIZE.x,
   );
 }

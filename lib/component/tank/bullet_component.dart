@@ -5,7 +5,7 @@ import 'package:tank90/component/base/tank_type.dart';
 import 'package:tank90/component/map/boss_component.dart';
 import 'package:tank90/component/map/map_cell_component.dart';
 import 'package:tank90/component/tank/base_tank_component.dart';
-import 'package:tank90/data/map_constants.dart';
+import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/scene/tank_war_game.dart';
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
@@ -72,8 +72,8 @@ class BulletComponent extends SpriteComponent
         !Rect.fromLTWH(
           0,
           0,
-          MapConstants.mapSize.x,
-          MapConstants.mapSize.y,
+          GameConstants.MAP_SIZE.x,
+          GameConstants.MAP_SIZE.y,
         ).overlaps(toRect())) {
       _isShotOutWall = true;
       bomAndDestroy(); //从父节点中删除

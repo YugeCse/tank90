@@ -12,7 +12,7 @@ import 'package:tank90/component/tank/base_tank_component.dart'
 import 'package:flame/components.dart'
     show HasGameReference, PositionComponent, TimerComponent, Vector2;
 import 'package:tank90/data/global_config.dart';
-import 'package:tank90/data/map_constants.dart';
+import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/data/notifier/prop_tank_attack_notifier.dart';
 import 'package:tank90/scene/tank_war_game.dart';
 
@@ -190,8 +190,8 @@ class EnemyTankComponent extends BaseTankComponent {
   /// 敌方坦克出生地址
   static final List<Vector2> bornPositions = [
     Vector2(16, 16),
-    Vector2(MapConstants.mapSize.x / 2, 16),
-    Vector2(MapConstants.mapSize.x - 16, 16),
+    Vector2(GameConstants.MAP_SIZE.x / 2, 16),
+    Vector2(GameConstants.MAP_SIZE.x - 16, 16),
   ];
 }
 
@@ -228,9 +228,9 @@ class EnemyTankFactory extends PositionComponent
   late TimerComponent _factoryTimer;
 
   EnemyTankFactory({
-    this.maxPerTankCount = GlobalConfig.ENEMY_PER_WAR_COUNT,
-    this.maxTotalTankCount = GlobalConfig.ENEMEY_MAX_COUNT,
-    this.redFlickerTankCount = GlobalConfig.ENEMY_RED_FLICKER_COUNT,
+    this.maxPerTankCount = GameConstants.ENEMY_PER_WAR_COUNT,
+    this.maxTotalTankCount = GameConstants.ENEMEY_MAX_COUNT,
+    this.redFlickerTankCount = GameConstants.ENEMY_RED_FLICKER_COUNT,
   });
 
   @override

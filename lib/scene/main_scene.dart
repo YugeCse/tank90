@@ -28,6 +28,7 @@ import 'package:tank90/data/notifier/game_over_notifier.dart';
 import 'package:tank90/data/notifier/prop_tank_attack_notifier.dart';
 import 'package:tank90/data/notifier/tank_bom_notifier.dart'
     show TankBomNotifier;
+import 'package:tank90/data/statistics/score_statistics_info.dart';
 import 'package:tank90/scene/tank_war_game.dart';
 import 'package:tank90/utils/audio_utils.dart';
 
@@ -108,6 +109,9 @@ class MainScene extends Component with HasGameReference<TankWarGame> {
           showGameOver(); //显示游戏结束的界面
         }
       } else {
+        /// TODO 需要添加对应的成就得分
+        var statisticsInfo = ScoreStatisticsInfo(type: event.type);
+        GlobalConfig.dataStatistics.add(statisticsInfo);
         if (GlobalConfig.enemyCounts == 0 &&
             (game.enemyTanks?.isEmpty ?? true)) {
           GlobalConfig.stageLevel = (GlobalConfig.stageLevel + 1).clamp(
@@ -115,7 +119,7 @@ class MainScene extends Component with HasGameReference<TankWarGame> {
             MapStageLevel.maps.length + 1,
           );
 
-          ///TODO 实际上应该跳转到结算页面，需要结算数据
+          /// TODO 实际上应该跳转到结算页面，需要结算数据
           game.router.pushReplacementNamed('Main'); //跳转新的界面
         }
       }
