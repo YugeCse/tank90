@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:tank90/component/base/direction.dart';
 import 'package:tank90/component/base/map_cell_type.dart';
+import 'package:tank90/component/base/tank_type.dart';
 import 'package:tank90/component/map/boss_component.dart';
 import 'package:tank90/component/map/map_cell_component.dart';
 import 'package:tank90/component/tank/base_tank_component.dart';
@@ -37,7 +38,7 @@ class BulletComponent extends SpriteComponent
   final double speed;
 
   /// 拥有者类型
-  final Type ownerType;
+  final TankType ownerType;
 
   /// 碰撞盒
   late RectangleHitbox hitbox;
@@ -95,7 +96,7 @@ class BulletComponent extends SpriteComponent
         other.setWillRemoveFromParent();
       }
       bomAndDestroy(); //爆炸并消失
-    } else if (other is BaseTankComponent && other.runtimeType != ownerType) {
+    } else if (other is BaseTankComponent && other.type != ownerType) {
       AudioUtils().playBulletCrack();
       if (!other.isProtectedState) {
         other.hit(); //被攻击
@@ -119,7 +120,7 @@ class BulletComponent extends SpriteComponent
 
   /// 创建子弹组件
   static BulletComponent create({
-    required Type ownerType,
+    required TankType ownerType,
     double speed = 150.0,
     required Vector2 velocity,
     Vector2? position,

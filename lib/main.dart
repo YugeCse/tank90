@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:flutter/services.dart' show SystemSound, SystemSoundType;
 import 'package:tank90/scene/splash_screen.dart' show SplashScreen;
 import 'package:flame/flame.dart';
 import 'package:flutter/foundation.dart';
@@ -16,13 +15,14 @@ void main() async {
 class MyApplicaption extends StatelessWidget {
   const MyApplicaption({super.key});
 
+  /// 初始化方法
   static Future<void> initialized() async {
     WidgetsFlutterBinding.ensureInitialized();
     if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
       await Flame.device.fullScreen();
       await Flame.device.setLandscape();
     }
-    AudioUtils().preload(); //加载音频数据
+    AudioUtils().preload(); //预加载音频数据，防止后面出现播放卡顿
   }
 
   @override
@@ -30,10 +30,7 @@ class MyApplicaption extends StatelessWidget {
     return MaterialApp(
       home: const SplashScreen(),
       builder: (_, child) => Listener(
-        onPointerDown: (_) {
-          AudioUtils().allowPlay = true;
-          SystemSound.play(SystemSoundType.click);
-        },
+        onPointerDown: (_) => AudioUtils().setAllowPlay(false),
         child: child!,
       ),
       theme: ThemeData.dark(),

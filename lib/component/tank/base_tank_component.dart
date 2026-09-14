@@ -280,7 +280,7 @@ abstract class BaseTankComponent extends SpriteComponent
       }
       game.warMapComponent?.add(
         BulletComponent.create(
-          ownerType: runtimeType,
+          ownerType: type,
           velocity: facingDirection,
           position: position + facingDirection * size.x / 2,
         ),

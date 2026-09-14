@@ -13,8 +13,10 @@ import 'package:tank90/scene/welcome_scene.dart';
 /// 游戏主场景
 class TankWarGame extends FlameGame
     with HasKeyboardHandlerComponents, HasCollisionDetection {
+  /// 资源图片对象
   late Image assetImage;
 
+  /// 页面路由对象
   late final RouterComponent router;
 
   @override

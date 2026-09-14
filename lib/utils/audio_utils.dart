@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flame_audio/flame_audio.dart';
+import 'package:flutter/services.dart';
 
 /// 音频播放控制类
 class AudioUtils {
@@ -45,11 +46,20 @@ class AudioUtils {
   }
 
   /// 是否允许播放声音
-  bool allowPlay = false;
+  bool _allowPlay = false;
+
+  /// 获取是否允许播放声音
+  bool get allowPlay => _allowPlay;
+
+  /// 设置是否允许播放
+  void setAllowPlay(bool value) {
+    _allowPlay = value;
+    if (value) SystemSound.play(SystemSoundType.click);
+  }
 
   /// 检测并播放声音
   void _checkAndPlay(Future<AudioPlayer> Function() next) {
-    if (allowPlay) {
+    if (_allowPlay) {
       // Web 浏览器可能因为自动播放策略拒绝 play，不能让异常冒泡到游戏主循环。
       unawaited(_playSafely(next));
     }
@@ -64,7 +74,7 @@ class AudioUtils {
   }
 
   void _checkAndPlayAudioPool(Future<Future<void> Function()> Function() next) {
-    if (allowPlay) {
+    if (_allowPlay) {
       // Web 浏览器可能因为自动播放策略拒绝 play，不能让异常冒泡到游戏主循环。
       unawaited(_playSafely2(next));
     }

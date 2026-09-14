@@ -21,6 +21,7 @@ import 'package:tank90/component/tank/player_tank_component.dart'
     show PlayerTankComponent;
 import 'package:tank90/component/tank/prop_component.dart';
 import 'package:tank90/data/global_config.dart';
+import 'package:tank90/data/map_stage_level.dart';
 import 'package:tank90/data/notifier/boom_all_notifier.dart';
 import 'package:tank90/data/notifier/boss_protected_notifier.dart';
 import 'package:tank90/data/notifier/game_over_notifier.dart';
@@ -109,7 +110,13 @@ class MainScene extends Component with HasGameReference<TankWarGame> {
       } else {
         if (GlobalConfig.enemyCounts == 0 &&
             (game.enemyTanks?.isEmpty ?? true)) {
-          ///TODO Jump To Next Stage Level
+          GlobalConfig.stageLevel = (GlobalConfig.stageLevel + 1).clamp(
+            1,
+            MapStageLevel.maps.length + 1,
+          );
+
+          ///TODO 实际上应该跳转到结算页面，需要结算数据
+          game.router.pushReplacementNamed('Main'); //跳转新的界面
         }
       }
     } else if (event is BoomAllNotifier) {

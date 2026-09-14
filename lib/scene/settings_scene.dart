@@ -112,8 +112,9 @@ class _SettingsSceneState extends State<SettingsScene> {
   );
 
   /// 切换声音是否打开的状态
+  /// + [isOpen] - 是否打开声音
   void _toggleSoundOpenState(bool isOpen) {
-    AudioUtils().allowPlay = isOpen;
+    AudioUtils().setAllowPlay(isOpen);
     setState(() => _isSoundOpen = isOpen);
   }
 }
