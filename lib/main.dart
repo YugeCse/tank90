@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flame_riverpod/flame_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tank90/scene/splash_screen.dart' show SplashScreen;
 import 'package:flame/flame.dart';
 import 'package:flutter/foundation.dart';
@@ -11,7 +12,7 @@ import 'package:tank90/utils/audio_utils.dart';
 
 void main() async {
   await MyApplicaption.initialized();
-  runApp(MyApplicaption());
+  runApp(ProviderScope(child: MyApplicaption()));
 }
 
 class MyApplicaption extends StatelessWidget {

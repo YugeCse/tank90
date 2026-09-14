@@ -42,4 +42,20 @@ enum TankType {
     }
     throw Exception("Unknown Direction, must be up、down、left、right");
   }
+
+  /// 敌人坦克类型
+  static final enemyTankTypes = <TankType>[
+    TankType.enemy0,
+    TankType.enemy1,
+    TankType.enemy2,
+    TankType.enemy3,
+    TankType.enemy4,
+  ];
+
+  /// 是否同一类型
+  bool isSameKind(TankType other) {
+    return ((other == TankType.player && this == TankType.player) ||
+        TankType.enemyTankTypes.contains(other) &&
+            TankType.enemyTankTypes.contains(this));
+  }
 }

@@ -23,7 +23,7 @@ class BulletComponent extends SpriteComponent
   final double speed;
 
   /// 拥有者类型
-  final TankType ownerType;
+  final TankType type;
 
   /// 碰撞盒
   late RectangleHitbox hitbox;
@@ -33,7 +33,7 @@ class BulletComponent extends SpriteComponent
 
   /// 构造函数
   BulletComponent({
-    required this.ownerType,
+    required this.type,
     this.speed = 150.0,
     required this.velocity,
   }) : super(size: Vector2.all(6.0), priority: 700) {
@@ -74,22 +74,27 @@ class BulletComponent extends SpriteComponent
     PositionComponent other,
   ) {
     if (other is MapCellComponent &&
-        other.type != MapCellType.grass &&
-        other.type != MapCellType.rive) {
+        ![MapCellType.grass, MapCellType.rive].contains(other.type)) {
       AudioUtils().playBulletCrack();
       if (other.type == MapCellType.mudWall) {
         //如果是泥墙，直接移除
         other.setWillRemoveFromParent();
       }
       bomAndDestroy(); //爆炸并消失
-    } else if (other is BaseTankComponent && other.type != ownerType) {
-      AudioUtils().playBulletCrack();
-      if (!other.isProtectedState) {
-        other.hit(); //被攻击
+    } else if (other is BaseTankComponent) {
+      if (!other.type.isSameKind(type)) {
+        AudioUtils().playBulletCrack();
+        if (!other.isProtectedState) {
+          other.hit(); //被攻击
+        }
+        bomAndDestroy(); //爆炸并消失
       }
-      bomAndDestroy(); //爆炸并消失
     } else if (other is BossComponent) {
       other.setDeathState(); //boss 爆炸死亡
+    } else if (other is BulletComponent && !other.type.isSameKind(type)) {
+      AudioUtils().playBulletCrack();
+      bomAndDestroy();
+      other.bomAndDestroy();
     }
     super.onCollisionStart(intersectionPoints, other);
   }
@@ -121,11 +126,8 @@ class BulletComponent extends SpriteComponent
     required Vector2 velocity,
     Vector2? position,
   }) {
-    return BulletComponent(
-      ownerType: ownerType,
-      velocity: velocity,
-      speed: speed,
-    )..position = position ?? Vector2.zero();
+    return BulletComponent(type: ownerType, velocity: velocity, speed: speed)
+      ..position = position ?? Vector2.zero();
   }
 }
 

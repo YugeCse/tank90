@@ -304,18 +304,18 @@ abstract class BaseTankComponent extends SpriteComponent
 
   /// 爆炸并消灭
   void bomAndDestroy() {
-    removeFromParent();
+    var mainScene = findMainScene();
+    var warMapComponent = findWarMapComponent();
+    removeFromParent(); //从父节点移除
     hitbox.collisionType = CollisionType.inactive;
-    if (runtimeType is PlayerTankComponent) {
-      AudioUtils().playPlayerCrack();
-    } else {
-      AudioUtils().playTankCrack();
-    }
-    findWarMapComponent()?.add(
+    type == TankType.player
+        ? AudioUtils().playPlayerCrack()
+        : AudioUtils().playTankCrack();
+    warMapComponent?.add(
       _TankBomEffectComponent(
         position: position,
         onFinished: () =>
-            findMainScene()?.onReceiveNotifier(TankBomNotifier(type: type)),
+            mainScene?.onReceiveNotifier(TankBomNotifier(type: type)),
       ),
     );
   }

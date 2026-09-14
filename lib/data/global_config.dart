@@ -2,7 +2,6 @@
 
 import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/data/game_level.dart';
-import 'package:tank90/data/provider/score_statistics.dart';
 
 /// 全局配置类
 class GlobalConfig {
@@ -22,7 +21,4 @@ class GlobalConfig {
 
   /// 敌人数量
   static int enemyCounts = GameConstants.ENEMEY_MAX_COUNT;
-
-  /// 数据结算对象
-  static ScoreStatistics dataStatistics = ScoreStatistics();
 }

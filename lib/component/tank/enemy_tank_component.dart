@@ -198,14 +198,6 @@ class EnemyTankComponent extends BaseTankComponent {
 /// 敌方坦克工厂组件
 class EnemyTankFactory extends PositionComponent
     with HasGameReference<TankWarGame> {
-  final List<TankType> tankTypes = [
-    TankType.enemy0,
-    TankType.enemy1,
-    TankType.enemy2,
-    TankType.enemy3,
-    TankType.enemy4,
-  ];
-
   /// 每批次允许的数量
   final int maxPerTankCount;
 
@@ -292,7 +284,11 @@ class EnemyTankFactory extends PositionComponent
           break; //所有坦克已经生产完成，需要跳出循环
         }
         await Future.delayed(
-          Duration(milliseconds: _random.nextIntBetween(500, 3000)),
+          Duration(
+            milliseconds: _generateTankCount < 5
+                ? 500
+                : _random.nextIntBetween(500, 3000),
+          ),
         );
       }
     }
@@ -304,6 +300,7 @@ class EnemyTankFactory extends PositionComponent
     Vector2 targetPosition, {
     int redFlickerCount = 0,
   }) {
+    var tankTypes = TankType.enemyTankTypes;
     return EnemyTankComponent.create(
       position: targetPosition,
       redFlickerCounter: redFlickerCount,

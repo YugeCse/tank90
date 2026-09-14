@@ -4,6 +4,7 @@ import 'dart:math' show max;
 
 import 'package:flame/components.dart';
 import 'package:flame/input.dart';
+import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Route, Image;
 import 'package:tank90/component/base/capability.dart';
@@ -29,12 +30,14 @@ import 'package:tank90/data/notifier/game_over_notifier.dart';
 import 'package:tank90/data/notifier/prop_tank_attack_notifier.dart';
 import 'package:tank90/data/notifier/tank_bom_notifier.dart'
     show TankBomNotifier;
+import 'package:tank90/data/provider/score_statistics.dart';
 import 'package:tank90/data/statistics/score_statistics_info.dart';
 import 'package:tank90/scene/tank_war_game.dart';
 import 'package:tank90/utils/audio_utils.dart';
 
 /// 主场景
-class MainScene extends Component with HasGameReference<TankWarGame> {
+class MainScene extends Component
+    with HasGameReference<TankWarGame>, RiverpodComponentMixin {
   /// 游戏地图对象
   WarMapComponent? mapComponent;
 
@@ -95,11 +98,12 @@ class MainScene extends Component with HasGameReference<TankWarGame> {
       _propFactoryComponent = PropFactoryComponent(),
     ); //添加装备道具工厂组件
     mapComponent?.add(EnemyTankFactory()); //添加敌方坦克工厂组件
-    add(SidebarComponent());
+    // add(SidebarComponent());
   }
 
   /// 接受消息事件
   void onReceiveNotifier(dynamic event) {
+    debugPrint('onReceiveNotifier 接收到事件：$event');
     if (event is GameOverNotifier) {
       showGameOver(); //显示游戏结束的界面
     } else if (event is TankBomNotifier) {
@@ -113,7 +117,7 @@ class MainScene extends Component with HasGameReference<TankWarGame> {
       } else {
         /// TODO 需要添加对应的成就得分
         var statisticsInfo = ScoreStatisticsInfo(type: event.type);
-        GlobalConfig.dataStatistics.add(statisticsInfo);
+        ref.read(scoreStatisticsProvider.notifier).add(statisticsInfo);
         if (GlobalConfig.enemyCounts == 0 &&
             (game.enemyTanks?.isEmpty ?? true)) {
           GlobalConfig.stageLevel = (GlobalConfig.stageLevel + 1).clamp(
@@ -159,8 +163,8 @@ class MainScene extends Component with HasGameReference<TankWarGame> {
   void _addPlayerTank() {
     if (playerTank != null) {
       playerTank?.removeFromParent();
+      playerTank = null;
     }
-    playerTank = null;
     mapComponent?.add(playerTank ??= PlayerTankComponent(joystick: joystick));
   }
 
@@ -189,7 +193,8 @@ mixin MainSceneMixin on Component {
   /// + [type] - 查找方式，默认：向上查找
   MainScene? findMainScene({FindType type = FindType.ancestors}) {
     return (type == FindType.ancestors ? ancestors() : descendants())
-        .whereType<MainScene>()
-        .firstOrNull;
+            .whereType<MainScene>()
+            .firstOrNull ??
+        findGame()?.descendants().whereType<MainScene>().firstOrNull;
   }
 }

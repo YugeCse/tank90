@@ -284,7 +284,8 @@ mixin WarMapComponentMixin on Component {
   /// + [type] - 查找方式，默认：往上查找
   WarMapComponent? findWarMapComponent({FindType type = FindType.ancestors}) {
     return (type == FindType.ancestors ? ancestors() : descendants())
-        .whereType<WarMapComponent>()
-        .firstOrNull;
+            .whereType<WarMapComponent>()
+            .firstOrNull ??
+        findGame()?.descendants().whereType<WarMapComponent>().firstOrNull;
   }
 }
