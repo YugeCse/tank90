@@ -1,4 +1,5 @@
 import 'package:async/async.dart';
+import 'package:flame/game.dart';
 import 'dart:math';
 
 import 'package:flutter/widgets.dart';
@@ -11,12 +12,12 @@ import 'package:tank90/component/map/map_cell_component.dart'
     show MapCellComponent;
 import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/data/map_stage_level.dart';
-import 'package:tank90/scene/tank_war_game.dart' show TankWarGame;
 import 'package:flame/components.dart';
 
 /// 战场地图组件
-class WarMapComponent extends PositionComponent
-    with HasGameReference<TankWarGame> {
+class WarMapComponent extends PositionComponent {
+  late final FlameGame _game;
+
   /// 关卡数
   int stage = 0;
 
@@ -44,7 +45,11 @@ class WarMapComponent extends PositionComponent
   final List<Vector2> _bossWallCoordinations = [];
 
   /// 构造方法
-  WarMapComponent({required this.stage, super.position});
+  WarMapComponent({
+    required FlameGame game,
+    required this.stage,
+    super.position,
+  }) : _game = game;
 
   @override
   Future<void>? onLoad() async {
@@ -68,12 +73,12 @@ class WarMapComponent extends PositionComponent
   void _setMapLocation() {
     var mapWidth = GameConstants.MAP_SIZE.x;
     var mapHeight = GameConstants.MAP_SIZE.y;
-    var scaleX = game.size.x / mapWidth;
-    var scaleY = game.size.y / mapHeight;
+    var scaleX = _game.size.x / mapWidth;
+    var scaleY = _game.size.y / mapHeight;
     var scaleV = min(scaleX, scaleY);
     scale = Vector2.all(scaleV);
-    position.x = (game.size.x - mapWidth * scaleV) / 2;
-    position.y = (game.size.y - mapHeight * scaleV) / 2;
+    position.x = (_game.size.x - mapWidth * scaleV) / 2;
+    position.y = (_game.size.y - mapHeight * scaleV) / 2;
   }
 
   /// 生成战争地图

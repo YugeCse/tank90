@@ -58,6 +58,7 @@ class MainScene extends Component with HasGameReference<TankWarGame> {
     AudioUtils().playStart(); //播放开始的声音
     add(
       mapComponent ??= WarMapComponent(
+        game: game,
         stage: max(GlobalConfig.stageLevel - 1, 0),
       ),
     );

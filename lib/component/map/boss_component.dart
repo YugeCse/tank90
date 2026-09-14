@@ -2,15 +2,16 @@ import 'dart:async';
 
 import 'package:flame/collisions.dart';
 import 'package:tank90/component/base/hitbox_mixin.dart';
+import 'package:tank90/component/map/war_map_component.dart';
 import 'package:tank90/data/notifier/game_over_notifier.dart';
-import 'package:tank90/scene/tank_war_game.dart' show TankWarGame;
+import 'package:tank90/scene/main_scene.dart';
 import 'package:flame/components.dart';
 import 'package:tank90/utils/audio_utils.dart';
 import 'package:tank90/utils/res_img_utils.dart';
 
 /// Boss组件
 class BossComponent extends SpriteComponent
-    with HasGameReference<TankWarGame>, HitboxMixin {
+    with HitboxMixin, MainSceneMixin, WarMapComponentMixin {
   /// 是否还存活
   bool _isAlive;
 
@@ -44,17 +45,17 @@ class BossComponent extends SpriteComponent
         animation: SpriteAnimation.spriteList(
           [
             Sprite(
-              game.assetImage,
+              assetImage,
               srcPosition: Vector2(320, 0),
               srcSize: Vector2.all(32.0),
             ),
             Sprite(
-              game.assetImage,
+              assetImage,
               srcPosition: Vector2(352, 0),
               srcSize: Vector2.all(32.0),
             ),
             Sprite(
-              game.assetImage,
+              assetImage,
               srcPosition: Vector2(384, 0),
               srcSize: Vector2.all(32.0),
             ),
@@ -65,14 +66,14 @@ class BossComponent extends SpriteComponent
         removeOnFinish: true,
       )
       ..animationTicker?.onComplete = () =>
-          game.mainScene?.onReceiveNotifier(GameOverNotifier());
+          findMainScene()?.onReceiveNotifier(GameOverNotifier());
   }
 
   /// 显示被破坏的特效
   void _showDestroyEffect() {
     hitbox.collisionType = CollisionType.inactive;
     AudioUtils().playPlayerCrack();
-    game.warMapComponent?.add(_boomComponent..position = center);
+    findWarMapComponent()?.add(_boomComponent..position = center);
   }
 
   /// 设置为死亡状态

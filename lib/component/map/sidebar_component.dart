@@ -2,12 +2,10 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:tank90/data/game_constants.dart';
-import 'package:tank90/scene/tank_war_game.dart';
 import 'package:tank90/utils/res_img_utils.dart';
 
 /// 侧边栏组件
-class SidebarComponent extends PositionComponent
-    with HasGameReference<TankWarGame> {
+class SidebarComponent extends PositionComponent {
   @override
   FutureOr<void> onLoad() async {
     size = Vector2(64, GameConstants.MAP_SIZE.y);

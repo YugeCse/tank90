@@ -2,17 +2,16 @@ import 'dart:async';
 
 import 'package:tank90/component/base/hitbox_mixin.dart';
 import 'package:tank90/component/base/map_cell_type.dart' show MapCellType;
-import 'package:tank90/scene/tank_war_game.dart' show TankWarGame;
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:tank90/utils/res_img_utils.dart';
 
 /// 地图单元组件
-class MapCellComponent extends SpriteComponent
-    with HasGameReference<TankWarGame>, HitboxMixin {
+class MapCellComponent extends SpriteComponent with HitboxMixin {
   /// 地图单元类型
   MapCellType type;
 
+  /// 构造方法
   MapCellComponent({required this.type, super.position})
     : super(size: MapCellType.size);
 
@@ -34,7 +33,7 @@ class MapCellComponent extends SpriteComponent
   void changeType(MapCellType type) {
     this.type = type;
     sprite = Sprite(
-      game.assetImage,
+      assetImage,
       srcSize: MapCellType.size,
       srcPosition: type.srcPosition,
     );
