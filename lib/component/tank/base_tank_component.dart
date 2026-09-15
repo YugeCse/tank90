@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math';
 
+import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:tank90/component/base/boss_wall_state.dart';
 import 'package:tank90/component/base/capability.dart';
 import 'package:tank90/component/base/direction.dart';
@@ -16,11 +17,11 @@ import 'package:tank90/component/tank/enemy_tank_component.dart';
 import 'package:tank90/component/tank/player_tank_component.dart';
 import 'package:tank90/component/tank/tank_born_component.dart';
 import 'package:tank90/component/tank/tank_protect_component.dart';
-import 'package:tank90/data/global_config.dart';
+import 'package:tank90/app/provider/global_config.dart';
 import 'package:tank90/data/game_constants.dart';
-import 'package:tank90/data/notifier/boom_all_notifier.dart';
-import 'package:tank90/data/notifier/boss_protected_notifier.dart';
-import 'package:tank90/data/notifier/tank_bom_notifier.dart'
+import 'package:tank90/app/notifier/boom_all_notifier.dart';
+import 'package:tank90/app/notifier/boss_protected_notifier.dart';
+import 'package:tank90/app/notifier/tank_bom_notifier.dart'
     show TankBomNotifier;
 import 'package:tank90/scene/main_scene.dart';
 import 'package:tank90/scene/tank_war_game.dart' show TankWarGame;
@@ -31,7 +32,12 @@ import 'package:tank90/utils/res_img_utils.dart';
 
 /// 坦克组件基类
 abstract class BaseTankComponent extends SpriteComponent
-    with CollisionCallbacks, HitboxMixin, MainSceneMixin, WarMapComponentMixin {
+    with
+        CollisionCallbacks,
+        HitboxMixin,
+        RiverpodComponentMixin,
+        MainSceneMixin,
+        WarMapComponentMixin {
   /// 坦克类型
   TankType type;
 
@@ -239,13 +245,13 @@ abstract class BaseTankComponent extends SpriteComponent
     }
     if (type is TankPropType) {
       if (this.type == TankType.player) {
-        GlobalConfig.playerLifes += 1;
+        globalConfig.playerLifes += 1;
       } else {
-        if (GlobalConfig.enemyCounts >= 20) {
+        if (globalConfig.enemyCounts >= 20) {
           //敌人最多能拥有 20 个
           return;
         }
-        GlobalConfig.enemyCounts += 1;
+        globalConfig.enemyCounts += 1;
       }
     } else if (type is TimerPropType) {
       var mainScene = findMainScene();

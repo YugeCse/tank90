@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flame/game.dart';
 import 'package:flame/input.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
+import 'package:flutter/material.dart' hide Route, OverlayRoute;
 import 'package:tank90/component/map/war_map_component.dart';
 import 'package:tank90/component/tank/base_tank_component.dart';
 import 'package:tank90/component/tank/enemy_tank_component.dart';
@@ -31,7 +32,10 @@ class TankWarGame extends FlameGame
           'Stage': Route(StageScreen.new),
           'Welcome': Route(WelcomeScene.new),
           'Settings': OverlayRoute(
-            (_, game) => SettingsScene(game: game as TankWarGame),
+            (_, game) => SettingsScene(
+              onRequestSceneClose: router.pop,
+              rootContainerSize: Size(game.size.x, game.size.y),
+            ),
           ),
         },
       ),

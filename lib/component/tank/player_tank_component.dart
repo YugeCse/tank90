@@ -9,7 +9,7 @@ import 'package:flame/input.dart' show JoystickComponent;
 import 'package:flutter/services.dart'
     show LogicalKeyboardKey, KeyDownEvent, KeyUpEvent;
 import 'package:tank90/data/game_properties.dart';
-import 'package:tank90/data/global_config.dart';
+import 'package:tank90/app/provider/global_config.dart';
 import 'base_tank_component.dart';
 
 /// 玩家坦克组件
@@ -98,7 +98,7 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
 
   @override
   bool onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
-    if (GlobalConfig.state == GameState.playing &&
+    if (globalConfig.gameState == GameState.playing &&
         !isBornState &&
         !capabilities.containsKey(SleepCapability)) {
       handleKeyEvent(event);

@@ -5,18 +5,22 @@ import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/extensions.dart';
+import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:tank90/component/base/prop_type.dart';
 import 'package:tank90/component/tank/enemy_tank_component.dart';
 import 'package:tank90/component/tank/player_tank_component.dart';
 import 'package:tank90/data/game_properties.dart';
-import 'package:tank90/data/global_config.dart';
+import 'package:tank90/app/provider/global_config.dart';
 import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/scene/tank_war_game.dart';
 import 'package:tank90/utils/res_img_utils.dart';
 
 /// 装备组件类
 class PropComponent extends SpriteComponent
-    with HasGameReference<TankWarGame>, CollisionCallbacks {
+    with
+        HasGameReference<TankWarGame>,
+        CollisionCallbacks,
+        RiverpodComponentMixin {
   /// 装备类型
   PropType propType;
 
@@ -88,7 +92,7 @@ class PropComponent extends SpriteComponent
       other.fetchProp(propType);
     } else if (other is EnemyTankComponent) {
       // 只有困难等级才能让敌人获得装备
-      if (GlobalConfig.gameLevel == GameLevel.difficulty) {
+      if (globalConfig.gameLevel == GameLevel.difficulty) {
         _hitbox.collisionType = CollisionType.inactive;
         removeFromParent();
         other.fetchProp(propType);

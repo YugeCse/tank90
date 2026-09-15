@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flame/effects.dart';
 import 'package:flame/extensions.dart';
+import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:tank90/component/base/capability.dart';
 import 'package:tank90/component/base/direction.dart' show Direction;
@@ -11,9 +12,9 @@ import 'package:tank90/component/tank/base_tank_component.dart'
     show BaseTankComponent;
 import 'package:flame/components.dart'
     show HasGameReference, PositionComponent, TimerComponent, Vector2;
-import 'package:tank90/data/global_config.dart';
+import 'package:tank90/app/provider/global_config.dart';
 import 'package:tank90/data/game_constants.dart';
-import 'package:tank90/data/notifier/prop_tank_attack_notifier.dart';
+import 'package:tank90/app/notifier/prop_tank_attack_notifier.dart';
 import 'package:tank90/scene/tank_war_game.dart';
 
 /// 地方坦克组件
@@ -197,7 +198,7 @@ class EnemyTankComponent extends BaseTankComponent {
 
 /// 敌方坦克工厂组件
 class EnemyTankFactory extends PositionComponent
-    with HasGameReference<TankWarGame> {
+    with HasGameReference<TankWarGame>, RiverpodComponentMixin {
   /// 每批次允许的数量
   final int maxPerTankCount;
 
@@ -238,7 +239,7 @@ class EnemyTankFactory extends PositionComponent
 
   /// 检查并生成坦克
   void _checkAndGenerateTanks() async {
-    if (GlobalConfig.enemyCounts <= 0) {
+    if (globalConfig.enemyCounts <= 0) {
       _factoryTimer.timer.stop();
       _factoryTimer.removeFromParent();
       debugPrint('所有坦克达到生产总数目：$maxTotalTankCount');
@@ -247,7 +248,7 @@ class EnemyTankFactory extends PositionComponent
     if (_isGeneratingTank) return;
     _isGeneratingTank = true;
     var diffCount = maxPerTankCount - (game.enemyTanks?.length ?? 0);
-    if (diffCount <= 0 || GlobalConfig.enemyCounts <= 0) {
+    if (diffCount <= 0 || globalConfig.enemyCounts <= 0) {
       _isGeneratingTank = false;
       return;
     }
@@ -274,8 +275,8 @@ class EnemyTankFactory extends PositionComponent
         game.warMapComponent?.add(newTank);
         addedTanks.add(newTank); //记录这个新增的坦克
         _generateTankCount++; //生成的坦克数量增加 1 次
-        if (GlobalConfig.enemyCounts > 0) {
-          GlobalConfig.enemyCounts--; //已经生成的坦克数量，总数量减少
+        if (globalConfig.enemyCounts > 0) {
+          globalConfig.enemyCounts--; //已经生成的坦克数量，总数量减少
         }
         if (--diffCount <= 0) {
           debugPrint('本批次所有坦克已经生产完成');

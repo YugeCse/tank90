@@ -18,7 +18,7 @@ import 'package:flame/components.dart';
 class WarMapComponent extends PositionComponent {
   late final FlameGame _game;
 
-  /// 关卡数
+  /// 关卡数, 从0开始
   int stage = 0;
 
   /// boss 表格坐标

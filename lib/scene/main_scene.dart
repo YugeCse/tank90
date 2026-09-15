@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:io';
-import 'dart:math' show max;
 
 import 'package:flame/components.dart';
 import 'package:flame/input.dart';
@@ -22,16 +21,16 @@ import 'package:tank90/component/tank/player_tank_component.dart'
     show PlayerTankComponent;
 import 'package:tank90/component/tank/prop_component.dart';
 import 'package:tank90/data/game_properties.dart';
-import 'package:tank90/data/global_config.dart';
+import 'package:tank90/app/provider/global_config.dart';
 import 'package:tank90/data/map_stage_level.dart';
-import 'package:tank90/data/notifier/boom_all_notifier.dart';
-import 'package:tank90/data/notifier/boss_protected_notifier.dart';
-import 'package:tank90/data/notifier/game_over_notifier.dart';
-import 'package:tank90/data/notifier/prop_tank_attack_notifier.dart';
-import 'package:tank90/data/notifier/tank_bom_notifier.dart'
+import 'package:tank90/app/notifier/boom_all_notifier.dart';
+import 'package:tank90/app/notifier/boss_protected_notifier.dart';
+import 'package:tank90/app/notifier/game_over_notifier.dart';
+import 'package:tank90/app/notifier/prop_tank_attack_notifier.dart';
+import 'package:tank90/app/notifier/tank_bom_notifier.dart'
     show TankBomNotifier;
-import 'package:tank90/data/provider/score_statistics.dart';
-import 'package:tank90/data/statistics/score_statistics_info.dart';
+import 'package:tank90/app/provider/score_statistics.dart';
+import 'package:tank90/data/score_statistics_info.dart';
 import 'package:tank90/scene/tank_war_game.dart';
 import 'package:tank90/utils/audio_utils.dart';
 
@@ -58,12 +57,15 @@ class MainScene extends Component
 
   @override
   FutureOr<void> onLoad() async {
-    GlobalConfig.state = GameState.playing;
+    globalConfig.gameState = GameState.playing;
     AudioUtils().playStart(); //播放开始的声音
     add(
       mapComponent ??= WarMapComponent(
         game: game,
-        stage: max(GlobalConfig.stageLevel - 1, 0),
+        stage: (globalConfig.stageLevel - 1).clamp(
+          0,
+          MapStageLevel.maps.length - 1,
+        ),
       ),
     );
     if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
@@ -108,10 +110,10 @@ class MainScene extends Component
       showGameOver(); //显示游戏结束的界面
     } else if (event is TankBomNotifier) {
       if (event.type == TankType.player) {
-        if (--GlobalConfig.playerLifes > 0) {
+        if (--globalConfig.playerLifes > 0) {
           _addPlayerTank(); //添加玩家坦克
         } else {
-          GlobalConfig.playerLifes = 0;
+          globalConfig.playerLifes = 0;
           showGameOver(); //显示游戏结束的界面
         }
       } else {
@@ -119,9 +121,9 @@ class MainScene extends Component
         var statisticsInfo = ScoreStatisticsInfo(type: event.type);
         ref.read(scoreStatisticsProvider.notifier).add(statisticsInfo);
         var isGameWin =
-            GlobalConfig.enemyCounts <= 0 && (game.enemyTanks?.isEmpty ?? true);
+            globalConfig.enemyCounts <= 0 && (game.enemyTanks?.isEmpty ?? true);
         if (isGameWin) {
-          GlobalConfig.stageLevel = (GlobalConfig.stageLevel + 1).clamp(
+          globalConfig.stageLevel = (globalConfig.stageLevel + 1).clamp(
             1,
             MapStageLevel.maps.length + 1,
           );
@@ -185,7 +187,7 @@ class MainScene extends Component
   /// 显示游戏失效的界面
   void showGameOver() {
     if (_gameOverComponent != null) return;
-    GlobalConfig.state = GameState.gameOver;
+    globalConfig.gameState = GameState.gameOver;
     add(_gameOverComponent ??= GameOverComponent());
   }
 }

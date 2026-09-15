@@ -1,4 +1,4 @@
-import 'package:tank90/data/statistics/score_statistics_info.dart';
+import 'package:tank90/data/score_statistics_info.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'score_statistics.g.dart';

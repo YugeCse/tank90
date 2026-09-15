@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flame/collisions.dart';
 import 'package:tank90/component/base/hitbox_mixin.dart';
 import 'package:tank90/component/map/war_map_component.dart';
-import 'package:tank90/data/notifier/game_over_notifier.dart';
+import 'package:tank90/app/notifier/game_over_notifier.dart';
 import 'package:tank90/scene/main_scene.dart';
 import 'package:flame/components.dart';
 import 'package:tank90/utils/audio_utils.dart';

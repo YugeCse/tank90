@@ -11,6 +11,9 @@ class AudioUtils {
 
   static final _instance = AudioUtils._internal();
 
+  /// 初始化操作
+  static void initialize() => SystemSound.play(SystemSoundType.click);
+
   late AudioPool _attackPool;
 
   late AudioPool _movePool;
@@ -54,7 +57,6 @@ class AudioUtils {
   /// 设置是否允许播放
   void setAllowPlay(bool value) {
     _allowPlay = value;
-    if (value) SystemSound.play(SystemSoundType.click);
   }
 
   /// 检测并播放声音
