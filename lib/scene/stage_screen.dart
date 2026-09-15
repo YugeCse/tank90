@@ -15,14 +15,13 @@ class StageScreen extends Component
         KeyboardHandler,
         RiverpodComponentMixin {
   /// 关卡文本组件
-  late TextComponent _stageComponent;
+  TextComponent? _stageComponent;
 
   @override
   FutureOr<void> onLoad() async {
-    var stageLevel = globalConfig.stageLevel;
+    await super.onLoad();
     add(
       _stageComponent = TextComponent(
-        text: 'STAGE $stageLevel',
         textRenderer: TextPaint(
           style: TextStyle(
             fontSize: 56,
@@ -30,19 +29,25 @@ class StageScreen extends Component
             fontWeight: FontWeight.bold,
           ),
         ),
+        text: 'STAGE --',
         anchor: Anchor.center,
         position: game.size / 2,
       ),
     );
   }
 
+  /// 监听数据变化
+  void listenDataChanged() {
+    var stageLevel = globalConfigInfo.stageLevel;
+    _stageComponent?.text = 'STAGE $stageLevel';
+    ref.listen(globalConfigProvider, (pre, next) {
+      _stageComponent?.text = 'STAGE ${next.stageLevel}';
+    });
+  }
+
   @override
   void onMount() {
-    addToGameWidgetBuild(
-      () => ref.listen(globalConfigProvider, (pre, next) {
-        _stageComponent.text = 'STAGE ${next.stageLevel}';
-      }),
-    );
+    addToGameWidgetBuild(listenDataChanged);
     super.onMount();
   }
 
@@ -52,12 +57,11 @@ class StageScreen extends Component
       var key = event.logicalKey;
       if ({LogicalKeyboardKey.enter, LogicalKeyboardKey.space}.contains(key)) {
         _goToMainGameScene();
-        debugPrint('点击了Enter键');
       } else if ({
         LogicalKeyboardKey.arrowUp,
         LogicalKeyboardKey.keyJ,
       }.contains(key)) {
-        var stageLevel = globalConfig.stageLevel - 1;
+        var stageLevel = globalConfigInfo.stageLevel - 1;
         globalConfig.stageLevel = stageLevel >= 1
             ? stageLevel
             : MapStageLevel.maps.length;
@@ -65,7 +69,7 @@ class StageScreen extends Component
         LogicalKeyboardKey.arrowDown,
         LogicalKeyboardKey.keyK,
       }.contains(key)) {
-        var stageLevel = globalConfig.stageLevel + 1;
+        var stageLevel = globalConfigInfo.stageLevel + 1;
         globalConfig.stageLevel = stageLevel > MapStageLevel.maps.length
             ? 1
             : stageLevel;

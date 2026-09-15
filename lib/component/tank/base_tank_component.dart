@@ -21,8 +21,8 @@ import 'package:tank90/app/provider/global_config.dart';
 import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/app/notifier/boom_all_notifier.dart';
 import 'package:tank90/app/notifier/boss_protected_notifier.dart';
-import 'package:tank90/app/notifier/tank_bom_notifier.dart'
-    show TankBomNotifier;
+import 'package:tank90/app/notifier/tank_boom_notifier.dart'
+    show TankBoomNotifier;
 import 'package:tank90/scene/main_scene.dart';
 import 'package:tank90/scene/tank_war_game.dart' show TankWarGame;
 import 'package:flame/collisions.dart';
@@ -56,6 +56,9 @@ abstract class BaseTankComponent extends SpriteComponent
   /// 是否处理了碰撞逻辑
   bool _isCollisionHandled = false;
 
+  /// 防爆次数
+  int explosionProofCount;
+
   /// 拥有的能力对象集合
   final Map<Type, Capability> capabilities = {};
 
@@ -68,30 +71,44 @@ abstract class BaseTankComponent extends SpriteComponent
   /// 是否是处理被保护状态
   bool get isProtectedState => _tankProtectComponent != null;
 
+  /// 构造方法
   BaseTankComponent({
     required this.type,
     double? speed,
     Vector2? facingDirection,
     super.position,
+    this.explosionProofCount = 0,
   }) : speed = type.initialSpeed,
        velocity = facingDirection ?? Direction.up,
        super(size: type.srcSize, anchor: Anchor.center, priority: 600);
+
+  /// 更新精灵图帧
+  /// + [type] - 坦克类型
+  void updateSprite(TankType type) {
+    sprite = Sprite(
+      assetImage,
+      srcSize: type.srcSize,
+      srcPosition: type.getSrcPosition(velocity),
+    );
+  }
 
   /// 出生完成事件
   void onBornFinished() {}
 
   @override
   FutureOr<void> onLoad() {
-    sprite = Sprite(
-      assetImage,
-      srcSize: type.srcSize,
-      srcPosition: type.getSrcPosition(velocity),
-    );
+    explosionProofCount = type.explosionProofCount;
+    updateSprite(type);
     facingDirection = velocity;
     velocity = Vector2.zero();
     add(hitbox = RectangleHitbox(size: size));
     opacity = 0; //默认设置透明度为0
     hitbox.collisionType = CollisionType.inactive;
+  }
+
+  @override
+  void onMount() {
+    super.onMount();
     findWarMapComponent()?.add(
       TankBornComponent(
         position: center,
@@ -247,7 +264,7 @@ abstract class BaseTankComponent extends SpriteComponent
       if (this.type == TankType.player) {
         globalConfig.playerLifes += 1;
       } else {
-        if (globalConfig.enemyCounts >= 20) {
+        if (globalConfigInfo.enemyCounts >= 20) {
           //敌人最多能拥有 20 个
           return;
         }
@@ -287,9 +304,9 @@ abstract class BaseTankComponent extends SpriteComponent
     }
   }
 
-  /// 开火
+  /// 开炮/攻击
   /// + [onFinished] - 开火完成的事件
-  void fire({void Function()? onFinished}) {
+  void attack({void Function()? onFinished}) {
     if (facingDirection != Vector2.zero()) {
       if (this is PlayerTankComponent) {
         AudioUtils().playAttack(); //播放玩家射击的声音
@@ -306,10 +323,20 @@ abstract class BaseTankComponent extends SpriteComponent
   }
 
   /// 被攻击
-  void hit() => bomAndDestroy(); //爆炸并损坏
+  void attacked() {
+    if (explosionProofCount > 0) {
+      explosionProofCount--;
+      onAttackedButNotExplosion();
+      return; //因为扛住了打击，所以不会执行下面的逻辑
+    }
+    boomAndDestroy(); //爆炸并损坏
+  }
+
+  /// 被攻击了，但是没有爆炸
+  void onAttackedButNotExplosion() {}
 
   /// 爆炸并消灭
-  void bomAndDestroy() {
+  void boomAndDestroy() {
     var mainScene = findMainScene();
     var warMapComponent = findWarMapComponent();
     removeFromParent(); //从父节点移除
@@ -318,21 +345,21 @@ abstract class BaseTankComponent extends SpriteComponent
         ? AudioUtils().playPlayerCrack()
         : AudioUtils().playTankCrack();
     warMapComponent?.add(
-      _TankBomEffectComponent(
+      _TankBoomEffectComponent(
         position: position,
         onFinished: () =>
-            mainScene?.onReceiveNotifier(TankBomNotifier(type: type)),
+            mainScene?.onReceiveNotifier(TankBoomNotifier(type: type)),
       ),
     );
   }
 }
 
 /// 坦克爆炸的效果组件
-class _TankBomEffectComponent extends SpriteAnimationComponent
+class _TankBoomEffectComponent extends SpriteAnimationComponent
     with HasGameReference<TankWarGame> {
   final void Function() onFinished;
 
-  _TankBomEffectComponent({super.position, required this.onFinished})
+  _TankBoomEffectComponent({super.position, required this.onFinished})
     : super(anchor: Anchor.center, removeOnFinish: true);
 
   @override

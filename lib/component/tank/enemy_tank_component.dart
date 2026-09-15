@@ -81,12 +81,23 @@ class EnemyTankComponent extends BaseTankComponent {
   }
 
   @override
-  void hit() {
+  void attacked() {
     if (redFlickerCounter <= 0) {
-      super.hit();
+      super.attacked();
     } else {
       redFlickerCounter--;
       findMainScene()?.onReceiveNotifier(PropTankAttackNotifier());
+    }
+  }
+
+  @override
+  void onAttackedButNotExplosion() {
+    if (explosionProofCount == 1) {
+      type = TankType.enemy3;
+      updateSprite(type);
+    } else if (explosionProofCount == 0) {
+      type = TankType.enemy4;
+      updateSprite(type);
     }
   }
 
@@ -153,7 +164,7 @@ class EnemyTankComponent extends BaseTankComponent {
   void _startRandomFireTimer() {
     add(
       _fireTimer ??= TimerComponent(
-        onTick: () => fire(
+        onTick: () => attack(
           onFinished: () {
             _fireTimer = null;
             _startRandomFireTimer();
@@ -239,7 +250,7 @@ class EnemyTankFactory extends PositionComponent
 
   /// 检查并生成坦克
   void _checkAndGenerateTanks() async {
-    if (globalConfig.enemyCounts <= 0) {
+    if (globalConfigInfo.enemyCounts <= 0) {
       _factoryTimer.timer.stop();
       _factoryTimer.removeFromParent();
       debugPrint('所有坦克达到生产总数目：$maxTotalTankCount');
@@ -248,7 +259,7 @@ class EnemyTankFactory extends PositionComponent
     if (_isGeneratingTank) return;
     _isGeneratingTank = true;
     var diffCount = maxPerTankCount - (game.enemyTanks?.length ?? 0);
-    if (diffCount <= 0 || globalConfig.enemyCounts <= 0) {
+    if (diffCount <= 0 || globalConfigInfo.enemyCounts <= 0) {
       _isGeneratingTank = false;
       return;
     }
@@ -275,7 +286,7 @@ class EnemyTankFactory extends PositionComponent
         game.warMapComponent?.add(newTank);
         addedTanks.add(newTank); //记录这个新增的坦克
         _generateTankCount++; //生成的坦克数量增加 1 次
-        if (globalConfig.enemyCounts > 0) {
+        if (globalConfigInfo.enemyCounts > 0) {
           globalConfig.enemyCounts--; //已经生成的坦克数量，总数量减少
         }
         if (--diffCount <= 0) {

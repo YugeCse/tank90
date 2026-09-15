@@ -1,14 +1,7 @@
 import 'package:flame_splash_screen/flame_splash_screen.dart'
     show FlameSplashScreen, FlameSplashTheme;
 import 'package:flutter/material.dart'
-    show
-        BuildContext,
-        Colors,
-        Navigator,
-        Scaffold,
-        State,
-        StatefulWidget,
-        Widget;
+    show BuildContext, Colors, Scaffold, State, StatefulWidget, Widget;
 import 'package:go_router/go_router.dart';
 
 /// 启动界面

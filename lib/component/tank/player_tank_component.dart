@@ -64,9 +64,10 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
       var diffTimeSec = curTimeSec - _lastFireTime;
       if (diffTimeSec > fireSpanTime) {
         _lastFireTime = curTimeSec;
-        fire(); //执行开火
+        attack(); //执行开火
       }
     }
+    if (capabilities.containsKey(SleepCapability)) return;
     // 处理方向 - 使用标志位
     bool hasDirection = false;
     if (_pressedKeys.contains(LogicalKeyboardKey.keyW)) {
@@ -82,9 +83,7 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
       hasDirection = true;
       setFacingDirection(Direction.right);
     }
-    if (!hasDirection) {
-      velocity = Vector2.zero(); //方向速度归零
-    }
+    if (!hasDirection) velocity = Vector2.zero(); //方向速度归零
   }
 
   /// 处理键盘事件，返回是否处理该事件
@@ -98,9 +97,7 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
 
   @override
   bool onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
-    if (globalConfig.gameState == GameState.playing &&
-        !isBornState &&
-        !capabilities.containsKey(SleepCapability)) {
+    if (globalConfigInfo.state == GameState.playing && !isBornState) {
       handleKeyEvent(event);
     }
     return super.onKeyEvent(event, keysPressed);

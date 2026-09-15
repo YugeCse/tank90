@@ -62,7 +62,7 @@ class BulletComponent extends SpriteComponent
           GameConstants.MAP_SIZE.y,
         ).overlaps(toRect())) {
       _isShotOutWall = true;
-      bomAndDestroy(); //从父节点中删除
+      boomAndDestroy(); //从父节点中删除
       AudioUtils().playBulletCrack(); //子弹射击到边界
     }
     position += velocity * speed * dt;
@@ -75,26 +75,31 @@ class BulletComponent extends SpriteComponent
   ) {
     if (other is MapCellComponent &&
         ![MapCellType.grass, MapCellType.rive].contains(other.type)) {
+      velocity = Vector2.zero();
       AudioUtils().playBulletCrack();
       if (other.type == MapCellType.mudWall) {
         //如果是泥墙，直接移除
         other.setWillRemoveFromParent();
       }
-      bomAndDestroy(); //爆炸并消失
+      boomAndDestroy(); //爆炸并消失
     } else if (other is BaseTankComponent) {
       if (!other.type.isSameKind(type)) {
+        velocity = Vector2.zero();
         AudioUtils().playBulletCrack();
         if (!other.isProtectedState) {
-          other.hit(); //被攻击
+          other.attacked(); //被攻击
         }
-        bomAndDestroy(); //爆炸并消失
+        boomAndDestroy(); //爆炸并消失
       }
     } else if (other is BossComponent) {
+      velocity = Vector2.zero();
+      boomAndDestroy();
       other.setDeathState(); //boss 爆炸死亡
     } else if (other is BulletComponent && !other.type.isSameKind(type)) {
+      velocity = Vector2.zero();
       AudioUtils().playBulletCrack();
-      bomAndDestroy();
-      other.bomAndDestroy();
+      boomAndDestroy();
+      other.boomAndDestroy();
     }
     super.onCollisionStart(intersectionPoints, other);
   }
@@ -112,11 +117,11 @@ class BulletComponent extends SpriteComponent
   }
 
   /// 爆炸并消失
-  void bomAndDestroy() {
+  void boomAndDestroy() {
     velocity = Vector2.zero();
     removeFromParent(); //下一帧从父节点删除
     hitbox.collisionType = CollisionType.inactive;
-    parent?.add(_BulletBomEffectComponent(position: position.clone()));
+    parent?.add(_BulletBoomEffectComponent(position: position.clone()));
   }
 
   /// 创建子弹组件
@@ -132,8 +137,8 @@ class BulletComponent extends SpriteComponent
 }
 
 /// 子弹爆炸效果的组件
-class _BulletBomEffectComponent extends SpriteAnimationComponent {
-  _BulletBomEffectComponent({required super.position})
+class _BulletBoomEffectComponent extends SpriteAnimationComponent {
+  _BulletBoomEffectComponent({required super.position})
     : super(anchor: Anchor.center, removeOnFinish: true);
 
   @override

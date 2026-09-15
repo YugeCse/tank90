@@ -92,7 +92,7 @@ class PropComponent extends SpriteComponent
       other.fetchProp(propType);
     } else if (other is EnemyTankComponent) {
       // 只有困难等级才能让敌人获得装备
-      if (globalConfig.gameLevel == GameLevel.difficulty) {
+      if (globalConfigInfo.gameLevel == GameLevel.difficulty) {
         _hitbox.collisionType = CollisionType.inactive;
         removeFromParent();
         other.fetchProp(propType);

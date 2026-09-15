@@ -3,12 +3,12 @@ import 'package:flame/image_composition.dart';
 
 /// 坦克类型枚举
 enum TankType {
-  player(0, 0, 100.0),
-  enemy0(0, 32, 80.0),
-  enemy1(128, 32, 150.0),
-  enemy2(0, 64, 90.0),
-  enemy3(128, 64, 95.0),
-  enemy4(256, 64, 98.0);
+  player(0, 0, 100.0, 0),
+  enemy0(0, 32, 80.0, 0),
+  enemy1(128, 32, 150.0, 0),
+  enemy2(0, 64, 90.0, 2),
+  enemy3(128, 64, 95.0, 1),
+  enemy4(256, 64, 98.0, 0);
 
   final double assetPositionX;
 
@@ -16,7 +16,15 @@ enum TankType {
 
   final double initialSpeed;
 
-  const TankType(this.assetPositionX, this.assetPositionY, this.initialSpeed);
+  /// 坦克的防爆次数
+  final int explosionProofCount;
+
+  const TankType(
+    this.assetPositionX,
+    this.assetPositionY,
+    this.initialSpeed,
+    this.explosionProofCount,
+  );
 
   Vector2 get srcSize => Vector2.all(32.0);
 

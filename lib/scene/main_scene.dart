@@ -1,6 +1,4 @@
 import 'dart:async';
-import 'dart:io';
-
 import 'package:flame/components.dart';
 import 'package:flame/input.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
@@ -27,8 +25,8 @@ import 'package:tank90/app/notifier/boom_all_notifier.dart';
 import 'package:tank90/app/notifier/boss_protected_notifier.dart';
 import 'package:tank90/app/notifier/game_over_notifier.dart';
 import 'package:tank90/app/notifier/prop_tank_attack_notifier.dart';
-import 'package:tank90/app/notifier/tank_bom_notifier.dart'
-    show TankBomNotifier;
+import 'package:tank90/app/notifier/tank_boom_notifier.dart'
+    show TankBoomNotifier;
 import 'package:tank90/app/provider/score_statistics.dart';
 import 'package:tank90/data/score_statistics_info.dart';
 import 'package:tank90/scene/tank_war_game.dart';
@@ -57,18 +55,11 @@ class MainScene extends Component
 
   @override
   FutureOr<void> onLoad() async {
-    globalConfig.gameState = GameState.playing;
-    AudioUtils().playStart(); //播放开始的声音
-    add(
-      mapComponent ??= WarMapComponent(
-        game: game,
-        stage: (globalConfig.stageLevel - 1).clamp(
-          0,
-          MapStageLevel.maps.length - 1,
-        ),
-      ),
-    );
-    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+    if (!kIsWeb &&
+        ([
+          TargetPlatform.android,
+          TargetPlatform.iOS,
+        ].contains(defaultTargetPlatform))) {
       add(
         joystick = JoystickComponent(
           priority: 1000,
@@ -83,7 +74,7 @@ class MainScene extends Component
           margin: EdgeInsets.only(bottom: 120, right: 120),
           children: [
             joystickFire = JoystickFireComponent(
-              onFireTap: () => playerTank?.fire(),
+              onFireTap: () => playerTank?.attack(),
             ),
           ],
         ),
@@ -97,6 +88,26 @@ class MainScene extends Component
         onTick: _addPlayerTank,
       ),
     );
+    AudioUtils().playStart(); //播放开始的声音
+  }
+
+  @override
+  void onMount() {
+    addToGameWidgetBuild(() {
+      Future.microtask(() {
+        ref.read(globalConfigProvider.notifier).gameState = GameState.playing;
+      });
+    });
+    super.onMount();
+    add(
+      mapComponent ??= WarMapComponent(
+        game: game,
+        stage: (globalConfigInfo.stageLevel - 1).clamp(
+          0,
+          MapStageLevel.maps.length - 1,
+        ),
+      ),
+    );
     mapComponent?.add(
       _propFactoryComponent = PropFactoryComponent(),
     ); //添加装备道具工厂组件
@@ -108,7 +119,7 @@ class MainScene extends Component
     debugPrint('onReceiveNotifier 接收到事件：$event');
     if (event is GameOverNotifier) {
       showGameOver(); //显示游戏结束的界面
-    } else if (event is TankBomNotifier) {
+    } else if (event is TankBoomNotifier) {
       if (event.type == TankType.player) {
         if (--globalConfig.playerLifes > 0) {
           _addPlayerTank(); //添加玩家坦克
@@ -121,9 +132,10 @@ class MainScene extends Component
         var statisticsInfo = ScoreStatisticsInfo(type: event.type);
         ref.read(scoreStatisticsProvider.notifier).add(statisticsInfo);
         var isGameWin =
-            globalConfig.enemyCounts <= 0 && (game.enemyTanks?.isEmpty ?? true);
+            globalConfigInfo.enemyCounts <= 0 &&
+            (game.enemyTanks?.isEmpty ?? true);
         if (isGameWin) {
-          globalConfig.stageLevel = (globalConfig.stageLevel + 1).clamp(
+          globalConfig.stageLevel = (globalConfigInfo.stageLevel + 1).clamp(
             1,
             MapStageLevel.maps.length + 1,
           );
@@ -150,7 +162,7 @@ class MainScene extends Component
           .whereType<EnemyTankComponent>();
       if (allEnemies == null) return;
       for (var enemy in allEnemies) {
-        enemy.bomAndDestroy(); //调用爆炸的方法
+        enemy.boomAndDestroy(); //调用爆炸的方法
       }
     } else {
       var allPlayers = mapComponent
@@ -158,7 +170,7 @@ class MainScene extends Component
           .whereType<PlayerTankComponent>();
       if (allPlayers == null) return;
       for (var player in allPlayers) {
-        player.bomAndDestroy(); //调用爆炸的方法
+        player.boomAndDestroy(); //调用爆炸的方法
       }
     }
   }
@@ -187,7 +199,7 @@ class MainScene extends Component
   /// 显示游戏失效的界面
   void showGameOver() {
     if (_gameOverComponent != null) return;
-    globalConfig.gameState = GameState.gameOver;
+    ref.read(globalConfigProvider.notifier).gameState = GameState.gameOver;
     add(_gameOverComponent ??= GameOverComponent());
   }
 }

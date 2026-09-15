@@ -35,40 +35,41 @@ class Applicaption extends ConsumerStatefulWidget {
 }
 
 class _MyApplicaptionState extends ConsumerState<Applicaption> {
-  final _router = GoRouter(
-    initialLocation: '/settings',
-    routes: [
-      GoRoute(path: '/', builder: (context, state) => const SplashScreen()),
-      GoRoute(
-        path: '/main',
-        builder: (context, state) => RiverpodAwareGameWidget(
-          key: GlobalKey<RiverpodAwareGameWidgetState>(),
-          game: TankWarGame(),
-        ),
-      ),
-      GoRoute(
-        path: '/settings',
-        builder: (context, state) => SettingsScene(
-          rootContainerSize: MediaQuery.sizeOf(context),
-          onRequestSceneClose: () => context.pushReplacement('/test'),
-        ),
-      ),
-      GoRoute(
-        path: '/test',
-        builder: (context, state) => Material(
-          child: Center(
-            child: InkWell(
-              onTap: () => context.pushReplacement('/settings'),
-              child: Text('Unknown Page Route'),
-            ),
-          ),
-        ),
-      ),
-    ],
-  );
+  late final GoRouter _router;
+
+  final _gameGlobalKey = GlobalKey<RiverpodAwareGameWidgetState>();
 
   @override
   void initState() {
+    _router = GoRouter(
+      initialLocation: '/',
+      routes: [
+        GoRoute(path: '/', builder: (context, state) => const SplashScreen()),
+        GoRoute(
+          path: '/main',
+          builder: (context, state) =>
+              RiverpodAwareGameWidget(key: _gameGlobalKey, game: TankWarGame()),
+        ),
+        GoRoute(
+          path: '/settings',
+          builder: (context, state) => SettingsScene(
+            rootContainerSize: MediaQuery.sizeOf(context),
+            onRequestSceneClose: () => context.pushReplacement('/test'),
+          ),
+        ),
+        GoRoute(
+          path: '/test',
+          builder: (context, state) => Material(
+            child: Center(
+              child: InkWell(
+                onTap: () => context.pushReplacement('/settings'),
+                child: Text('Unknown Page Route'),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
     super.initState();
     initializeUserSettings(); //初始化用户配置
   }

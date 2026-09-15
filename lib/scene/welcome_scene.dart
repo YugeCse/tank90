@@ -2,11 +2,13 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flame/input.dart';
+import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:tank90/scene/tank_war_game.dart';
 
 /// 还原场景
-class WelcomeScene extends Component with HasGameReference<TankWarGame> {
+class WelcomeScene extends Component
+    with HasGameReference<TankWarGame>, RiverpodComponentMixin {
   /// 透明特效对象
   OpacityEffect? _opacityEffect;
 

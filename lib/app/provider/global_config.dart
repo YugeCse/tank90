@@ -18,8 +18,8 @@ class GlobalConfig extends _$GlobalConfig {
 
   GameState get gameState => state.state;
 
-  set gameState(GameState state) {
-    this.state = this.state.copyWith(state: state);
+  set gameState(GameState gameState) {
+    state = state.copyWith(state: gameState);
   }
 
   GameLevel get gameLevel => state.gameLevel;
@@ -70,6 +70,9 @@ class GlobalConfig extends _$GlobalConfig {
 }
 
 extension GlobalConfigProviderExtension on RiverpodComponentMixin {
+  /// 获取全局的GlobalConfig对象
+  GlobalConfigInfo get globalConfigInfo => ref.read(globalConfigProvider);
+
   /// 获取全局的GlobalConfig对象
   GlobalConfig get globalConfig => ref.read(globalConfigProvider.notifier);
 }

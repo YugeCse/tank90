@@ -14,25 +14,25 @@ class GlobalConfigInfo {
   });
 
   /// 游戏状态
-  GameState state = GameState.playing;
+  final GameState state;
 
   /// 游戏等级
-  GameLevel gameLevel = GameLevel.easy;
+  final GameLevel gameLevel;
 
   /// 声音是否打开
-  bool soundAvailable = false;
+  final bool soundAvailable;
 
   /// 关卡
-  int stageLevel = 1;
+  final int stageLevel;
 
   /// 玩家得分
-  int scoreCount = 0;
+  final int scoreCount;
 
   /// 玩家生命数
-  int playerLifes = 3;
+  final int playerLifes;
 
   /// 敌人数量
-  int enemyCounts = GameConstants.ENEMEY_MAX_COUNT;
+  final int enemyCounts;
 
   /// 复制一个对象
   GlobalConfigInfo copyWith({
