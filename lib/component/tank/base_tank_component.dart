@@ -88,7 +88,7 @@ abstract class BaseTankComponent extends SpriteComponent
     sprite = Sprite(
       assetImage,
       srcSize: type.srcSize,
-      srcPosition: type.getSrcPosition(velocity),
+      srcPosition: type.getSrcPosition(facingDirection),
     );
   }
 

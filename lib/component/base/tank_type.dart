@@ -38,17 +38,17 @@ enum TankType {
 
   Vector2 get _rightOffsetDelta => Vector2(96, 0);
 
-  Vector2 getSrcPosition(Vector2 direction) {
-    if (direction == Direction.up) {
+  Vector2 getSrcPosition(Vector2 facingDirection) {
+    if (facingDirection == Direction.up) {
       return _upOffsetDelta + srcPosition;
-    } else if (direction == Direction.down) {
+    } else if (facingDirection == Direction.down) {
       return _downOffsetDelta + srcPosition;
-    } else if (direction == Direction.left) {
+    } else if (facingDirection == Direction.left) {
       return _leftOffsetDelta + srcPosition;
-    } else if (direction == Direction.right) {
+    } else if (facingDirection == Direction.right) {
       return _rightOffsetDelta + srcPosition;
     }
-    throw Exception("Unknown Direction, must be up、down、left、right");
+    return _rightOffsetDelta + srcPosition;
   }
 
   /// 敌人坦克类型
