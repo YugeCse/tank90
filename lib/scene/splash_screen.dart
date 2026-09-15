@@ -9,6 +9,7 @@ import 'package:flutter/material.dart'
         State,
         StatefulWidget,
         Widget;
+import 'package:go_router/go_router.dart';
 
 /// 启动界面
 class SplashScreen extends StatefulWidget {
@@ -25,7 +26,7 @@ class SplashScreenState extends State<SplashScreen> {
       backgroundColor: Colors.black,
       body: FlameSplashScreen(
         theme: FlameSplashTheme.dark,
-        onFinish: (context) => Navigator.pushReplacementNamed(context, 'Game'),
+        onFinish: (context) => context.pushReplacement('/main'),
       ),
     );
   }
