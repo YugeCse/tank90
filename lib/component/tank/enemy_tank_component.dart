@@ -15,7 +15,7 @@ import 'package:flame/components.dart'
 import 'package:tank90/app/provider/global_config.dart';
 import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/app/notifier/prop_tank_attack_notifier.dart';
-import 'package:tank90/scene/tank_war_game.dart';
+import 'package:tank90/app/tank_war_game.dart';
 
 /// 地方坦克组件
 class EnemyTankComponent extends BaseTankComponent {

@@ -10,6 +10,7 @@ import 'package:tank90/component/tank/enemy_tank_component.dart';
 import 'package:tank90/scene/main_scene.dart';
 import 'package:tank90/scene/settings_scene.dart';
 import 'package:tank90/scene/stage_screen.dart';
+import 'package:tank90/scene/statistics_scene.dart';
 import 'package:tank90/scene/welcome_scene.dart';
 
 /// 游戏主场景
@@ -26,7 +27,7 @@ class TankWarGame extends FlameGame
     await images.load('tankAll.png');
     add(
       router = RouterComponent(
-        initialRoute: 'Welcome',
+        initialRoute: 'Statistics',
         routes: {
           'Main': Route(MainScene.new),
           'Stage': Route(StageScreen.new),
@@ -37,6 +38,7 @@ class TankWarGame extends FlameGame
               rootContainerSize: Size(game.size.x, game.size.y),
             ),
           ),
+          'Statistics': Route(StatisticsScene.new),
         },
       ),
     );

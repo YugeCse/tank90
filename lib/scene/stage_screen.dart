@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show KeyDownEvent, LogicalKeyboardKey;
 import 'package:tank90/app/provider/global_config.dart';
 import 'package:tank90/data/map_stage_level.dart';
-import 'package:tank90/scene/tank_war_game.dart';
+import 'package:tank90/app/tank_war_game.dart';
 
 /// 关卡场景
 class StageScreen extends Component

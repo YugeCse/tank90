@@ -29,7 +29,7 @@ import 'package:tank90/app/notifier/tank_boom_notifier.dart'
     show TankBoomNotifier;
 import 'package:tank90/app/provider/score_statistics.dart';
 import 'package:tank90/data/score_statistics_info.dart';
-import 'package:tank90/scene/tank_war_game.dart';
+import 'package:tank90/app/tank_war_game.dart';
 import 'package:tank90/utils/audio_utils.dart';
 
 /// 主场景

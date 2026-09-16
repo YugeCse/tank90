@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
 import 'package:flutter/material.dart';
-import 'package:tank90/scene/tank_war_game.dart';
+import 'package:tank90/app/tank_war_game.dart';
 import 'package:tank90/utils/res_img_utils.dart';
 
 /// 游戏结束的组件

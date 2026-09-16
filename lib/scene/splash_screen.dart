@@ -1,8 +1,14 @@
 import 'package:flame_splash_screen/flame_splash_screen.dart'
     show FlameSplashScreen, FlameSplashTheme;
 import 'package:flutter/material.dart'
-    show BuildContext, Colors, Scaffold, State, StatefulWidget, Widget;
-import 'package:go_router/go_router.dart';
+    show
+        BuildContext,
+        Colors,
+        Navigator,
+        Scaffold,
+        State,
+        StatefulWidget,
+        Widget;
 
 /// 启动界面
 class SplashScreen extends StatefulWidget {
@@ -19,7 +25,7 @@ class SplashScreenState extends State<SplashScreen> {
       backgroundColor: Colors.black,
       body: FlameSplashScreen(
         theme: FlameSplashTheme.dark,
-        onFinish: (context) => context.pushReplacement('/main'),
+        onFinish: (context) => Navigator.pushReplacementNamed(context, "/main"),
       ),
     );
   }

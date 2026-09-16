@@ -12,7 +12,7 @@ import 'package:tank90/component/tank/player_tank_component.dart';
 import 'package:tank90/data/game_properties.dart';
 import 'package:tank90/app/provider/global_config.dart';
 import 'package:tank90/data/game_constants.dart';
-import 'package:tank90/scene/tank_war_game.dart';
+import 'package:tank90/app/tank_war_game.dart';
 import 'package:tank90/utils/res_img_utils.dart';
 
 /// 装备组件类

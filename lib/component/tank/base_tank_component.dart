@@ -24,7 +24,7 @@ import 'package:tank90/app/notifier/boss_protected_notifier.dart';
 import 'package:tank90/app/notifier/tank_boom_notifier.dart'
     show TankBoomNotifier;
 import 'package:tank90/scene/main_scene.dart';
-import 'package:tank90/scene/tank_war_game.dart' show TankWarGame;
+import 'package:tank90/app/tank_war_game.dart' show TankWarGame;
 import 'package:flame/collisions.dart';
 import 'package:flame/components.dart';
 import 'package:tank90/utils/audio_utils.dart';
