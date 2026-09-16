@@ -1,8 +1,7 @@
 import 'package:async/async.dart';
-import 'package:flame/game.dart';
-import 'dart:math';
 
 import 'package:flutter/widgets.dart';
+import 'package:tank90/app/tank_war_game.dart';
 import 'package:tank90/component/base/boss_wall_state.dart';
 import 'package:tank90/component/base/find_type.dart';
 import 'package:tank90/component/base/map_cell_type.dart' show MapCellType;
@@ -15,9 +14,8 @@ import 'package:tank90/data/map_stage_level.dart';
 import 'package:flame/components.dart';
 
 /// 战场地图组件
-class WarMapComponent extends PositionComponent {
-  late final FlameGame _game;
-
+class WarMapComponent extends PositionComponent
+    with HasGameReference<TankWarGame> {
   /// 关卡数, 从0开始
   int stage = 0;
 
@@ -45,14 +43,11 @@ class WarMapComponent extends PositionComponent {
   final List<Vector2> _bossWallCoordinations = [];
 
   /// 构造方法
-  WarMapComponent({
-    required FlameGame game,
-    required this.stage,
-    super.position,
-  }) : _game = game;
+  WarMapComponent({required this.stage, super.position});
 
   @override
   Future<void>? onLoad() async {
+    size = GameConstants.MAP_SIZE;
     _setMapLocation();
     await add(GameCellComponent()); //生成地图基础格子
     await generateWarMap(); //生成战争地图数据
@@ -62,7 +57,7 @@ class WarMapComponent extends PositionComponent {
   @override
   void onGameResize(Vector2 size) {
     try {
-      _setMapLocation();
+      _setMapLocation(size: size);
       relocationWarMap(size);
     } finally {
       super.onGameResize(size);
@@ -70,15 +65,11 @@ class WarMapComponent extends PositionComponent {
   }
 
   /// 调整地图位置
-  void _setMapLocation() {
-    var mapWidth = GameConstants.MAP_SIZE.x;
-    var mapHeight = GameConstants.MAP_SIZE.y;
-    var scaleX = _game.size.x / mapWidth;
-    var scaleY = _game.size.y / mapHeight;
-    var scaleV = min(scaleX, scaleY);
-    scale = Vector2.all(scaleV);
-    position.x = (_game.size.x - mapWidth * scaleV) / 2;
-    position.y = (_game.size.y - mapHeight * scaleV) / 2;
+  void _setMapLocation({Vector2? size}) {
+    // var mapWidth = GameConstants.MAP_SIZE.x;
+    // var mapHeight = GameConstants.MAP_SIZE.y;
+    // position.x = (size?.x ?? game.size.x - mapWidth) / 2;
+    // position.y = (size?.y ?? game.size.y - mapHeight) / 2;
   }
 
   /// 生成战争地图

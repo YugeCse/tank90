@@ -79,7 +79,8 @@ abstract class BaseTankComponent extends SpriteComponent
     super.position,
     this.explosionProofCount = 0,
   }) : speed = type.initialSpeed,
-       velocity = facingDirection ?? Direction.up,
+       velocity = Vector2.zero(),
+       facingDirection = facingDirection ?? Direction.up,
        super(size: type.srcSize, anchor: Anchor.center, priority: 600);
 
   /// 更新精灵图帧

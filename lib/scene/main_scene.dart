@@ -99,9 +99,8 @@ class MainScene extends Component
       });
     });
     super.onMount();
-    add(
+    game.world.add(
       mapComponent ??= WarMapComponent(
-        game: game,
         stage: (globalConfigInfo.stageLevel - 1).clamp(
           0,
           MapStageLevel.maps.length - 1,

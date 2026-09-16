@@ -1,5 +1,8 @@
 import 'dart:async';
+import 'dart:math' hide Rectangle;
 
+import 'package:flame/camera.dart';
+import 'package:flame/experimental.dart';
 import 'package:flame/game.dart';
 import 'package:flame/input.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
@@ -25,9 +28,11 @@ class TankWarGame extends FlameGame
   @override
   FutureOr<void> load() async {
     await images.load('tankAll.png');
-    add(
+    camera.viewport = FixedAspectRatioViewport(aspectRatio: 1.0);
+    camera.viewfinder.anchor = .topLeft;
+    world.add(
       router = RouterComponent(
-        initialRoute: 'Statistics',
+        initialRoute: 'Welcome',
         routes: {
           'Main': Route(MainScene.new),
           'Stage': Route(StageScreen.new),
@@ -42,6 +47,13 @@ class TankWarGame extends FlameGame
         },
       ),
     );
+  }
+
+  @override
+  void onGameResize(Vector2 size) {
+    super.onGameResize(size);
+    var m = min(size.x, size.y);
+    camera.setBounds(Rectangle.fromLTWH(0, 0, m, m));
   }
 
   /// 获取游戏战场地图组件

@@ -1,4 +1,6 @@
-import 'package:flutter/widgets.dart';
+import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:tank90/component/base/capability.dart';
 import 'package:tank90/component/base/direction.dart' show Direction;
 import 'package:tank90/component/base/tank_type.dart' show TankType;
@@ -31,6 +33,23 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
     super.speed,
     super.type = TankType.player,
   }) : super(position: defaultPosition);
+
+  @override
+  FutureOr<void> onLoad() async {
+    await super.onLoad();
+    debugMode = true;
+    debugColor = Colors.red;
+  }
+
+  @override
+  void render(Canvas canvas) {
+    super.render(canvas);
+    var paint = Paint()
+      ..isAntiAlias = true
+      ..color = Colors.red;
+    var rect = toRect();
+    canvas.drawRRect(RRect.fromRectAndCorners(rect), paint);
+  }
 
   @override
   void update(double dt) {

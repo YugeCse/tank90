@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:tank90/app/tank_war_game.dart';
 import 'package:tank90/component/base/tank_type.dart';
 import 'package:tank90/component/view/animated_number_text_component.dart';
+import 'package:tank90/utils/num_utils.dart';
 import 'package:tank90/utils/res_img_utils.dart';
 
 /// 结算场景页面
@@ -88,36 +89,46 @@ class StatisticsScene extends PositionComponent
   /// 布局所有组件
   /// + [size] - 可见区域视图大小
   void _layoutAllComponents(Vector2 size) {
+    double requiredWidth = (size.x * 0.8).clamp(400.0, 800.0);
+    double offsetX = ((size.x - requiredWidth) / 2.0).atLeast(0.0);
     var layoutYOffset = 0.0;
     if (_titleTextComponent != null) {
-      _titleTextComponent?.position = Vector2(size.x / 2.0, 30);
+      _titleTextComponent?.position = Vector2(
+        offsetX + requiredWidth / 2.0,
+        30,
+      );
       layoutYOffset = _titleTextComponent?.toRect().bottom ?? 0;
     }
 
     if (_dividerComponent != null) {
       layoutYOffset = layoutYOffset + 20;
-      _dividerComponent?.position = Vector2(0, layoutYOffset);
-      _dividerComponent?.size = Vector2(size.x, 3.0);
+      _dividerComponent?.size = Vector2(requiredWidth, 3.0);
+      _dividerComponent?.position = Vector2(offsetX, layoutYOffset);
       layoutYOffset = layoutYOffset + (_dividerComponent?.size.y ?? 0);
     }
 
     if (_headerItemComponent != null) {
       layoutYOffset = layoutYOffset + 20;
-      _headerItemComponent?.position = Vector2(0, layoutYOffset);
+      _headerItemComponent?.position = Vector2(offsetX, layoutYOffset);
+      _headerItemComponent?.size = Vector2(
+        requiredWidth,
+        _headerItemComponent!.size.y,
+      );
       layoutYOffset = layoutYOffset + (_headerItemComponent?.size.y ?? 0);
     }
 
     if (_dividerComponent2 != null) {
       layoutYOffset = layoutYOffset + 20;
-      _dividerComponent2?.position = Vector2(0, layoutYOffset);
-      _dividerComponent2?.size = Vector2(size.x, 3.0);
+      _dividerComponent2?.position = Vector2(offsetX, layoutYOffset);
+      _dividerComponent2?.size = Vector2(requiredWidth, 3.0);
       layoutYOffset = layoutYOffset + (_dividerComponent2?.size.y ?? 0);
     }
 
     if (_itemStatisticsComponentInfos != null) {
       for (var info in _itemStatisticsComponentInfos!) {
         layoutYOffset = layoutYOffset + 20.0;
-        info.root?.position = Vector2(0, layoutYOffset);
+        info.root?.position = Vector2(offsetX, layoutYOffset);
+        info.root?.size = Vector2(requiredWidth, info.root?.size.y ?? 0);
         layoutYOffset = layoutYOffset + (info.root?.size.y ?? 0);
       }
     }
@@ -125,7 +136,8 @@ class StatisticsScene extends PositionComponent
 
   /// 构建结算表格头部视图
   PositionComponent _buildStatisticsHeaderItemComponent() {
-    PositionComponent rootContainer;
+    double requiredWidth = (game.size.x * 0.8).clamp(400.0, 800.0);
+    double offsetX = ((game.size.x - requiredWidth) / 2.0).atLeast(0.0);
     var title = '类型';
     var textPaint = TextPaint(
       style: TextStyle(fontSize: 28, color: Colors.white),
@@ -134,9 +146,9 @@ class StatisticsScene extends PositionComponent
     var containerHeight = 50.0;
     var titleOffsetY = (containerHeight - titleTextPainter.height) / 2.0;
     var valueOffsetY = (containerHeight - titleTextPainter.height) / 2.0;
-    rootContainer = PositionComponent(
+    PositionComponent rootContainer = PositionComponent(
       anchor: .topLeft,
-      size: Vector2(game.size.x, containerHeight),
+      size: Vector2(requiredWidth, containerHeight),
       children: [
         TextComponent(anchor: .topLeft, text: title, textRenderer: textPaint)
           ..position = Vector2(20.0, titleOffsetY),
@@ -145,15 +157,15 @@ class StatisticsScene extends PositionComponent
           text: '数量',
           textRenderer: textPaint,
           size: Vector2(80.0, titleTextPainter.height),
-        )..position = Vector2(game.size.x - 220.0, valueOffsetY),
+        )..position = Vector2(requiredWidth - 220.0, valueOffsetY),
         TextComponent(
           anchor: .topRight,
           text: '得分',
           textRenderer: textPaint,
           size: Vector2(200.0, titleTextPainter.height),
-        )..position = Vector2(game.size.x - 20.0, valueOffsetY),
+        )..position = Vector2(requiredWidth - 20.0, valueOffsetY),
       ],
-    )..debugMode = true;
+    )..position = Vector2(offsetX, 0);
     return rootContainer;
   }
 
@@ -162,6 +174,8 @@ class StatisticsScene extends PositionComponent
   _StatisticsComponentGroupInfo _buildStatistisRowItemComponent({
     required TankType tankType,
   }) {
+    double requiredWidth = (game.size.x * 0.8).clamp(400.0, 800.0);
+    double offsetX = ((game.size.x - requiredWidth) / 2.0).atLeast(0.0);
     AnimatedNumberTextComponent numText;
     AnimatedNumberTextComponent scoreText;
     TextPaint textPaint = TextPaint(
@@ -173,7 +187,7 @@ class StatisticsScene extends PositionComponent
     double valueOffsetY = (containerHeight - textDrawHeight) / 2.0;
     PositionComponent root = PositionComponent(
       anchor: .topLeft,
-      size: Vector2(game.size.x, containerHeight),
+      size: Vector2(requiredWidth, containerHeight),
       children: [
         SpriteComponent(
           anchor: .topLeft,
@@ -189,15 +203,15 @@ class StatisticsScene extends PositionComponent
           initialValue: 0,
           textRenderer: textPaint,
           size: Vector2(80.0, textDrawHeight),
-        )..position = Vector2(game.size.x - 220.0, valueOffsetY),
+        )..position = Vector2(requiredWidth - 220.0, valueOffsetY),
         scoreText = AnimatedNumberTextComponent(
           anchor: .topRight,
           initialValue: 0,
           textRenderer: textPaint,
           size: Vector2(200.0, textDrawHeight),
-        )..position = Vector2(game.size.x - 20.0, valueOffsetY),
+        )..position = Vector2(requiredWidth - 20.0, valueOffsetY),
       ],
-    );
+    )..position = Vector2(offsetX, 0);
     return _StatisticsComponentGroupInfo(
       root: root,
       numText: numText,

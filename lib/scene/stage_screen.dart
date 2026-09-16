@@ -79,7 +79,5 @@ class StageScreen extends Component
   }
 
   /// 跳转到主界面
-  void _goToMainGameScene() {
-    game.router.pushReplacementNamed('Main');
-  }
+  void _goToMainGameScene() => game.router.pushReplacementNamed('Main');
 }
