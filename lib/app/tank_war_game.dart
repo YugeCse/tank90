@@ -28,7 +28,7 @@ class TankWarGame extends FlameGame
   @override
   FutureOr<void> load() async {
     await images.load('tankAll.png');
-    camera.viewport = FixedAspectRatioViewport(aspectRatio: 1.0);
+    camera.viewport = FixedResolutionViewport(resolution: Vector2(416, 416));
     camera.viewfinder.anchor = .topLeft;
     world.add(
       router = RouterComponent(
@@ -54,6 +54,9 @@ class TankWarGame extends FlameGame
     super.onGameResize(size);
     var m = min(size.x, size.y);
     camera.setBounds(Rectangle.fromLTWH(0, 0, m, m));
+    debugPrint(
+      'zoom = ${camera.viewfinder.zoom} visibleSize = ${camera.visibleWorldRect}',
+    );
   }
 
   /// 获取游戏战场地图组件
