@@ -7,7 +7,14 @@ part 'score_statistics.g.dart';
 @Riverpod(keepAlive: true)
 class ScoreStatistics extends _$ScoreStatistics {
   @override
-  List<ScoreStatisticsInfo> build() => [];
+  List<ScoreStatisticsInfo> build() => [
+    // ...TankType.enemyTankTypes.map(
+    //   (type) => ScoreStatisticsInfo(
+    //     type: type,
+    //     score: Random().nextIntBetween(100, 1000),
+    //   ),
+    // ),
+  ];
 
   /// 添加新结算数据
   void add(ScoreStatisticsInfo info) => state = [...state, info];

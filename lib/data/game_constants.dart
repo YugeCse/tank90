@@ -18,6 +18,9 @@ class GameConstants {
   /// 敌方红坦克数量：3
   static const ENEMY_RED_FLICKER_COUNT = 3;
 
+  /// 画布大小
+  static final Vector2 CANVAS_SIZE = Vector2(416, 416);
+
   /// 地图像素尺寸
   static final Vector2 MAP_SIZE = Vector2(416, 416);
 

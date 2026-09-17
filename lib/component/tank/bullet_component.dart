@@ -126,10 +126,10 @@ class BulletComponent extends SpriteComponent
 
   /// 创建子弹组件
   static BulletComponent create({
-    required TankType ownerType,
+    Vector2? position,
     double speed = 150.0,
     required Vector2 velocity,
-    Vector2? position,
+    required TankType ownerType,
   }) {
     return BulletComponent(type: ownerType, velocity: velocity, speed: speed)
       ..position = position ?? Vector2.zero();

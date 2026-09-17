@@ -37,19 +37,19 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
   @override
   FutureOr<void> onLoad() async {
     await super.onLoad();
-    debugMode = true;
-    debugColor = Colors.red;
+    // debugMode = true;
+    // debugColor = Colors.red;
   }
 
-  @override
-  void render(Canvas canvas) {
-    super.render(canvas);
-    var paint = Paint()
-      ..isAntiAlias = true
-      ..color = Colors.red;
-    var rect = toRect();
-    canvas.drawRRect(RRect.fromRectAndCorners(rect), paint);
-  }
+  // @override
+  // void render(Canvas canvas) {
+  //   super.render(canvas);
+  //   var paint = Paint()
+  //     ..isAntiAlias = true
+  //     ..color = Colors.red;
+  //   var rect = toRect();
+  //   canvas.drawRRect(RRect.fromRectAndCorners(rect), paint);
+  // }
 
   @override
   void update(double dt) {

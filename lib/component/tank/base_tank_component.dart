@@ -41,6 +41,9 @@ abstract class BaseTankComponent extends SpriteComponent
   /// 坦克类型
   TankType type;
 
+  /// 坦克原始类型，不变化的
+  final TankType _originType;
+
   /// 移动速度
   double speed;
 
@@ -78,7 +81,8 @@ abstract class BaseTankComponent extends SpriteComponent
     Vector2? facingDirection,
     super.position,
     this.explosionProofCount = 0,
-  }) : speed = type.initialSpeed,
+  }) : _originType = type,
+       speed = type.initialSpeed,
        velocity = Vector2.zero(),
        facingDirection = facingDirection ?? Direction.up,
        super(size: type.srcSize, anchor: Anchor.center, priority: 600);
@@ -342,14 +346,14 @@ abstract class BaseTankComponent extends SpriteComponent
     var warMapComponent = findWarMapComponent();
     removeFromParent(); //从父节点移除
     hitbox.collisionType = CollisionType.inactive;
-    type == TankType.player
+    _originType == TankType.player
         ? AudioUtils().playPlayerCrack()
         : AudioUtils().playTankCrack();
     warMapComponent?.add(
       _TankBoomEffectComponent(
         position: position,
         onFinished: () =>
-            mainScene?.onReceiveNotifier(TankBoomNotifier(type: type)),
+            mainScene?.onReceiveNotifier(TankBoomNotifier(type: _originType)),
       ),
     );
   }

@@ -4,6 +4,7 @@ import 'package:flame/components.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show KeyDownEvent, LogicalKeyboardKey;
+import 'package:tank90/app/app_router.dart';
 import 'package:tank90/app/provider/global_config.dart';
 import 'package:tank90/data/map_stage_level.dart';
 import 'package:tank90/app/tank_war_game.dart';
@@ -79,5 +80,6 @@ class StageScreen extends Component
   }
 
   /// 跳转到主界面
-  void _goToMainGameScene() => game.router.pushReplacementNamed('Main');
+  void _goToMainGameScene() =>
+      game.router.pushReplacementNamed(AppRouter.ROUTE_MAIN);
 }

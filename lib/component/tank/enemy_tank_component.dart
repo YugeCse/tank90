@@ -25,10 +25,6 @@ class EnemyTankComponent extends BaseTankComponent {
   /// 开火定时器
   TimerComponent? _fireTimer;
 
-  Color? _originalColor;
-
-  double? _originalOpacity;
-
   /// 红色闪烁组件
   CombinedEffect? _redFlickerEffect;
 
@@ -123,9 +119,6 @@ class EnemyTankComponent extends BaseTankComponent {
   /// 显示红坦克特效
   void _showRedFlickerEffect() {
     if (_redFlickerEffect != null) return;
-    // 只在第一次记录初始状态
-    _originalColor ??= paint.color;
-    _originalOpacity ??= paint.color.a; // 0.0 - 1.0
     add(
       _redFlickerEffect ??= CombinedEffect(
         [
@@ -150,14 +143,8 @@ class EnemyTankComponent extends BaseTankComponent {
       _redFlickerEffect = null;
     }
     // 手动恢复初始状态
-    if (_originalColor != null) {
-      paint.color = _originalColor!;
-      _originalColor = null;
-    }
-    if (_originalOpacity != null) {
-      paint.color = paint.color.withValues(alpha: _originalOpacity!);
-      _originalOpacity = null;
-    }
+    paint.color = Colors.white;
+    paint.color = paint.color.withValues(alpha: 1.0);
   }
 
   /// 启动随机开火的定时器

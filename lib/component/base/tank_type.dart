@@ -3,53 +3,36 @@ import 'package:flame/image_composition.dart';
 
 /// 坦克类型枚举
 enum TankType {
-  player(0, 0, 100.0, 0),
-  enemy0(0, 32, 80.0, 0),
-  enemy1(128, 32, 150.0, 0),
-  enemy2(0, 64, 90.0, 2),
-  enemy3(128, 64, 95.0, 1),
-  enemy4(256, 64, 98.0, 0);
+  player(0, 0, 0, 100.0, 0),
+  enemy0(100, 0, 32, 80.0, 0),
+  enemy1(300, 128, 32, 160.0, 0),
+  enemy2(300, 0, 64, 120.0, 2),
+  enemy3(200, 128, 64, 100.0, 1),
+  enemy4(120, 256, 64, 90.0, 0);
 
+  /// 记分
+  final int score;
+
+  /// 资源坐标x
   final double assetPositionX;
 
+  /// 资源坐标y
   final double assetPositionY;
 
+  /// 初始化时的速度
   final double initialSpeed;
 
   /// 坦克的防爆次数
   final int explosionProofCount;
 
+  /// 构造方法
   const TankType(
+    this.score,
     this.assetPositionX,
     this.assetPositionY,
     this.initialSpeed,
     this.explosionProofCount,
   );
-
-  Vector2 get srcSize => Vector2.all(32.0);
-
-  Vector2 get srcPosition => Vector2(assetPositionX, assetPositionY);
-
-  Vector2 get _upOffsetDelta => Vector2(0, 0);
-
-  Vector2 get _downOffsetDelta => Vector2(32, 0);
-
-  Vector2 get _leftOffsetDelta => Vector2(64, 0);
-
-  Vector2 get _rightOffsetDelta => Vector2(96, 0);
-
-  Vector2 getSrcPosition(Vector2 facingDirection) {
-    if (facingDirection == Direction.up) {
-      return _upOffsetDelta + srcPosition;
-    } else if (facingDirection == Direction.down) {
-      return _downOffsetDelta + srcPosition;
-    } else if (facingDirection == Direction.left) {
-      return _leftOffsetDelta + srcPosition;
-    } else if (facingDirection == Direction.right) {
-      return _rightOffsetDelta + srcPosition;
-    }
-    return _rightOffsetDelta + srcPosition;
-  }
 
   /// 敌人坦克类型
   static final enemyTankTypes = <TankType>[
@@ -65,5 +48,27 @@ enum TankType {
     return ((other == TankType.player && this == TankType.player) ||
         TankType.enemyTankTypes.contains(other) &&
             TankType.enemyTankTypes.contains(this));
+  }
+
+  /// 获取资源图片大小
+  Vector2 get srcSize => Vector2.all(32.0);
+
+  /// 获取资源图片的起始坐标
+  Vector2 get srcPosition => Vector2(assetPositionX, assetPositionY);
+
+  /// 根据朝向获取资源的位置
+  /// + [facingDirection] - 朝向
+  Vector2 getSrcPosition(Vector2 facingDirection) {
+    if (facingDirection == Direction.up) {
+      return Vector2(0, 0) + srcPosition;
+    } else if (facingDirection == Direction.down) {
+      return Vector2(32, 0) + srcPosition;
+    } else if (facingDirection == Direction.left) {
+      return Vector2(64, 0) + srcPosition;
+    } else if (facingDirection == Direction.right) {
+      return Vector2(96, 0) + srcPosition;
+    }
+    return (this == TankType.player ? Vector2(0, 0) : Vector2(32, 0)) +
+        srcPosition;
   }
 }

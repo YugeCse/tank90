@@ -48,7 +48,6 @@ class WarMapComponent extends PositionComponent
   @override
   Future<void>? onLoad() async {
     size = GameConstants.MAP_SIZE;
-    _setMapLocation();
     await add(GameCellComponent()); //生成地图基础格子
     await generateWarMap(); //生成战争地图数据
     changeBossWallState(FlickerBossWallState());
@@ -57,19 +56,10 @@ class WarMapComponent extends PositionComponent
   @override
   void onGameResize(Vector2 size) {
     try {
-      _setMapLocation(size: size);
       relocationWarMap(size);
     } finally {
       super.onGameResize(size);
     }
-  }
-
-  /// 调整地图位置
-  void _setMapLocation({Vector2? size}) {
-    // var mapWidth = GameConstants.MAP_SIZE.x;
-    // var mapHeight = GameConstants.MAP_SIZE.y;
-    // position.x = (size?.x ?? game.size.x - mapWidth) / 2;
-    // position.y = (size?.y ?? game.size.y - mapHeight) / 2;
   }
 
   /// 生成战争地图

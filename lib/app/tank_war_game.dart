@@ -1,20 +1,14 @@
 import 'dart:async';
-import 'dart:math' hide Rectangle;
 
 import 'package:flame/camera.dart';
-import 'package:flame/experimental.dart';
 import 'package:flame/game.dart';
 import 'package:flame/input.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
-import 'package:flutter/material.dart' hide Route, OverlayRoute;
+import 'package:tank90/app/app_router.dart';
 import 'package:tank90/component/map/war_map_component.dart';
 import 'package:tank90/component/tank/base_tank_component.dart';
 import 'package:tank90/component/tank/enemy_tank_component.dart';
 import 'package:tank90/scene/main_scene.dart';
-import 'package:tank90/scene/settings_scene.dart';
-import 'package:tank90/scene/stage_screen.dart';
-import 'package:tank90/scene/statistics_scene.dart';
-import 'package:tank90/scene/welcome_scene.dart';
 
 /// 游戏主场景
 class TankWarGame extends FlameGame
@@ -22,40 +16,25 @@ class TankWarGame extends FlameGame
         HasKeyboardHandlerComponents,
         HasCollisionDetection,
         RiverpodGameMixin {
+  TankWarGame()
+    : super(
+        camera: CameraComponent.withFixedResolution(width: 416.0, height: 416.0)
+          ..viewfinder.anchor = .topLeft,
+      );
+
   /// 页面路由对象，跳转到支持的场景
   late final RouterComponent router;
 
   @override
   FutureOr<void> load() async {
     await images.load('tankAll.png');
-    camera.viewport = FixedResolutionViewport(resolution: Vector2(416, 416));
-    camera.viewfinder.anchor = .topLeft;
     world.add(
       router = RouterComponent(
-        initialRoute: 'Welcome',
-        routes: {
-          'Main': Route(MainScene.new),
-          'Stage': Route(StageScreen.new),
-          'Welcome': Route(WelcomeScene.new),
-          'Settings': OverlayRoute(
-            (_, game) => SettingsScene(
-              onRequestSceneClose: router.pop,
-              rootContainerSize: Size(game.size.x, game.size.y),
-            ),
-          ),
-          'Statistics': Route(StatisticsScene.new),
-        },
+        initialRoute: AppRouter.INIT_ROUTE,
+        routes: AppRouter.buildRouteConfigs(
+          requestRouterPop: () => router.pop(),
+        ),
       ),
-    );
-  }
-
-  @override
-  void onGameResize(Vector2 size) {
-    super.onGameResize(size);
-    var m = min(size.x, size.y);
-    camera.setBounds(Rectangle.fromLTWH(0, 0, m, m));
-    debugPrint(
-      'zoom = ${camera.viewfinder.zoom} visibleSize = ${camera.visibleWorldRect}',
     );
   }
 

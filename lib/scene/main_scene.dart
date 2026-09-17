@@ -4,6 +4,7 @@ import 'package:flame/input.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Route, Image;
+import 'package:tank90/app/app_router.dart';
 import 'package:tank90/component/base/capability.dart';
 import 'package:tank90/component/base/find_type.dart';
 import 'package:tank90/component/base/tank_type.dart';
@@ -99,7 +100,7 @@ class MainScene extends Component
       });
     });
     super.onMount();
-    game.world.add(
+    add(
       mapComponent ??= WarMapComponent(
         stage: (globalConfigInfo.stageLevel - 1).clamp(
           0,
@@ -127,8 +128,11 @@ class MainScene extends Component
           showGameOver(); //显示游戏结束的界面
         }
       } else {
-        /// TODO 需要添加对应的成就得分
-        var statisticsInfo = ScoreStatisticsInfo(type: event.type);
+        var statisticsInfo = ScoreStatisticsInfo(
+          type: event.type,
+          score: event.type.score,
+          additionalScore: event.additionalScore,
+        );
         ref.read(scoreStatisticsProvider.notifier).add(statisticsInfo);
         var isGameWin =
             globalConfigInfo.enemyCounts <= 0 &&
@@ -138,10 +142,7 @@ class MainScene extends Component
             1,
             MapStageLevel.maps.length + 1,
           );
-          debugPrint('玩家已经通关！！！');
-
-          /// TODO 实际上应该跳转到结算页面，需要结算数据
-          game.router.pushReplacementNamed('Main'); //跳转新的界面
+          game.router.pushReplacementNamed(AppRouter.ROUTE_STATISTICS); //跳转新的界面
         }
       }
     } else if (event is BoomAllNotifier) {
@@ -191,15 +192,18 @@ class MainScene extends Component
   }
 
   /// 冻结玩家坦克
-  void freezePlayerTank() {
-    playerTank?.capabilities[SleepCapability] = SleepCapability();
-  }
+  void freezePlayerTank() =>
+      playerTank?.capabilities[SleepCapability] = SleepCapability();
 
   /// 显示游戏失效的界面
   void showGameOver() {
     if (_gameOverComponent != null) return;
     ref.read(globalConfigProvider.notifier).gameState = GameState.gameOver;
     add(_gameOverComponent ??= GameOverComponent());
+    Future.delayed(
+      Duration(seconds: 10),
+      () => game.router.pushReplacementNamed(AppRouter.ROUTE_STATISTICS),
+    );
   }
 }
 

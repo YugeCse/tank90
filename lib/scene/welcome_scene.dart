@@ -4,6 +4,7 @@ import 'package:flame/effects.dart';
 import 'package:flame/input.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
+import 'package:tank90/app/app_router.dart';
 import 'package:tank90/app/tank_war_game.dart';
 
 /// 还原场景
@@ -100,11 +101,10 @@ class WelcomeScene extends Component
   /// 显示设置场景
   void _showSettingsScene() async {
     _removeOpacityEffect();
-    game.router.pushOverlay('Settings');
+    game.router.pushOverlay(AppRouter.ROUTE_SETTINGS);
   }
 
   /// 切换到关卡场景
-  void _changeToStageScene() {
-    game.router.pushReplacementNamed('Stage');
-  }
+  void _changeToStageScene() =>
+      game.router.pushReplacementNamed(AppRouter.ROUTE_STAGE);
 }

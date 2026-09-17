@@ -8,7 +8,7 @@ import 'package:tank90/utils/res_img_utils.dart';
 class SidebarComponent extends PositionComponent {
   @override
   FutureOr<void> onLoad() async {
-    size = Vector2(64, GameConstants.MAP_SIZE.y);
+    size = Vector2(64, GameConstants.CANVAS_SIZE.y);
     add(
       RectangleComponent(
         size: size,
