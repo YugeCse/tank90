@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide OverlayRoute;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/data/game_properties.dart';
 import 'package:tank90/app/provider/global_config.dart';
 
@@ -76,8 +77,9 @@ class _SettingsSceneState extends ConsumerState<SettingsScene>
     required GameLevel level,
     required bool soundAvailable,
   }) => Container(
-    width: 500,
-    height: 400,
+    alignment: .center,
+    width: GameConstants.CANVAS_SIZE.x,
+    height: GameConstants.CANVAS_SIZE.y,
     decoration: BoxDecoration(
       border: .all(width: 5.0, color: Colors.white.withValues(alpha: 0.5)),
       borderRadius: .circular(12.0),

@@ -6,13 +6,13 @@ import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:tank90/app/app_router.dart';
 import 'package:tank90/app/provider/global_config.dart'
-    show GlobalConfigProviderExtension, globalConfigProvider;
+    show globalConfigProvider;
 import 'package:tank90/app/provider/score_statistics.dart';
 import 'package:tank90/app/tank_war_game.dart';
 import 'package:tank90/component/base/tank_type.dart';
 import 'package:tank90/component/view/animated_number_text_component.dart';
 import 'package:tank90/data/game_constants.dart';
-import 'package:tank90/data/map_stage_level.dart';
+import 'package:tank90/data/game_properties.dart';
 import 'package:tank90/utils/res_img_utils.dart';
 
 /// 结算场景页面
@@ -87,10 +87,15 @@ class StatisticsScene extends PositionComponent
     addToGameWidgetBuild(_showDataStatistics);
     super.onMount();
     Future.delayed(Duration(seconds: 15), () {
-      var level = globalConfigInfo.stageLevel;
-      if (level < MapStageLevel.maps.length) {
-        level += 1;
-        ref.read(globalConfigProvider.notifier).stageLevel = level;
+      var canSwitchToNextStage = ref
+          .read(globalConfigProvider.notifier)
+          .switchToNextStageLevel();
+      if (canSwitchToNextStage) {
+        if (ref.read(globalConfigProvider).state == GameState.gameOver) {
+          ref.read(globalConfigProvider.notifier).resetState();
+          game.router.pushReplacementNamed(AppRouter.ROUTE_WELCOME);
+          return;
+        }
         game.router.pushReplacementNamed(AppRouter.ROUTE_MAIN);
       } else {
         ///TODO 恭喜你，你已经完全通关！！！

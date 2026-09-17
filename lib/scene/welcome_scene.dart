@@ -6,6 +6,7 @@ import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:tank90/app/app_router.dart';
 import 'package:tank90/app/tank_war_game.dart';
+import 'package:tank90/data/game_constants.dart';
 
 /// 还原场景
 class WelcomeScene extends Component
@@ -35,7 +36,7 @@ class WelcomeScene extends Component
         button: TextComponent(
           text: 'Settings',
           textRenderer: TextPaint(
-            style: TextStyle(fontSize: 20, color: Colors.white),
+            style: TextStyle(fontSize: 16, color: Colors.white),
           ),
         ),
         onPressed: _showSettingsScene,
@@ -43,17 +44,16 @@ class WelcomeScene extends Component
     );
     add(
       _startButtonComponent = ButtonComponent(
-        anchor: Anchor.center,
+        anchor: Anchor.bottomCenter,
         button: TextComponent(
           text: 'START GAME',
           textRenderer: TextPaint(
-            style: TextStyle(fontSize: 32, color: Colors.white),
+            style: TextStyle(fontSize: 28, color: Colors.white),
           ),
         ),
         onPressed: _changeToStageScene,
       ),
     );
-    _addOpacityEffect(); //默认添加透明特效
     _adjustComponentPositions(); //调整welcome图标的位置
   }
 
@@ -70,23 +70,13 @@ class WelcomeScene extends Component
       if (_startButtonComponent != null) {
         _startButtonComponent?.position = Vector2(
           game.size.x / 2.0,
-          _welcomeComponent!.toRect().bottom + 50.0,
+          GameConstants.MAP_SIZE.y - 20.0,
         );
       }
     }
     if (_settingsButtonComponent != null) {
-      _settingsButtonComponent?.position = Vector2(game.size.x - 20.0, 30.0);
+      _settingsButtonComponent?.position = Vector2(game.size.x - 10.0, 10.0);
     }
-  }
-
-  /// 添加透明过渡特效
-  void _addOpacityEffect() {
-    _welcomeComponent?.add(
-      _opacityEffect = OpacityEffect.fadeOut(
-        EffectController(duration: 5),
-        onComplete: () => _changeToStageScene(),
-      ),
-    );
   }
 
   /// 删除透明过渡特效

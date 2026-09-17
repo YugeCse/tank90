@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flame/components.dart';
+import 'package:flame/events.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show KeyDownEvent, LogicalKeyboardKey;
@@ -14,6 +15,7 @@ class StageScreen extends Component
     with
         HasGameReference<TankWarGame>,
         KeyboardHandler,
+        DoubleTapCallbacks,
         RiverpodComponentMixin {
   /// 关卡文本组件
   TextComponent? _stageComponent;
@@ -77,6 +79,12 @@ class StageScreen extends Component
       }
     }
     return super.onKeyEvent(event, keysPressed);
+  }
+
+  @override
+  void onDoubleTapUp(DoubleTapEvent event) {
+    super.onDoubleTapUp(event);
+    game.router.pushReplacementNamed(AppRouter.ROUTE_MAIN);
   }
 
   /// 跳转到主界面

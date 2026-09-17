@@ -2,9 +2,12 @@
 
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import 'package:tank90/app/provider/score_statistics.dart';
 import 'package:tank90/app/provider/shared_preferences.dart';
+import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/data/game_properties.dart';
 import 'package:tank90/data/global_config_info.dart';
+import 'package:tank90/data/map_stage_level.dart';
 import 'package:tank90/utils/audio_utils.dart';
 import 'package:tank90/utils/num_utils.dart';
 
@@ -67,6 +70,26 @@ class GlobalConfig extends _$GlobalConfig {
 
   void decrementOneLifeForPlayer() =>
       state = state.copyWith(playerLifes: (state.playerLifes - 1).atLeast(0));
+
+  /// 切换到下一关卡
+  bool switchToNextStageLevel() {
+    var level = stageLevel;
+    if (level >= MapStageLevel.maps.length) {
+      return false;
+    }
+    stageLevel = level + 1;
+    enemyCounts = GameConstants.ENEMEY_MAX_COUNT;
+    ref.read(scoreStatisticsProvider.notifier).clear();
+    return true;
+  }
+
+  /// 状态重置
+  void resetState() {
+    stageLevel = 1;
+    playerLifes = 3;
+    enemyCounts = GameConstants.ENEMEY_MAX_COUNT;
+    ref.read(scoreStatisticsProvider.notifier).clear();
+  }
 }
 
 extension GlobalConfigProviderExtension on RiverpodComponentMixin {

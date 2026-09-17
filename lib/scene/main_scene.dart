@@ -142,7 +142,10 @@ class MainScene extends Component
             1,
             MapStageLevel.maps.length + 1,
           );
-          game.router.pushReplacementNamed(AppRouter.ROUTE_STATISTICS); //跳转新的界面
+          Future.delayed(
+            Duration(seconds: 6),
+            () => game.router.pushReplacementNamed(AppRouter.ROUTE_STATISTICS),
+          ); //跳转新的界面
         }
       }
     } else if (event is BoomAllNotifier) {

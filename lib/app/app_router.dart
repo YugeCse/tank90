@@ -44,7 +44,7 @@ class AppRouter {
       ),
     ),
     ROUTE_STAGE: Route(StageScreen.new),
-    ROUTE_MAIN: Route(MainScene.new),
+    ROUTE_MAIN: Route(MainScene.new, maintainState: false),
     ROUTE_STATISTICS: Route(StatisticsScene.new),
   };
 }
