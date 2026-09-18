@@ -144,7 +144,7 @@ class EnemyTankComponent extends BaseTankComponent {
     }
     // 手动恢复初始状态
     paint.color = Colors.white;
-    paint.color = paint.color.withValues(alpha: 1.0);
+    sprite?.paint.color = Colors.white;
   }
 
   /// 启动随机开火的定时器

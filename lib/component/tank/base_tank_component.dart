@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:flame_riverpod/flame_riverpod.dart';
+import 'package:tank90/app/notifier/enemy_increment_notifier.dart';
 import 'package:tank90/component/base/boss_wall_state.dart';
 import 'package:tank90/component/base/capability.dart';
 import 'package:tank90/component/base/direction.dart';
@@ -274,6 +275,8 @@ abstract class BaseTankComponent extends SpriteComponent
           return;
         }
         globalConfig.enemyCounts += 1;
+        var mainScene = findMainScene();
+        mainScene?.onReceiveNotifier(EnemyIncrementNotifier());
       }
     } else if (type is TimerPropType) {
       var mainScene = findMainScene();

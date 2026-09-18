@@ -5,6 +5,7 @@ import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Route, Image;
 import 'package:tank90/app/app_router.dart';
+import 'package:tank90/app/notifier/enemy_increment_notifier.dart';
 import 'package:tank90/component/base/capability.dart';
 import 'package:tank90/component/base/find_type.dart';
 import 'package:tank90/component/base/tank_type.dart';
@@ -19,6 +20,8 @@ import 'package:tank90/component/tank/enemy_tank_component.dart';
 import 'package:tank90/component/tank/player_tank_component.dart'
     show PlayerTankComponent;
 import 'package:tank90/component/tank/prop_component.dart';
+import 'package:tank90/component/view/info_sidebar_component.dart';
+import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/data/game_properties.dart';
 import 'package:tank90/app/provider/global_config.dart';
 import 'package:tank90/data/map_stage_level.dart';
@@ -38,6 +41,9 @@ class MainScene extends Component
     with HasGameReference<TankWarGame>, RiverpodComponentMixin {
   /// 游戏地图对象
   WarMapComponent? mapComponent;
+
+  /// 侧边信息栏
+  InfoSidebarComponent? _infoSidebarComponent;
 
   /// 道具工厂对象
   PropFactoryComponent? _propFactoryComponent;
@@ -106,12 +112,16 @@ class MainScene extends Component
           0,
           MapStageLevel.maps.length - 1,
         ),
-      ),
+      )..position = Vector2.zero(),
     );
     mapComponent?.add(
       _propFactoryComponent = PropFactoryComponent(),
     ); //添加装备道具工厂组件
     mapComponent?.add(EnemyTankFactory()); //添加敌方坦克工厂组件
+    add(
+      _infoSidebarComponent = InfoSidebarComponent()
+        ..position = Vector2(GameConstants.MAP_SIZE.x, 0),
+    );
   }
 
   /// 接受消息事件
@@ -128,6 +138,7 @@ class MainScene extends Component
           showGameOver(); //显示游戏结束的界面
         }
       } else {
+        _infoSidebarComponent?.removeOneEnemySprite();
         var statisticsInfo = ScoreStatisticsInfo(
           type: event.type,
           score: event.type.score,
@@ -154,6 +165,8 @@ class MainScene extends Component
       _propFactoryComponent?.generateProp(); //生成道具组件
     } else if (event is BossProtectedNotifier) {
       mapComponent?.changeBossWallState(event.state);
+    } else if (event is EnemyIncrementNotifier) {
+      _infoSidebarComponent?.addEnemySprite();
     }
   }
 

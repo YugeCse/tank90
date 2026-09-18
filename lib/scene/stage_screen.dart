@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show KeyDownEvent, LogicalKeyboardKey;
 import 'package:tank90/app/app_router.dart';
 import 'package:tank90/app/provider/global_config.dart';
+import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/data/map_stage_level.dart';
 import 'package:tank90/app/tank_war_game.dart';
 
@@ -52,6 +53,18 @@ class StageScreen extends Component
   void onMount() {
     addToGameWidgetBuild(listenDataChanged);
     super.onMount();
+  }
+
+  @override
+  void render(Canvas canvas) {
+    canvas.drawRect(
+      GameConstants.CANVAS_RECT,
+      Paint()
+        ..isAntiAlias = true
+        ..style = PaintingStyle.fill
+        ..color = GameConstants.CANVAS_BG_COLOR,
+    );
+    super.render(canvas);
   }
 
   @override

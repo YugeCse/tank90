@@ -10,7 +10,7 @@ import 'package:tank90/app/provider/global_config.dart'
 import 'package:tank90/app/provider/score_statistics.dart';
 import 'package:tank90/app/tank_war_game.dart';
 import 'package:tank90/component/base/tank_type.dart';
-import 'package:tank90/component/view/animated_number_text_component.dart';
+import 'package:tank90/component/view/animated_number_component.dart';
 import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/data/game_properties.dart';
 import 'package:tank90/utils/res_img_utils.dart';
@@ -249,8 +249,8 @@ class StatisticsScene extends PositionComponent
     required TankType tankType,
   }) {
     double requiredWidth = GameConstants.CANVAS_SIZE.x;
-    AnimatedNumberTextComponent numText;
-    AnimatedNumberTextComponent scoreText;
+    AnimatedNumberComponent numText;
+    AnimatedNumberComponent scoreText;
     TextPaint textPaint = TextPaint(
       style: TextStyle(fontSize: 14, color: Colors.white),
     );
@@ -271,16 +271,26 @@ class StatisticsScene extends PositionComponent
           ),
           position: Vector2(20.0, titleOffsetY),
         ),
-        numText = AnimatedNumberTextComponent(
+        PositionComponent(
           anchor: .topRight,
-          initialValue: 0,
-          textRenderer: textPaint,
+          children: [
+            numText = AnimatedNumberComponent(
+              anchor: .topRight,
+              initialValue: 0,
+              textRenderer: textPaint,
+            ),
+          ],
           size: Vector2(30.0, textDrawHeight),
         )..position = Vector2(requiredWidth - 120.0, valueOffsetY),
-        scoreText = AnimatedNumberTextComponent(
+        PositionComponent(
           anchor: .topRight,
-          initialValue: 0,
-          textRenderer: textPaint,
+          children: [
+            scoreText = AnimatedNumberComponent(
+              anchor: .topRight,
+              initialValue: 0,
+              textRenderer: textPaint,
+            ),
+          ],
           size: Vector2(100.0, textDrawHeight),
         )..position = Vector2(requiredWidth - 20.0, valueOffsetY),
       ],
@@ -295,8 +305,8 @@ class StatisticsScene extends PositionComponent
   /// 构建总和结算Item视图信息组件
   _StatisticsComponentGroupInfo _buildStatistisFooterItemComponent() {
     double requiredWidth = GameConstants.CANVAS_SIZE.x;
-    AnimatedNumberTextComponent numText;
-    AnimatedNumberTextComponent scoreText;
+    AnimatedNumberComponent numText;
+    AnimatedNumberComponent scoreText;
     TextPaint textPaint = TextPaint(
       style: TextStyle(fontSize: 14, color: Colors.white),
     );
@@ -314,16 +324,25 @@ class StatisticsScene extends PositionComponent
       children: [
         TextComponent(text: '合计', textRenderer: titleTextPaint)
           ..position = Vector2(20.0, titleOffsetY),
-        numText = AnimatedNumberTextComponent(
-          anchor: .topRight,
-          initialValue: 0,
-          textRenderer: textPaint,
+        PositionComponent(
+          children: [
+            numText = AnimatedNumberComponent(
+              anchor: .topRight,
+              initialValue: 0,
+              textRenderer: textPaint,
+            ),
+          ],
           size: Vector2(30.0, textDrawHeight),
         )..position = Vector2(requiredWidth - 120.0, valueOffsetY),
-        scoreText = AnimatedNumberTextComponent(
+        PositionComponent(
           anchor: .topRight,
-          initialValue: 0,
-          textRenderer: textPaint,
+          children: [
+            scoreText = AnimatedNumberComponent(
+              anchor: .topRight,
+              initialValue: 0,
+              textRenderer: textPaint,
+            ),
+          ],
           size: Vector2(100.0, textDrawHeight),
         )..position = Vector2(requiredWidth - 20.0, valueOffsetY),
       ],
@@ -348,8 +367,8 @@ class _StatisticsComponentGroupInfo {
   final PositionComponent? root;
 
   /// 计数组件
-  final AnimatedNumberTextComponent? numText;
+  final AnimatedNumberComponent? numText;
 
   /// 记分组件
-  final AnimatedNumberTextComponent? scoreText;
+  final AnimatedNumberComponent? scoreText;
 }

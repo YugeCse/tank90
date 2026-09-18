@@ -56,7 +56,7 @@ class _MyApplicaptionState extends ConsumerState<Applicaption> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      initialRoute: '/splash',
+      initialRoute: '/main',
       onGenerateRoute: _onGeneratePageRoute,
     );
   }
