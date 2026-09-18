@@ -63,6 +63,9 @@ abstract class BaseTankComponent extends SpriteComponent
   /// 防爆次数
   int explosionProofCount;
 
+  /// 是否能够消灭草
+  bool canFireGrass = false;
+
   /// 拥有的能力对象集合
   final Map<Type, Capability> capabilities = {};
 
@@ -301,11 +304,14 @@ abstract class BaseTankComponent extends SpriteComponent
       if (capabilities.containsKey(StrongFireCapability)) {
         var capability =
             capabilities[StrongFireCapability] as StrongFireCapability;
-        var level = max(capability.fireLevel + 1, 3);
+        // 火力等级最多按 4 颗星处理，3 颗及以上都显示 large 炮嘴；4颗星能够烧毁草场地块
+        var level = min(capability.fireLevel + 1, 4);
         capability.fireLevel = level;
         capabilities[StrongFireCapability] = capability;
+        canFireGrass = level >= 4; //当超过4颗星的时候，能够消灭草场
       } else {
-        capabilities[StrongFireCapability] = StrongFireCapability(fireLevel: 2);
+        // 第一颗星对应 longer 炮嘴。
+        capabilities[StrongFireCapability] = StrongFireCapability(fireLevel: 1);
       }
     } else if (type is HatProtectPropType) {
       showProtectEffect(); //如果没有保护效果的，则添加保护效果

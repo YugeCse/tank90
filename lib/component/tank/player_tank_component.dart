@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:tank90/component/base/capability.dart';
 import 'package:tank90/component/base/direction.dart' show Direction;
+import 'package:tank90/component/base/tank_cannon_type.dart';
 import 'package:tank90/component/base/tank_type.dart' show TankType;
 import 'package:tank90/data/game_constants.dart' show GameConstants;
 import 'package:flame/components.dart'
@@ -35,27 +37,69 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
   }) : super(position: defaultPosition);
 
   @override
-  FutureOr<void> onLoad() async {
-    await super.onLoad();
-    // debugMode = true;
-    // debugColor = Colors.red;
+  void render(Canvas canvas) {
+    super.render(canvas);
+    final paint = Paint()
+      ..isAntiAlias = true
+      ..color = Colors.red;
+    final (width, length) = switch (cannonType) {
+      TankCannonType.normal => (4.0, 10.0),
+      TankCannonType.longer => (4.0, 14.0),
+      TankCannonType.thicker => (7.0, 10.0),
+      TankCannonType.larger => (8.0, 16.0),
+    };
+    canvas.save();
+    // 本地坐标中炮嘴默认朝上，根据坦克朝向旋转炮嘴。
+    final angle = atan2(facingDirection.y, facingDirection.x) + pi / 2;
+    canvas.rotate(angle);
+    final rect = Rect.fromLTWH(-width / 2, -length, width, length);
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, const Radius.circular(1.5)),
+      paint,
+    );
+    canvas.restore();
   }
-
-  // @override
-  // void render(Canvas canvas) {
-  //   super.render(canvas);
-  //   var paint = Paint()
-  //     ..isAntiAlias = true
-  //     ..color = Colors.red;
-  //   var rect = toRect();
-  //   canvas.drawRRect(RRect.fromRectAndCorners(rect), paint);
-  // }
 
   @override
   void update(double dt) {
     super.update(dt);
     _updateTankAction(); //处理Tank行为
     _controlDirectionByJoystick(); //通过Joystick控制方向
+  }
+
+  /// 根据当前火力等级获取炮嘴类型。
+  TankCannonType get cannonType {
+    final capability = capabilities[StrongFireCapability];
+    if (capability is! StrongFireCapability) {
+      return TankCannonType.normal;
+    }
+    switch (capability.fireLevel) {
+      case 1:
+        return TankCannonType.longer;
+      case 2:
+        return TankCannonType.thicker;
+      default:
+        return capability.fireLevel >= 3
+            ? TankCannonType.larger
+            : TankCannonType.normal;
+    }
+  }
+
+  @override
+  void attacked() {
+    // 没有被保护能力且是最大火力炮嘴类型时，能承受1次攻击
+    if (capabilities[ProtectedCapability] == null &&
+        cannonType == TankCannonType.larger) {
+      var capability = capabilities[StrongFireCapability];
+      if (capability != null) {
+        canFireGrass = false; //不能烧掉草场
+        capability = (capability as StrongFireCapability);
+        capability.fireLevel = 2;
+        capabilities[StrongFireCapability] = capability;
+        return;
+      }
+    }
+    super.attacked();
   }
 
   /// 通过Joystick控制方向

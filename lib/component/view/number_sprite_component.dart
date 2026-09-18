@@ -14,7 +14,7 @@ class NumberSpriteComponent extends PositionComponent {
   final List<int> _numbers = [];
 
   /// 数字资源占用的UI大小
-  final Vector2 _srcSize = Vector2(14, 14);
+  final Vector2 _srcSize = Vector2(14, 13);
 
   /// 数字0在资源上的坐标位置
   final Vector2 _zeroPosition = Vector2(256, 96);
@@ -52,14 +52,16 @@ class NumberSpriteComponent extends PositionComponent {
     removeAll(children);
     for (var i = 0; i < nums.length; i++) {
       var num = nums[i];
-      var position = Vector2(14.0 * i, 0);
-      var srcPosition = Vector2(_zeroPosition.x + num * 14.0, _zeroPosition.y);
+      var position = Vector2(_srcSize.x * i, 0);
       add(
         SpriteComponent(
           sprite: Sprite(
             assetImage,
             srcSize: _srcSize,
-            srcPosition: srcPosition,
+            srcPosition: Vector2(
+              _zeroPosition.x + num * _srcSize.x,
+              _zeroPosition.y,
+            ),
           ),
         )..position = position,
       );

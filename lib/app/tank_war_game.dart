@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flame/camera.dart';
 import 'package:flame/game.dart';
@@ -8,6 +9,7 @@ import 'package:tank90/app/app_router.dart';
 import 'package:tank90/component/map/war_map_component.dart';
 import 'package:tank90/component/tank/base_tank_component.dart';
 import 'package:tank90/component/tank/enemy_tank_component.dart';
+import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/scene/main_scene.dart';
 
 /// 游戏主场景
@@ -18,8 +20,10 @@ class TankWarGame extends FlameGame
         RiverpodGameMixin {
   TankWarGame()
     : super(
-        camera: CameraComponent.withFixedResolution(width: 416.0, height: 416.0)
-          ..viewfinder.anchor = .topLeft,
+        camera: CameraComponent.withFixedResolution(
+          width: GameConstants.CANVAS_SIZE.x,
+          height: GameConstants.CANVAS_SIZE.y,
+        )..viewfinder.anchor = .topLeft,
       );
 
   /// 页面路由对象，跳转到支持的场景
@@ -36,6 +40,18 @@ class TankWarGame extends FlameGame
         ),
       ),
     );
+  }
+
+  @override
+  void render(Canvas canvas) {
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.x, size.y),
+      Paint()
+        ..isAntiAlias = true
+        ..style = PaintingStyle.fill
+        ..color = GameConstants.CANVAS_BG_COLOR,
+    );
+    super.render(canvas);
   }
 
   /// 获取游戏战场地图组件
