@@ -106,13 +106,15 @@ class MainScene extends Component
       });
     });
     super.onMount();
+    var curStage = (globalConfigInfo.stageLevel - 1).clamp(
+      0,
+      MapStageLevel.maps.length - 1,
+    );
     add(
       mapComponent ??= WarMapComponent(
-        stage: (globalConfigInfo.stageLevel - 1).clamp(
-          0,
-          MapStageLevel.maps.length - 1,
-        ),
-      )..position = Vector2.zero(),
+        stage: curStage,
+        position: Vector2.zero(),
+      ),
     );
     mapComponent?.add(
       _propFactoryComponent = PropFactoryComponent(),
@@ -186,6 +188,7 @@ class MainScene extends Component
       if (allEnemies == null) return;
       for (var enemy in allEnemies) {
         enemy.boomAndDestroy(); //调用爆炸的方法
+        _infoSidebarComponent?.removeOneEnemySprite(); //爆炸一个，删除一个记录
       }
     } else {
       var allPlayers = mapComponent
