@@ -1,5 +1,6 @@
 import 'package:tank90/component/base/direction.dart' show Direction;
 import 'package:flame/image_composition.dart';
+import 'package:tank90/component/base/tank_cannon_type.dart';
 
 /// 坦克类型枚举
 enum TankType {
@@ -58,17 +59,45 @@ enum TankType {
 
   /// 根据朝向获取资源的位置
   /// + [facingDirection] - 朝向
-  Vector2 getSrcPosition(Vector2 facingDirection) {
+  Vector2 getSrcPosition(Vector2 facingDirection, {Vector2? srcPosition}) {
     if (facingDirection == Direction.up) {
-      return Vector2(0, 0) + srcPosition;
+      return Vector2(0, 0) + (srcPosition ?? this.srcPosition);
     } else if (facingDirection == Direction.down) {
-      return Vector2(32, 0) + srcPosition;
+      return Vector2(32, 0) + (srcPosition ?? this.srcPosition);
     } else if (facingDirection == Direction.left) {
-      return Vector2(64, 0) + srcPosition;
+      return Vector2(64, 0) + (srcPosition ?? this.srcPosition);
     } else if (facingDirection == Direction.right) {
-      return Vector2(96, 0) + srcPosition;
+      return Vector2(96, 0) + (srcPosition ?? this.srcPosition);
     }
     return (this == TankType.player ? Vector2(0, 0) : Vector2(32, 0)) +
-        srcPosition;
+        (srcPosition ?? this.srcPosition);
+  }
+
+  /// 获取玩家资源坐标信息
+  /// + [type] - 炮筒类型
+  /// + [facingDirection] - 面朝方向
+  Vector2 getSrcPositionByCannonType({
+    required TankCannonType type,
+    required Vector2 facingDirection,
+  }) {
+    switch (type) {
+      case TankCannonType.longer:
+        return getSrcPosition(
+          facingDirection,
+          srcPosition: Vector2(288.0, 160),
+        );
+      case TankCannonType.thicker:
+        return getSrcPosition(
+          facingDirection,
+          srcPosition: Vector2(288.0, 192),
+        );
+      case TankCannonType.larger:
+        return getSrcPosition(
+          facingDirection,
+          srcPosition: Vector2(288.0, 224),
+        );
+      default:
+        return getSrcPosition(facingDirection);
+    }
   }
 }

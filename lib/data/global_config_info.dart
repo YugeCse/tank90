@@ -1,3 +1,4 @@
+import 'package:tank90/component/base/capability.dart';
 import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/data/game_properties.dart';
 
@@ -9,8 +10,9 @@ class GlobalConfigInfo {
     this.soundAvailable = false,
     this.stageLevel = 1,
     this.scoreCount = 0,
-    this.playerLifes = 3,
+    this.cacheCapabilities,
     this.enemyCounts = GameConstants.ENEMEY_MAX_COUNT,
+    this.playerLifes = GameConstants.DEAULT_PLAYER_LIFES,
   });
 
   /// 游戏状态
@@ -34,6 +36,9 @@ class GlobalConfigInfo {
   /// 敌人数量
   final int enemyCounts;
 
+  /// 缓存的能力
+  final Map<Type, Capability>? cacheCapabilities;
+
   /// 复制一个对象
   GlobalConfigInfo copyWith({
     GameState? state,
@@ -43,6 +48,7 @@ class GlobalConfigInfo {
     int? scoreCount,
     int? playerLifes,
     int? enemyCounts,
+    Map<Type, Capability>? cacheCapabilities,
   }) => GlobalConfigInfo(
     state: state ?? this.state,
     gameLevel: gameLevel ?? this.gameLevel,
@@ -51,5 +57,6 @@ class GlobalConfigInfo {
     playerLifes: playerLifes ?? this.playerLifes,
     enemyCounts: enemyCounts ?? this.enemyCounts,
     soundAvailable: soundAvailable ?? this.soundAvailable,
+    cacheCapabilities: cacheCapabilities ?? this.cacheCapabilities,
   );
 }

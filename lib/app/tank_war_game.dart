@@ -44,13 +44,7 @@ class TankWarGame extends FlameGame
 
   @override
   void render(Canvas canvas) {
-    canvas.drawRect(
-      Rect.fromLTWH(0, 0, size.x, size.y),
-      Paint()
-        ..isAntiAlias = true
-        ..style = PaintingStyle.fill
-        ..color = GameConstants.CANVAS_BG_COLOR,
-    );
+    canvas.drawColor(GameConstants.CANVAS_BG_COLOR, BlendMode.src);
     super.render(canvas);
   }
 

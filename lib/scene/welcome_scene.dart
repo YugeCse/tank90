@@ -27,7 +27,7 @@ class WelcomeScene extends Component
   FutureOr<void> onLoad() async {
     add(
       _welcomeComponent = SpriteComponent(
-        sprite: Sprite(await game.images.load('menu.gif')),
+        sprite: Sprite(await game.images.load('menu.png')),
       ),
     );
     add(

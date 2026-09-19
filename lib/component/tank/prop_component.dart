@@ -113,12 +113,14 @@ class PropFactoryComponent extends Component
 
   /// 道具权重数据表，合计为：100
   static final Map<PropType, int> weightMap = {
-    TankPropType(): 5,
+    TankPropType(): 9,
     TimerPropType(): 10,
-    BossProtectPropType(): 30,
+    BossProtectPropType(): 12,
     BoomPropType(): 8,
-    StarPropType(): 10,
-    HatProtectPropType(): 37,
+    StarPropType(): 16,
+    HatProtectPropType(): 18,
+    GunPropType(): 7,
+    ShipPropType(): 20,
   };
 
   /// 道具生成的随机对象

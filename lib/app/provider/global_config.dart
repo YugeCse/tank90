@@ -4,6 +4,7 @@ import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:tank90/app/provider/score_statistics.dart';
 import 'package:tank90/app/provider/shared_preferences.dart';
+import 'package:tank90/component/base/capability.dart';
 import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/data/game_properties.dart';
 import 'package:tank90/data/global_config_info.dart';
@@ -83,11 +84,20 @@ class GlobalConfig extends _$GlobalConfig {
     return true;
   }
 
+  /// 设置缓存的能力集合
+  set cacheCapabilities(Map<Type, Capability> value) {
+    state = state.copyWith(cacheCapabilities: value);
+  }
+
+  /// 获取缓存的能力集合
+  Map<Type, Capability> get cacheCapabilities => state.cacheCapabilities ?? {};
+
   /// 状态重置
   void resetState() {
     stageLevel = 1;
-    playerLifes = 3;
+    cacheCapabilities = {}; //清空能力数据
     enemyCounts = GameConstants.ENEMEY_MAX_COUNT;
+    playerLifes = GameConstants.DEAULT_PLAYER_LIFES;
     ref.read(scoreStatisticsProvider.notifier).clear();
   }
 }

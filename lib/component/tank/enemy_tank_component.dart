@@ -5,6 +5,7 @@ import 'package:flame/effects.dart';
 import 'package:flame/extensions.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
+import 'package:tank90/component/base/bullet_type.dart';
 import 'package:tank90/component/base/capability.dart';
 import 'package:tank90/component/base/direction.dart' show Direction;
 import 'package:tank90/component/base/tank_type.dart' show TankType;
@@ -37,6 +38,7 @@ class EnemyTankComponent extends BaseTankComponent {
   /// 是否闪烁状态
   bool _isRedFlickerState = false;
 
+  /// 构造函数
   EnemyTankComponent._({
     super.speed,
     super.facingDirection,
@@ -46,25 +48,21 @@ class EnemyTankComponent extends BaseTankComponent {
   });
 
   @override
-  FutureOr<void> onLoad() async {
-    await super.onLoad();
-    _startAutoMoveTimer(); //启动自动移动的定时器
-    _startRandomFireTimer(); //启动随机开火的定时器
-  }
-
-  @override
   void update(double dt) {
     super.update(dt);
-    if (redFlickerCounter <= 0 && _isRedFlickerState) {
-      _isRedFlickerState = false;
-      _removeRedFlickerEffect(); //移除红色闪烁效果
-    }
-    if (capabilities.containsKey(SleepCapability)) {
-      _removeAutoMoveTimer();
-      _removeRandomFireTime();
-    } else {
-      if (_moveTimer == null) _startAutoMoveTimer();
-      if (_fireTimer == null) _startRandomFireTimer();
+    //如果不是出生状态才开启下面的逻辑
+    if (!isBornState) {
+      if (redFlickerCounter <= 0 && _isRedFlickerState) {
+        _isRedFlickerState = false;
+        _removeRedFlickerEffect(); //移除红色闪烁效果
+      }
+      if (capabilities.containsKey(SleepCapability)) {
+        _removeAutoMoveTimer();
+        _removeRandomFireTime();
+      } else {
+        if (_moveTimer == null) _startAutoMoveTimer();
+        if (_fireTimer == null) _startRandomFireTimer();
+      }
     }
   }
 
@@ -74,6 +72,20 @@ class EnemyTankComponent extends BaseTankComponent {
       _isRedFlickerState = true;
       _showRedFlickerEffect(); //显示红坦克特效
     }
+    _startAutoMoveTimer(); //启动自动移动的定时器
+    _startRandomFireTimer(); //启动随机开火的定时器
+  }
+
+  @override
+  void onAdjustPositionStartBeforeCollision() {
+    _removeAutoMoveTimer();
+    super.onAdjustPositionStartBeforeCollision();
+  }
+
+  @override
+  void onAdjustPositionEndedAfterCollision() {
+    _startAutoMoveTimer();
+    super.onAdjustPositionEndedAfterCollision();
   }
 
   @override
@@ -90,11 +102,30 @@ class EnemyTankComponent extends BaseTankComponent {
   void onAttackedButNotExplosion() {
     if (explosionProofCount == 1) {
       type = TankType.enemy3;
-      updateSprite(type);
+      updateSprite(type); //更换新的精灵图像
+      setFacingDirection(facingDirection);
     } else if (explosionProofCount == 0) {
       type = TankType.enemy4;
-      updateSprite(type);
+      updateSprite(type); //更换新的精灵图像
+      setFacingDirection(facingDirection);
     }
+  }
+
+  @override
+  BulletType getAttackBulletType() {
+    var strongFireCability =
+        capabilities[StrongFireCapability] as StrongFireCapability?;
+    var strongFireLevel = (strongFireCability?.fireLevel ?? 0);
+    if (strongFireLevel > 0) {
+      if ([TankType.enemy2, TankType.enemy3, TankType.enemy4].contains(type) ||
+          TankType.enemy0 == type ||
+          (TankType.enemy1 == type && strongFireLevel >= 3)) {
+        return BulletType.xstrong;
+      } else if (strongFireLevel >= 1) {
+        return BulletType.strong;
+      }
+    }
+    return super.getAttackBulletType();
   }
 
   /// 启动自动移动的定时器
@@ -207,7 +238,7 @@ class EnemyTankFactory extends PositionComponent
   int redFlickerTankCount = 0;
 
   /// 随机对象
-  late Random _random;
+  final Random _random = Random();
 
   /// 是否正在生产坦克
   bool _isGeneratingTank = false;
@@ -225,8 +256,8 @@ class EnemyTankFactory extends PositionComponent
   });
 
   @override
-  FutureOr<void> onLoad() {
-    _random = Random();
+  void onMount() {
+    super.onMount();
     _factoryTimer = TimerComponent(
       period: 2.0,
       repeat: true,
@@ -266,7 +297,7 @@ class EnemyTankFactory extends PositionComponent
           await Future.delayed(const Duration(milliseconds: 500));
           continue;
         }
-        var redFlickerCount = [4, 11, 17].contains(_generateTankCount)
+        var redFlickerCount = [5, 11, 16, 20].contains(_generateTankCount)
             ? _random.nextIntBetween(1, 3)
             : 0;
         var newTank = generate(position, redFlickerCount: redFlickerCount);

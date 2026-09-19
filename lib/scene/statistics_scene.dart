@@ -111,11 +111,7 @@ class StatisticsScene extends PositionComponent
 
   @override
   void render(Canvas canvas) {
-    var paint = Paint()
-      ..isAntiAlias = true
-      ..style = PaintingStyle.fill
-      ..color = const Color.fromARGB(255, 29, 29, 29);
-    canvas.drawRect(Rect.fromLTWH(0, 0, game.size.x, game.size.y), paint);
+    canvas.drawColor(GameConstants.CANVAS_BG_COLOR, BlendMode.src);
     super.render(canvas);
   }
 

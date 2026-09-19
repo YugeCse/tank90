@@ -149,14 +149,21 @@ class MainScene extends Component
             globalConfigInfo.enemyCounts <= 0 &&
             (game.enemyTanks?.isEmpty ?? true);
         if (isGameWin) {
-          globalConfig.stageLevel = (globalConfigInfo.stageLevel + 1).clamp(
-            1,
-            MapStageLevel.maps.length + 1,
-          );
-          Future.delayed(
-            Duration(seconds: 6),
-            () => game.router.pushReplacementNamed(AppRouter.ROUTE_STATISTICS),
-          ); //跳转新的界面
+          var nextStage = (globalConfigInfo.stageLevel + 1);
+          nextStage = nextStage.clamp(1, MapStageLevel.maps.length + 1);
+          globalConfig.stageLevel = nextStage;
+          //保存上一个关卡的坦克获得的能力
+          if (playerTank != null) {
+            globalConfig.cacheCapabilities = playerTank?.capabilities ?? {};
+          }
+          add(
+            TimerComponent(
+              period: 6,
+              removeOnFinish: true,
+              onTick: () =>
+                  game.router.pushReplacementNamed(AppRouter.ROUTE_STATISTICS),
+            ),
+          ); //跳转新的关卡界面
         }
       }
     } else if (event is BoomAllNotifier) {
@@ -197,7 +204,14 @@ class MainScene extends Component
       playerTank?.removeFromParent();
       playerTank = null;
     }
-    mapComponent?.add(playerTank ??= PlayerTankComponent(joystick: joystick));
+    var capabilities = ref.read(globalConfigProvider).cacheCapabilities;
+    mapComponent?.add(
+      playerTank ??= PlayerTankComponent(
+        joystick: joystick,
+        facingDirection: Vector2(0.0, -1.0),
+        capabilities: Map.from(capabilities ?? {}),
+      ),
+    );
   }
 
   /// 冻结敌方坦克
@@ -215,10 +229,14 @@ class MainScene extends Component
   void showGameOver() {
     if (_gameOverComponent != null) return;
     ref.read(globalConfigProvider.notifier).gameState = GameState.gameOver;
-    add(_gameOverComponent ??= GameOverComponent());
-    Future.delayed(
-      Duration(seconds: 10),
-      () => game.router.pushReplacementNamed(AppRouter.ROUTE_STATISTICS),
+    add(_gameOverComponent ??= GameOverComponent()); //显示游戏结束的界面
+    add(
+      TimerComponent(
+        period: 10,
+        removeOnFinish: true,
+        onTick: () =>
+            game.router.pushReplacementNamed(AppRouter.ROUTE_STATISTICS),
+      ),
     );
   }
 }

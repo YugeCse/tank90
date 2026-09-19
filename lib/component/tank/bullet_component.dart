@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flame_riverpod/flame_riverpod.dart';
+import 'package:tank90/component/base/bullet_type.dart';
 import 'package:tank90/component/base/direction.dart';
 import 'package:tank90/component/base/map_cell_type.dart';
 import 'package:tank90/component/base/tank_type.dart';
@@ -16,6 +17,9 @@ import 'package:tank90/utils/res_img_utils.dart';
 /// 子弹组件
 class BulletComponent extends SpriteComponent
     with CollisionCallbacks, RiverpodComponentMixin {
+  /// 子弹类型
+  BulletType type;
+
   /// 单位速度向量
   Vector2 velocity;
 
@@ -23,20 +27,27 @@ class BulletComponent extends SpriteComponent
   final double speed;
 
   /// 拥有者类型
-  final TankType type;
+  final TankType ownerType;
 
   /// 碰撞盒
   late RectangleHitbox hitbox;
+
+  /// 是否可以焚烧草场
+  final bool _fireGrass;
 
   /// 是否出墙了，默认：false
   bool _isShotOutWall = false;
 
   /// 构造函数
   BulletComponent({
-    required this.type,
-    this.speed = 150.0,
+    required this.ownerType,
+    this.type = BulletType.normal,
     required this.velocity,
-  }) : super(size: Vector2.all(6.0), priority: 700) {
+    super.position,
+    bool fireGrass = false,
+  }) : speed = type.speed,
+       _fireGrass = fireGrass,
+       super(size: Vector2.all(6.0), priority: 700) {
     add(hitbox = RectangleHitbox(size: Vector2.all(5.0)));
   }
 
@@ -73,17 +84,22 @@ class BulletComponent extends SpriteComponent
     Set<Vector2> intersectionPoints,
     PositionComponent other,
   ) {
-    if (other is MapCellComponent &&
-        ![MapCellType.grass, MapCellType.rive].contains(other.type)) {
-      velocity = Vector2.zero();
-      AudioUtils().playBulletCrack();
-      if (other.type == MapCellType.mudWall) {
-        //如果是泥墙，直接移除
-        other.setWillRemoveFromParent();
+    if (other is MapCellComponent) {
+      if ((_fireGrass && other.type == MapCellType.grass) ||
+          (other.type == MapCellType.mudWall) ||
+          (other.type == MapCellType.steelWall && type == BulletType.xstrong)) {
+        velocity = Vector2.zero();
+        AudioUtils().playBulletCrack();
+        other.setWillRemoveFromParent(); //直接移除
+        boomAndDestroy(); //爆炸并消失
+      } else if (type != BulletType.xstrong &&
+          other.type == MapCellType.steelWall) {
+        velocity = Vector2.zero();
+        AudioUtils().playBulletCrack();
+        boomAndDestroy(); //爆炸并消失
       }
-      boomAndDestroy(); //爆炸并消失
     } else if (other is BaseTankComponent) {
-      if (!other.type.isSameKind(type)) {
+      if (!other.type.isSameKind(ownerType)) {
         velocity = Vector2.zero();
         AudioUtils().playBulletCrack();
         if (!other.isProtectedState) {
@@ -95,7 +111,8 @@ class BulletComponent extends SpriteComponent
       velocity = Vector2.zero();
       boomAndDestroy();
       other.setDeathState(); //boss 爆炸死亡
-    } else if (other is BulletComponent && !other.type.isSameKind(type)) {
+    } else if (other is BulletComponent &&
+        !other.ownerType.isSameKind(ownerType)) {
       velocity = Vector2.zero();
       AudioUtils().playBulletCrack();
       boomAndDestroy();
@@ -127,11 +144,13 @@ class BulletComponent extends SpriteComponent
   /// 创建子弹组件
   static BulletComponent create({
     Vector2? position,
-    double speed = 150.0,
+    BulletType type = BulletType.normal,
     required Vector2 velocity,
     required TankType ownerType,
+    bool fireGrass = false,
+    BulletType bulletType = BulletType.normal,
   }) {
-    return BulletComponent(type: ownerType, velocity: velocity, speed: speed)
+    return BulletComponent(ownerType: ownerType, type: type, velocity: velocity)
       ..position = position ?? Vector2.zero();
   }
 }

@@ -1,8 +1,8 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:tank90/component/base/bullet_type.dart';
 import 'package:tank90/component/base/capability.dart';
 import 'package:tank90/component/base/direction.dart' show Direction;
+import 'package:tank90/component/base/prop_type.dart';
 import 'package:tank90/component/base/tank_cannon_type.dart';
 import 'package:tank90/component/base/tank_type.dart' show TankType;
 import 'package:tank90/data/game_constants.dart' show GameConstants;
@@ -18,7 +18,7 @@ import 'base_tank_component.dart';
 /// 玩家坦克组件
 class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
   /// 开火间隔时间
-  double fireSpanTime = 0.5;
+  double _fireSpanTime = 0.5;
 
   /// 记录上一次的开火时间
   double _lastFireTime = 0;
@@ -29,41 +29,23 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
   /// 记录被按下的按键
   final Set<LogicalKeyboardKey> _pressedKeys = {};
 
+  /// 构造函数
   PlayerTankComponent({
-    required this.joystick,
+    this.joystick,
+    Vector2? position,
     super.speed,
     super.type = TankType.player,
-  }) : super(position: defaultPosition);
-
-  @override
-  void render(Canvas canvas) {
-    super.render(canvas);
-    final paint = Paint()
-      ..isAntiAlias = true
-      ..color = Colors.red;
-    final (width, length) = switch (cannonType) {
-      TankCannonType.normal => (4.0, 10.0),
-      TankCannonType.longer => (4.0, 14.0),
-      TankCannonType.thicker => (7.0, 10.0),
-      TankCannonType.larger => (8.0, 16.0),
-    };
-    canvas.save();
-    // 本地坐标中炮嘴默认朝上，根据坦克朝向旋转炮嘴。
-    final angle = atan2(facingDirection.y, facingDirection.x) + pi / 2;
-    canvas.rotate(angle);
-    final rect = Rect.fromLTWH(-width / 2, -length, width, length);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(rect, const Radius.circular(1.5)),
-      paint,
-    );
-    canvas.restore();
-  }
+    super.facingDirection,
+    super.capabilities,
+  }) : super(position: position ?? defaultPosition);
 
   @override
   void update(double dt) {
     super.update(dt);
-    _updateTankAction(); //处理Tank行为
-    _controlDirectionByJoystick(); //通过Joystick控制方向
+    if (!isBornState) {
+      _updateTankAction(); //处理Tank行为
+      _controlDirectionByJoystick(); //通过Joystick控制方向
+    }
   }
 
   /// 根据当前火力等级获取炮嘴类型。
@@ -85,13 +67,24 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
   }
 
   @override
+  Vector2 getSrcPosition(Vector2 facingDir) {
+    if (cannonType != TankCannonType.normal) {
+      debugPrint('-----> facingDir $facingDir');
+      return type.getSrcPositionByCannonType(
+        type: cannonType,
+        facingDirection: facingDir,
+      );
+    }
+    return super.getSrcPosition(facingDir);
+  }
+
+  @override
   void attacked() {
     // 没有被保护能力且是最大火力炮嘴类型时，能承受1次攻击
     if (capabilities[ProtectedCapability] == null &&
         cannonType == TankCannonType.larger) {
       var capability = capabilities[StrongFireCapability];
       if (capability != null) {
-        canFireGrass = false; //不能烧掉草场
         capability = (capability as StrongFireCapability);
         capability.fireLevel = 2;
         capabilities[StrongFireCapability] = capability;
@@ -99,6 +92,30 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
       }
     }
     super.attacked();
+  }
+
+  @override
+  BulletType getAttackBulletType() {
+    switch (cannonType) {
+      case TankCannonType.thicker:
+        return BulletType.strong;
+      case TankCannonType.larger:
+        return BulletType.xstrong;
+      default:
+        return super.getAttackBulletType();
+    }
+  }
+
+  @override
+  void fetchProp(PropType type) {
+    super.fetchProp(type);
+    if (_fireSpanTime > 0.3 &&
+        ((capabilities[StrongFireCapability] as StrongFireCapability?)
+                    ?.fireLevel ??
+                0) >=
+            1) {
+      _fireSpanTime = 0.3; //如果已经获得了火力加持，直接减少发射炮弹的间隔时间
+    }
   }
 
   /// 通过Joystick控制方向
@@ -124,7 +141,7 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
     if (_pressedKeys.contains(LogicalKeyboardKey.keyJ)) {
       var curTimeSec = DateTime.now().millisecondsSinceEpoch / 1000;
       var diffTimeSec = curTimeSec - _lastFireTime;
-      if (diffTimeSec > fireSpanTime) {
+      if (diffTimeSec > _fireSpanTime) {
         _lastFireTime = curTimeSec;
         attack(); //执行开火
       }

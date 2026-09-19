@@ -8,6 +8,8 @@ class GameConstants {
   /// 资源图片名称
   static const RES_IMG_NAME = 'tankAll.png';
 
+  static const DEAULT_PLAYER_LIFES = 3;
+
   /// 敌人最大数量: 20
   static const ENEMEY_MAX_COUNT = 20;
 
