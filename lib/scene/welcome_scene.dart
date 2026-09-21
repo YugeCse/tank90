@@ -91,7 +91,7 @@ class WelcomeScene extends Component
   /// 显示设置场景
   void _showSettingsScene() async {
     _removeOpacityEffect();
-    game.router.pushOverlay(AppRouter.ROUTE_SETTINGS);
+    game.router.pushNamed(AppRouter.ROUTE_SETTINGS);
   }
 
   /// 切换到关卡场景

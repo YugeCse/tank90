@@ -1,7 +1,5 @@
 // ignore_for_file: constant_identifier_names
 
-import 'dart:ui' show Size;
-
 import 'package:flame/game.dart';
 import 'package:tank90/scene/main_scene.dart';
 import 'package:tank90/scene/settings_scene.dart';
@@ -42,12 +40,7 @@ class AppRouter {
   }) => {
     ROUTE_TEST: Route(TestScene.new),
     ROUTE_WELCOME: Route(WelcomeScene.new),
-    ROUTE_SETTINGS: OverlayRoute(
-      (_, game) => SettingsScene(
-        onRequestSceneClose: requestRouterPop,
-        rootContainerSize: Size(game.size.x, game.size.y),
-      ),
-    ),
+    ROUTE_SETTINGS: Route(SettingsScene.new, transparent: true),
     ROUTE_STAGE: Route(StageScreen.new),
     ROUTE_MAIN: Route(MainScene.new, maintainState: false),
     ROUTE_STATISTICS: Route(StatisticsScene.new),
