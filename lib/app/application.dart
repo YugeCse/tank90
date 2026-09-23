@@ -6,7 +6,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tank90/app/provider/global_config.dart';
 import 'package:tank90/app/provider/shared_preferences.dart';
-import 'package:tank90/scene/settings_scene.dart';
 import 'package:tank90/scene/splash_screen.dart';
 import 'package:tank90/app/tank_war_game.dart';
 import 'package:tank90/utils/audio_utils.dart';
@@ -56,7 +55,7 @@ class _MyApplicaptionState extends ConsumerState<Applicaption> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      initialRoute: '/splash',
+      initialRoute: '/main',
       onGenerateRoute: _onGeneratePageRoute,
     );
   }
@@ -75,13 +74,6 @@ class _MyApplicaptionState extends ConsumerState<Applicaption> {
     var routeName = settings.name ?? '/';
     if (['/', '/splash'].contains(routeName)) {
       return PageRouteBuilder(pageBuilder: (context, _, _) => SplashScreen());
-    } else if (routeName == '/settings') {
-      return PageRouteBuilder(
-        pageBuilder: (context, _, _) => SettingsScene(
-          rootContainerSize: MediaQuery.sizeOf(context),
-          onRequestSceneClose: () {},
-        ),
-      );
     } else if (routeName == '/main') {
       return PageRouteBuilder(
         pageBuilder: (context, _, _) => RiverpodAwareGameWidget(

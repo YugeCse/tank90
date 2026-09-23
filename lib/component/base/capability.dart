@@ -27,3 +27,6 @@ class StrongFireCapability extends Capability {
   /// 构造函数
   StrongFireCapability({this.fireLevel = 1});
 }
+
+/// 轮渡能力
+class FerryCapability extends Capability {}

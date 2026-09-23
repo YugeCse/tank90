@@ -6,13 +6,13 @@ import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:tank90/app/app_router.dart';
 import 'package:tank90/app/provider/global_config.dart'
-    show GlobalConfigProviderExtension, globalConfigProvider;
+    show globalConfigProvider;
 import 'package:tank90/app/provider/score_statistics.dart';
 import 'package:tank90/app/tank_war_game.dart';
 import 'package:tank90/component/base/tank_type.dart';
-import 'package:tank90/component/view/animated_number_text_component.dart';
+import 'package:tank90/component/view/animated_number_component.dart';
 import 'package:tank90/data/game_constants.dart';
-import 'package:tank90/data/map_stage_level.dart';
+import 'package:tank90/data/game_properties.dart';
 import 'package:tank90/utils/res_img_utils.dart';
 
 /// 结算场景页面
@@ -87,10 +87,15 @@ class StatisticsScene extends PositionComponent
     addToGameWidgetBuild(_showDataStatistics);
     super.onMount();
     Future.delayed(Duration(seconds: 15), () {
-      var level = globalConfigInfo.stageLevel;
-      if (level < MapStageLevel.maps.length) {
-        level += 1;
-        ref.read(globalConfigProvider.notifier).stageLevel = level;
+      var canSwitchToNextStage = ref
+          .read(globalConfigProvider.notifier)
+          .switchToNextStageLevel();
+      if (canSwitchToNextStage) {
+        if (ref.read(globalConfigProvider).state == GameState.gameOver) {
+          ref.read(globalConfigProvider.notifier).resetState();
+          game.router.pushReplacementNamed(AppRouter.ROUTE_WELCOME);
+          return;
+        }
         game.router.pushReplacementNamed(AppRouter.ROUTE_MAIN);
       } else {
         ///TODO 恭喜你，你已经完全通关！！！
@@ -106,11 +111,7 @@ class StatisticsScene extends PositionComponent
 
   @override
   void render(Canvas canvas) {
-    var paint = Paint()
-      ..isAntiAlias = true
-      ..style = PaintingStyle.fill
-      ..color = const Color.fromARGB(255, 29, 29, 29);
-    canvas.drawRect(Rect.fromLTWH(0, 0, game.size.x, game.size.y), paint);
+    canvas.drawColor(GameConstants.CANVAS_BG_COLOR, BlendMode.src);
     super.render(canvas);
   }
 
@@ -244,8 +245,8 @@ class StatisticsScene extends PositionComponent
     required TankType tankType,
   }) {
     double requiredWidth = GameConstants.CANVAS_SIZE.x;
-    AnimatedNumberTextComponent numText;
-    AnimatedNumberTextComponent scoreText;
+    AnimatedNumberComponent numText;
+    AnimatedNumberComponent scoreText;
     TextPaint textPaint = TextPaint(
       style: TextStyle(fontSize: 14, color: Colors.white),
     );
@@ -266,16 +267,26 @@ class StatisticsScene extends PositionComponent
           ),
           position: Vector2(20.0, titleOffsetY),
         ),
-        numText = AnimatedNumberTextComponent(
+        PositionComponent(
           anchor: .topRight,
-          initialValue: 0,
-          textRenderer: textPaint,
+          children: [
+            numText = AnimatedNumberComponent(
+              anchor: .topRight,
+              initialValue: 0,
+              textRenderer: textPaint,
+            ),
+          ],
           size: Vector2(30.0, textDrawHeight),
         )..position = Vector2(requiredWidth - 120.0, valueOffsetY),
-        scoreText = AnimatedNumberTextComponent(
+        PositionComponent(
           anchor: .topRight,
-          initialValue: 0,
-          textRenderer: textPaint,
+          children: [
+            scoreText = AnimatedNumberComponent(
+              anchor: .topRight,
+              initialValue: 0,
+              textRenderer: textPaint,
+            ),
+          ],
           size: Vector2(100.0, textDrawHeight),
         )..position = Vector2(requiredWidth - 20.0, valueOffsetY),
       ],
@@ -290,8 +301,8 @@ class StatisticsScene extends PositionComponent
   /// 构建总和结算Item视图信息组件
   _StatisticsComponentGroupInfo _buildStatistisFooterItemComponent() {
     double requiredWidth = GameConstants.CANVAS_SIZE.x;
-    AnimatedNumberTextComponent numText;
-    AnimatedNumberTextComponent scoreText;
+    AnimatedNumberComponent numText;
+    AnimatedNumberComponent scoreText;
     TextPaint textPaint = TextPaint(
       style: TextStyle(fontSize: 14, color: Colors.white),
     );
@@ -309,16 +320,25 @@ class StatisticsScene extends PositionComponent
       children: [
         TextComponent(text: '合计', textRenderer: titleTextPaint)
           ..position = Vector2(20.0, titleOffsetY),
-        numText = AnimatedNumberTextComponent(
-          anchor: .topRight,
-          initialValue: 0,
-          textRenderer: textPaint,
+        PositionComponent(
+          children: [
+            numText = AnimatedNumberComponent(
+              anchor: .topRight,
+              initialValue: 0,
+              textRenderer: textPaint,
+            ),
+          ],
           size: Vector2(30.0, textDrawHeight),
         )..position = Vector2(requiredWidth - 120.0, valueOffsetY),
-        scoreText = AnimatedNumberTextComponent(
+        PositionComponent(
           anchor: .topRight,
-          initialValue: 0,
-          textRenderer: textPaint,
+          children: [
+            scoreText = AnimatedNumberComponent(
+              anchor: .topRight,
+              initialValue: 0,
+              textRenderer: textPaint,
+            ),
+          ],
           size: Vector2(100.0, textDrawHeight),
         )..position = Vector2(requiredWidth - 20.0, valueOffsetY),
       ],
@@ -343,8 +363,8 @@ class _StatisticsComponentGroupInfo {
   final PositionComponent? root;
 
   /// 计数组件
-  final AnimatedNumberTextComponent? numText;
+  final AnimatedNumberComponent? numText;
 
   /// 记分组件
-  final AnimatedNumberTextComponent? scoreText;
+  final AnimatedNumberComponent? scoreText;
 }

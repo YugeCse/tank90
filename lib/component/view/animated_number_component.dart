@@ -1,30 +1,22 @@
 import 'dart:math';
-import 'package:flame/components.dart';
 import 'package:flame/text.dart';
+import 'package:tank90/component/view/number_sprite_component.dart';
 
 /// 动态数字组件
-class AnimatedNumberTextComponent extends TextComponent {
-  AnimatedNumberTextComponent({
-    required int initialValue,
-    required TextRenderer textRenderer,
-    this.duration = 1.0,
-    this.formatter,
+class AnimatedNumberComponent extends NumberSpriteComponent {
+  /// 构造方法
+  AnimatedNumberComponent({
     super.anchor,
     super.angle,
-    super.size,
+    this.duration = 1.0,
+    required int initialValue,
+    required TextRenderer textRenderer,
   }) : _displayValue = initialValue,
        _targetValue = initialValue,
-       _startValue = initialValue,
-       super(
-         text: formatter?.call(initialValue) ?? '$initialValue',
-         textRenderer: textRenderer,
-       );
+       _startValue = initialValue;
 
   /// 动画时长（秒）
   final double duration;
-
-  /// 自定义格式化，比如千分位、补零
-  final String Function(int value)? formatter;
 
   int _displayValue;
   int _targetValue;
@@ -51,7 +43,7 @@ class AnimatedNumberTextComponent extends TextComponent {
     _targetValue = newValue;
     _startValue = newValue;
     _elapsed = 0;
-    text = formatter?.call(newValue) ?? '$newValue';
+    number = newValue;
   }
 
   @override
@@ -67,11 +59,11 @@ class AnimatedNumberTextComponent extends TextComponent {
 
     _displayValue = (_startValue + (_targetValue - _startValue) * eased)
         .round();
-    text = formatter?.call(_displayValue) ?? '$_displayValue';
+    number = _displayValue;
 
     if (t >= 1.0) {
       _displayValue = _targetValue;
-      text = formatter?.call(_displayValue) ?? '$_displayValue';
+      number = _displayValue;
     }
   }
 }

@@ -1,12 +1,11 @@
 // ignore_for_file: constant_identifier_names
 
-import 'dart:ui' show Size;
-
 import 'package:flame/game.dart';
 import 'package:tank90/scene/main_scene.dart';
 import 'package:tank90/scene/settings_scene.dart';
 import 'package:tank90/scene/stage_screen.dart';
 import 'package:tank90/scene/statistics_scene.dart';
+import 'package:tank90/scene/test_scene.dart';
 import 'package:tank90/scene/welcome_scene.dart';
 
 /// 路由管理类
@@ -15,6 +14,9 @@ class AppRouter {
 
   /// 初始界面
   static const INIT_ROUTE = ROUTE_WELCOME;
+
+  /// 测试路由
+  static const ROUTE_TEST = 'Test';
 
   /// 启动欢迎页
   static const ROUTE_WELCOME = 'Welcome';
@@ -36,15 +38,11 @@ class AppRouter {
   static Map<String, Route> buildRouteConfigs({
     required void Function() requestRouterPop,
   }) => {
+    ROUTE_TEST: Route(TestScene.new),
     ROUTE_WELCOME: Route(WelcomeScene.new),
-    ROUTE_SETTINGS: OverlayRoute(
-      (_, game) => SettingsScene(
-        onRequestSceneClose: requestRouterPop,
-        rootContainerSize: Size(game.size.x, game.size.y),
-      ),
-    ),
+    ROUTE_SETTINGS: Route(SettingsScene.new, transparent: true),
     ROUTE_STAGE: Route(StageScreen.new),
-    ROUTE_MAIN: Route(MainScene.new),
+    ROUTE_MAIN: Route(MainScene.new, maintainState: false),
     ROUTE_STATISTICS: Route(StatisticsScene.new),
   };
 }

@@ -44,7 +44,7 @@ final class GlobalConfigProvider
   }
 }
 
-String _$globalConfigHash() => r'cac3e627334448feb98b4558788989b68f4c10fa';
+String _$globalConfigHash() => r'57e6eaca8b7381d324542df2c0992901ff1839ba';
 
 /// 全局配置类
 

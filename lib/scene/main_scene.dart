@@ -5,6 +5,7 @@ import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Route, Image;
 import 'package:tank90/app/app_router.dart';
+import 'package:tank90/app/notifier/enemy_increment_notifier.dart';
 import 'package:tank90/component/base/capability.dart';
 import 'package:tank90/component/base/find_type.dart';
 import 'package:tank90/component/base/tank_type.dart';
@@ -19,6 +20,8 @@ import 'package:tank90/component/tank/enemy_tank_component.dart';
 import 'package:tank90/component/tank/player_tank_component.dart'
     show PlayerTankComponent;
 import 'package:tank90/component/tank/prop_component.dart';
+import 'package:tank90/component/view/info_sidebar_component.dart';
+import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/data/game_properties.dart';
 import 'package:tank90/app/provider/global_config.dart';
 import 'package:tank90/data/map_stage_level.dart';
@@ -38,6 +41,9 @@ class MainScene extends Component
     with HasGameReference<TankWarGame>, RiverpodComponentMixin {
   /// 游戏地图对象
   WarMapComponent? mapComponent;
+
+  /// 侧边信息栏
+  InfoSidebarComponent? _infoSidebarComponent;
 
   /// 道具工厂对象
   PropFactoryComponent? _propFactoryComponent;
@@ -100,18 +106,24 @@ class MainScene extends Component
       });
     });
     super.onMount();
+    var curStage = (globalConfigInfo.stageLevel - 1).clamp(
+      0,
+      MapStageLevel.maps.length - 1,
+    );
     add(
       mapComponent ??= WarMapComponent(
-        stage: (globalConfigInfo.stageLevel - 1).clamp(
-          0,
-          MapStageLevel.maps.length - 1,
-        ),
+        stage: curStage,
+        position: Vector2.zero(),
       ),
     );
     mapComponent?.add(
       _propFactoryComponent = PropFactoryComponent(),
     ); //添加装备道具工厂组件
     mapComponent?.add(EnemyTankFactory()); //添加敌方坦克工厂组件
+    add(
+      _infoSidebarComponent = InfoSidebarComponent()
+        ..position = Vector2(GameConstants.MAP_SIZE.x, 0),
+    );
   }
 
   /// 接受消息事件
@@ -128,6 +140,7 @@ class MainScene extends Component
           showGameOver(); //显示游戏结束的界面
         }
       } else {
+        _infoSidebarComponent?.removeOneEnemySprite();
         var statisticsInfo = ScoreStatisticsInfo(
           type: event.type,
           score: event.type.score,
@@ -138,11 +151,21 @@ class MainScene extends Component
             globalConfigInfo.enemyCounts <= 0 &&
             (game.enemyTanks?.isEmpty ?? true);
         if (isGameWin) {
-          globalConfig.stageLevel = (globalConfigInfo.stageLevel + 1).clamp(
-            1,
-            MapStageLevel.maps.length + 1,
-          );
-          game.router.pushReplacementNamed(AppRouter.ROUTE_STATISTICS); //跳转新的界面
+          var nextStage = (globalConfigInfo.stageLevel + 1);
+          nextStage = nextStage.clamp(1, MapStageLevel.maps.length + 1);
+          globalConfig.stageLevel = nextStage;
+          //保存上一个关卡的坦克获得的能力
+          if (playerTank != null) {
+            globalConfig.cacheCapabilities = playerTank?.capabilities ?? {};
+          }
+          add(
+            TimerComponent(
+              period: 6,
+              removeOnFinish: true,
+              onTick: () =>
+                  game.router.pushReplacementNamed(AppRouter.ROUTE_STATISTICS),
+            ),
+          ); //跳转新的关卡界面
         }
       }
     } else if (event is BoomAllNotifier) {
@@ -151,6 +174,8 @@ class MainScene extends Component
       _propFactoryComponent?.generateProp(); //生成道具组件
     } else if (event is BossProtectedNotifier) {
       mapComponent?.changeBossWallState(event.state);
+    } else if (event is EnemyIncrementNotifier) {
+      _infoSidebarComponent?.addEnemySprite();
     }
   }
 
@@ -163,6 +188,7 @@ class MainScene extends Component
       if (allEnemies == null) return;
       for (var enemy in allEnemies) {
         enemy.boomAndDestroy(); //调用爆炸的方法
+        _infoSidebarComponent?.removeOneEnemySprite(); //爆炸一个，删除一个记录
       }
     } else {
       var allPlayers = mapComponent
@@ -181,7 +207,14 @@ class MainScene extends Component
       playerTank?.removeFromParent();
       playerTank = null;
     }
-    mapComponent?.add(playerTank ??= PlayerTankComponent(joystick: joystick));
+    var capabilities = ref.read(globalConfigProvider).cacheCapabilities;
+    mapComponent?.add(
+      playerTank ??= PlayerTankComponent(
+        joystick: joystick,
+        facingDirection: Vector2(0.0, -1.0),
+        capabilities: Map.from(capabilities ?? {}),
+      ),
+    );
   }
 
   /// 冻结敌方坦克
@@ -199,10 +232,14 @@ class MainScene extends Component
   void showGameOver() {
     if (_gameOverComponent != null) return;
     ref.read(globalConfigProvider.notifier).gameState = GameState.gameOver;
-    add(_gameOverComponent ??= GameOverComponent());
-    Future.delayed(
-      Duration(seconds: 10),
-      () => game.router.pushReplacementNamed(AppRouter.ROUTE_STATISTICS),
+    add(_gameOverComponent ??= GameOverComponent()); //显示游戏结束的界面
+    add(
+      TimerComponent(
+        period: 10,
+        removeOnFinish: true,
+        onTick: () =>
+            game.router.pushReplacementNamed(AppRouter.ROUTE_STATISTICS),
+      ),
     );
   }
 }

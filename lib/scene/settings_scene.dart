@@ -1,198 +1,197 @@
+import 'dart:async';
+
+import 'package:flame/components.dart';
+import 'package:flame/input.dart';
+import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart' hide OverlayRoute;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tank90/data/game_properties.dart';
 import 'package:tank90/app/provider/global_config.dart';
+import 'package:tank90/app/tank_war_game.dart';
+import 'package:tank90/data/game_constants.dart';
+import 'package:tank90/data/game_properties.dart';
 
-/// 设置界面
-class SettingsScene extends ConsumerStatefulWidget {
-  /// 构造方法
-  const SettingsScene({
-    super.key,
-    required this.rootContainerSize,
-    required this.onRequestSceneClose,
-  });
-
-  /// 根容器尺寸大小
-  final Size rootContainerSize;
-
-  /// 请求场景关闭
-  final void Function() onRequestSceneClose;
+/// 设置弹窗界面
+class SettingsScene extends PositionComponent
+    with RiverpodComponentMixin, HasGameReference<TankWarGame> {
+  late final Sprite _musicOpenSprite;
+  late final Sprite _musicCloseSprite;
+  late final SpriteComponent? _musicStatusSprite;
+  late final List<Sprite> _gameLevelSprites;
+  late final SpriteComponent _gameLevelSprite;
 
   @override
-  ConsumerState<SettingsScene> createState() => _SettingsSceneState();
-}
-
-class _SettingsSceneState extends ConsumerState<SettingsScene>
-    with SingleTickerProviderStateMixin {
-  late Animation<Offset> _animation;
-
-  late AnimationController _shakeController;
-
-  @override
-  void initState() {
-    _shakeController = AnimationController(vsync: this)
-      ..duration = Duration(seconds: 2)
-      ..repeat(count: 3, period: Duration(milliseconds: 500));
-    _animation = Tween(begin: Offset(-15, 0), end: Offset(15, 0)).animate(
-      CurvedAnimation(parent: _shakeController, curve: Curves.easeInOut),
-    );
-    _shakeController.forward();
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    var globalConfigInfo = ref.watch(globalConfigProvider);
-    var level = globalConfigInfo.gameLevel;
-    var soundAvailable = globalConfigInfo.soundAvailable;
-    debugPrint('global config: $level, $soundAvailable');
-    return Material(
-      color: Colors.transparent,
-      child: Container(
-        alignment: .center,
-        color: Colors.black.withAlpha(100),
-        width: widget.rootContainerSize.width,
-        height: widget.rootContainerSize.height,
-        child: AnimatedBuilder(
-          animation: _animation,
-          builder: (_, _) => _buildDialogContentView(
-            level: level,
-            soundAvailable: soundAvailable,
-          ),
-        ),
+  FutureOr<void> onLoad() async {
+    await super.onLoad();
+    _musicCloseSprite = await Sprite.load('music_close.png');
+    _musicOpenSprite = await Sprite.load('music_open.png');
+    _gameLevelSprites = [
+      await Sprite.load('game_easy.png'),
+      await Sprite.load('game_normal.png'),
+      await Sprite.load('game_difficult.png'),
+    ];
+    var offsetX = (GameConstants.CANVAS_SIZE.x - 300.0) / 2.0;
+    var offsetY = (GameConstants.CANVAS_SIZE.y - 200.0) / 2.0;
+    var offsetMx = GameConstants.CANVAS_SIZE.x - offsetX;
+    var offsetMy = GameConstants.CANVAS_SIZE.y - offsetY;
+    var circlePaint = Paint()
+      ..isAntiAlias = true
+      ..style = .fill
+      ..color = Colors.transparent;
+    add(
+      SpriteComponent(
+        sprite: await Sprite.load('game_settings.png'),
+        position: Vector2(offsetX + 20, offsetY + 15),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _shakeController.dispose();
-    super.dispose();
-  }
-
-  /// 构建窗口内容区域
-  /// + []
-  Widget _buildDialogContentView({
-    required GameLevel level,
-    required bool soundAvailable,
-  }) => Container(
-    width: 500,
-    height: 400,
-    decoration: BoxDecoration(
-      border: .all(width: 5.0, color: Colors.white.withValues(alpha: 0.5)),
-      borderRadius: .circular(12.0),
-      color: Colors.grey.withValues(alpha: 0.9),
-    ),
-    child: Column(
-      children: [
-        _buildTitleView(),
-        Divider(color: Colors.grey),
-        _buildSwitchItemView(
-          title: '开启声音',
-          value: soundAvailable,
-          onChanged: _toggleSoundOpenState,
-        ),
-        Divider(color: Colors.transparent, height: 16.0),
-        _buildLevelChoiceItemView(level: level),
-        Spacer(),
-        Padding(
-          padding: EdgeInsets.only(bottom: 20),
-          child: _buildFlatButton(
-            text: '关闭',
-            onClick: widget.onRequestSceneClose,
-          ),
-        ),
-      ],
-    ),
-  );
-
-  /// 构建标题视图
-  Widget _buildTitleView() {
-    return Padding(
-      padding: .symmetric(horizontal: 0, vertical: 8.0),
-      child: Text('设置', style: TextStyle(color: Colors.white, fontSize: 32.0)),
+    add(
+      SpriteComponent(
+        sprite: await Sprite.load('game_music.png'),
+        position: Vector2(offsetX + 20, offsetY + 62),
+      ),
     );
-  }
-
-  /// 构建开关 Item 视图
-  Widget _buildSwitchItemView({
-    required String title,
-    required bool value,
-    required void Function(bool) onChanged,
-  }) => Padding(
-    padding: .symmetric(horizontal: 20),
-    child: Row(
-      crossAxisAlignment: .center,
-      children: [
-        Text(title, style: TextStyle(fontSize: 20, color: Colors.white)),
-        Spacer(),
-        Switch(value: value, onChanged: onChanged),
-      ],
-    ),
-  );
-
-  /// 构建模式 Item 视图
-  Widget _buildLevelChoiceItemView({required GameLevel level}) {
-    var textStyle = TextStyle(fontSize: 20, color: Colors.white);
-    return Padding(
-      padding: EdgeInsetsGeometry.symmetric(horizontal: 20),
-      child: Row(
-        crossAxisAlignment: .center,
+    add(
+      ButtonComponent(
+        onPressed: _toggleGameMusicStatus,
+        position: Vector2(offsetMx - 48, offsetY + 62),
+        button: _musicStatusSprite = SpriteComponent(sprite: _musicCloseSprite),
+      ),
+    );
+    add(
+      SpriteComponent(
+        sprite: await Sprite.load('game_level.png'),
+        position: Vector2(offsetX + 16, offsetY + 94),
+      ),
+    );
+    add(
+      PositionComponent(
+        position: Vector2(offsetMx - 148, offsetY + 94),
         children: [
-          Text('模式选择', style: TextStyle(fontSize: 20, color: Colors.white)),
-          Spacer(),
-          RadioGroup<GameLevel>(
-            groupValue: level,
-            onChanged: _toggleGameLevel,
-            child: Row(
-              crossAxisAlignment: .center,
-              children: [
-                Radio(value: GameLevel.easy),
-                Padding(
-                  padding: .only(right: 8),
-                  child: Text('简单', style: textStyle),
-                ),
-                Radio(value: GameLevel.normal),
-                Padding(
-                  padding: .only(right: 8),
-                  child: Text('一般', style: textStyle),
-                ),
-                Radio(value: GameLevel.difficulty),
-                Padding(
-                  padding: .only(right: 8),
-                  child: Text('困难', style: textStyle),
-                ),
-              ],
-            ),
+          _gameLevelSprite = SpriteComponent(sprite: _gameLevelSprites.first),
+          ButtonComponent(
+            anchor: .center,
+            size: Vector2.all(12),
+            position: Vector2(35, 16),
+            onPressed: () => _toggleGameLevel(.easy),
+            button: CircleComponent(radius: 6, paint: circlePaint),
+          ),
+          ButtonComponent(
+            anchor: .center,
+            size: Vector2.all(12),
+            position: Vector2(80, 16),
+            onPressed: () => _toggleGameLevel(.normal),
+            button: CircleComponent(radius: 6, paint: circlePaint),
+          ),
+          ButtonComponent(
+            anchor: .center,
+            size: Vector2.all(12),
+            position: Vector2(121, 16),
+            onPressed: () => _toggleGameLevel(.difficulty),
+            button: CircleComponent(radius: 6, paint: circlePaint),
           ),
         ],
       ),
     );
-  }
-
-  /// 构建按钮
-  Widget _buildFlatButton({
-    required String text,
-    required void Function() onClick,
-  }) => FilledButton(
-    onPressed: onClick,
-    style: ButtonStyle(
-      padding: WidgetStatePropertyAll(
-        EdgeInsets.symmetric(horizontal: 32, vertical: 12.0),
+    add(
+      ButtonComponent(
+        anchor: .center,
+        onPressed: _closeDialog,
+        button: SpriteComponent(
+          sprite: await Sprite.load('game_settings_close.png'),
+        ),
+        position: Vector2(GameConstants.CANVAS_SIZE.x / 2.0, offsetMy - 32),
       ),
-    ),
-    child: Text(text, style: TextStyle(fontSize: 20, color: Colors.white)),
-  );
-
-  /// 切换声音是否打开的状态
-  /// + [isOpen] - 是否打开声音
-  void _toggleSoundOpenState(bool isOpen) {
-    ref.read(globalConfigProvider.notifier).soundAvailable = isOpen;
+    );
   }
 
-  /// 切换模式
-  /// + [level] - 模式
-  void _toggleGameLevel(GameLevel? level) {
-    ref.read(globalConfigProvider.notifier).gameLevel = level ?? GameLevel.easy;
+  @override
+  void onMount() {
+    addToGameWidgetBuild(() {
+      var globalConfig = ref.read(globalConfigProvider);
+      _setGameLevelSprite(globalConfig.gameLevel);
+      _setGameMusicStatusSprite(globalConfig.soundAvailable);
+      ref.listen(globalConfigProvider, (_, next) {
+        _setGameLevelSprite(next.gameLevel);
+        _setGameMusicStatusSprite(next.soundAvailable);
+      });
+    });
+    super.onMount();
+  }
+
+  @override
+  void render(Canvas canvas) {
+    canvas.drawBackground();
+    super.render(canvas);
+  }
+
+  /// 设置音乐开关的sprite
+  void _setGameMusicStatusSprite(bool isAvailable) {
+    _musicStatusSprite?.sprite = isAvailable
+        ? _musicCloseSprite
+        : _musicOpenSprite;
+  }
+
+  /// 切换游戏声音状态
+  void _toggleGameMusicStatus() {
+    var globalConfig = ref.read(globalConfigProvider);
+    var targetValue = !globalConfig.soundAvailable;
+    ref.read(globalConfigProvider.notifier).soundAvailable = targetValue;
+  }
+
+  /// 设置游戏等级的sprite
+  void _setGameLevelSprite(GameLevel target) {
+    _gameLevelSprite.sprite = (target == .easy
+        ? _gameLevelSprites.first
+        : (target == .normal ? _gameLevelSprites[1] : _gameLevelSprites.last));
+  }
+
+  /// 切换游戏等级设置
+  void _toggleGameLevel(GameLevel target) {
+    debugPrint('current target: $target');
+    ref.read(globalConfigProvider.notifier).gameLevel = target;
+  }
+
+  /// 关闭当前页面
+  void _closeDialog() => game.router.pop();
+}
+
+extension _CanvasDrawer on Canvas {
+  /// 绘制背景
+  void drawBackground() {
+    clearScreen();
+    var paint = Paint()
+      ..isAntiAlias = true
+      ..style = .fill
+      ..color = const Color.fromARGB(255, 128, 128, 128).withValues(alpha: 0.8);
+    drawRoundRectBackground(paint);
+    paint
+      ..style = .stroke
+      ..color = Colors.grey
+      ..strokeWidth = 3.0;
+    drawRoundRectBackground(paint);
+  }
+
+  /// 清屏处理
+  void clearScreen() {
+    drawRect(
+      GameConstants.CANVAS_RECT,
+      Paint()
+        ..isAntiAlias = true
+        ..style = .fill
+        ..color = const Color.fromARGB(189, 0, 0, 0),
+    );
+  }
+
+  /// 绘制矩形背景
+  void drawRoundRectBackground(Paint paint) {
+    drawRRect(
+      .fromRectAndRadius(
+        .fromCenter(
+          center: (GameConstants.CANVAS_SIZE / 2.0).toOffset(),
+          width: 300,
+          height: 200,
+        ),
+        .circular(12),
+      ),
+      paint,
+    );
   }
 }

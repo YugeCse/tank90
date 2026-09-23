@@ -1,9 +1,12 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flame_riverpod/flame_riverpod.dart';
+import 'package:flutter/material.dart';
+import 'package:tank90/app/notifier/enemy_increment_notifier.dart';
 import 'package:tank90/component/base/boss_wall_state.dart';
+import 'package:tank90/component/base/bullet_type.dart';
 import 'package:tank90/component/base/capability.dart';
+import 'package:tank90/component/base/capability_controller.dart';
 import 'package:tank90/component/base/direction.dart';
 import 'package:tank90/component/base/hitbox_mixin.dart';
 import 'package:tank90/component/base/map_cell_type.dart';
@@ -62,11 +65,11 @@ abstract class BaseTankComponent extends SpriteComponent
   /// 防爆次数
   int explosionProofCount;
 
-  /// 拥有的能力对象集合
-  final Map<Type, Capability> capabilities = {};
+  /// 拥有的能力控制器
+  CapabilityController capabilityController;
 
   /// 碰撞对象集合, 方便计算碰撞数据
-  final Set<Component> _collisionObjects = {};
+  final Set<Component> _collisionObjects = <Component>{};
 
   /// 坦克保护组件，有时效性的
   TankProtectComponent? _tankProtectComponent;
@@ -74,41 +77,45 @@ abstract class BaseTankComponent extends SpriteComponent
   /// 是否是处理被保护状态
   bool get isProtectedState => _tankProtectComponent != null;
 
+  /// 获取所有能力集合
+  Map<Type, Capability> get capabilities =>
+      capabilityController.allCapabilities;
+
   /// 构造方法
   BaseTankComponent({
     required this.type,
     double? speed,
+    Vector2? velocity,
     Vector2? facingDirection,
     super.position,
-    this.explosionProofCount = 0,
+    Map<Type, Capability>? capabilities,
   }) : _originType = type,
        speed = type.initialSpeed,
-       velocity = Vector2.zero(),
-       facingDirection = facingDirection ?? Direction.up,
-       super(size: type.srcSize, anchor: Anchor.center, priority: 600);
-
-  /// 更新精灵图帧
-  /// + [type] - 坦克类型
-  void updateSprite(TankType type) {
-    sprite = Sprite(
-      assetImage,
-      srcSize: type.srcSize,
-      srcPosition: type.getSrcPosition(facingDirection),
-    );
+       velocity = velocity ?? Vector2.zero(),
+       facingDirection =
+           facingDirection ??
+           (type == TankType.player ? Direction.up : Direction.random()),
+       explosionProofCount = type.explosionProofCount,
+       capabilityController = CapabilityController(
+         capabilities: Map.from(capabilities ?? {}),
+       ),
+       super(size: type.srcSize, anchor: Anchor.center, priority: 600) {
+    updateSprite(type); //更新当前显示的精灵图片
+    setFacingDirection(this.facingDirection); //设置当前的朝向数据
   }
-
-  /// 出生完成事件
-  void onBornFinished() {}
 
   @override
   FutureOr<void> onLoad() {
-    explosionProofCount = type.explosionProofCount;
-    updateSprite(type);
-    facingDirection = velocity;
-    velocity = Vector2.zero();
-    add(hitbox = RectangleHitbox(size: size));
     opacity = 0; //默认设置透明度为0
-    hitbox.collisionType = CollisionType.inactive;
+    add(
+      hitbox = RectangleHitbox(
+        size: size,
+        collisionType: CollisionType.inactive,
+      ),
+    );
+    if (capabilityController.hasProtectedCapapbility) {
+      showProtectEffect(); //显示保护状态
+    }
   }
 
   @override
@@ -123,15 +130,37 @@ abstract class BaseTankComponent extends SpriteComponent
   }
 
   @override
+  void render(Canvas canvas) {
+    if (capabilityController.hasFerryCapability) {
+      var paint = Paint()
+        ..isAntiAlias = true
+        ..style = .stroke
+        ..strokeWidth = 2.0
+        ..color = Colors.white70;
+      var rrect = RRect.fromRectAndRadius(
+        Rect.fromLTWH(0, 0, width, height),
+        .circular(3),
+      );
+      canvas.drawRRect(rrect, paint);
+    }
+    super.render(canvas);
+  }
+
+  @override
   void update(double dt) {
     super.update(dt);
-    if (!capabilities.containsKey(SleepCapability)) {
-      position += velocity * speed * dt;
-    } else {
-      var capability = capabilities[SleepCapability] as SleepCapability;
-      capability.sleepTimeSec -= dt;
-      if (capability.sleepTimeSec <= 0.0) {
-        capabilities.remove(SleepCapability); //移除这个能力
+    // 非正在出生的状态，才能执行下面的逻辑
+    if (!isBornState) {
+      if (!capabilityController.hasSleepCapability) {
+        position += velocity * speed * dt;
+      } else {
+        var capability =
+            capabilityController.getCapability(SleepCapability)
+                as SleepCapability;
+        capability.sleepTimeSec -= dt;
+        if (capability.sleepTimeSec <= 0.0) {
+          capabilityController.removeCapability(SleepCapability); //移除这个能力
+        }
       }
     }
     _adjustLimitPosition(dt); //更新位置
@@ -179,6 +208,8 @@ abstract class BaseTankComponent extends SpriteComponent
     final overlapX = nCollisionDx - diffCenter.dx.abs(); // 穿透深度
     final overlapY = nCollisionDy - diffCenter.dy.abs(); // 穿透深度
     if (overlapX > epsilon && overlapY > epsilon) {
+      velocity = Vector2.zero(); //防止额外移动，所以先禁止它继续移动
+      onAdjustPositionEndedAfterCollision();
       if (overlapX < overlapY) {
         final correction = diffCenter.dx < 0 ? -overlapX : overlapX;
         position.x += correction / absoluteScale.x; // 绝对位移转局部位移
@@ -186,41 +217,61 @@ abstract class BaseTankComponent extends SpriteComponent
         final correction = diffCenter.dy < 0 ? -overlapY : overlapY;
         position.y += correction / absoluteScale.y; // 绝对位移转局部位移
       }
-      velocity = Vector2.zero();
+      onAdjustPositionEndedAfterCollision();
     }
   }
+
+  /// 在碰撞发生前调整坐标数据
+  void onAdjustPositionStartBeforeCollision() {}
+
+  /// 在碰撞发生后调整坐标数据
+  void onAdjustPositionEndedAfterCollision() {}
 
   @override
   void onCollisionStart(
     Set<Vector2> intersectionPoints,
     PositionComponent other,
   ) {
-    if ((other is MapCellComponent && other.type != MapCellType.grass) ||
-        other is BaseTankComponent ||
-        other is BossComponent) {
+    if (other is BaseTankComponent ||
+        other is BossComponent ||
+        (other is MapCellComponent &&
+            ((![
+                  MapCellType.grass,
+                  MapCellType.ice,
+                  MapCellType.rive,
+                ].contains(other.type)) ||
+                (!capabilityController.hasFerryCapability &&
+                    other.type == MapCellType.rive)))) {
       _collisionObjects.add(other);
     }
     super.onCollisionStart(intersectionPoints, other);
   }
 
   @override
-  void onCollision(Set<Vector2> intersectionPoints, PositionComponent other) {
-    if ((other is MapCellComponent && other.type != MapCellType.grass) ||
-        other is BaseTankComponent ||
-        other is BossComponent) {
-      _collisionObjects.add(other);
-    }
-    super.onCollision(intersectionPoints, other);
-  }
-
-  @override
   void onCollisionEnd(PositionComponent other) {
-    if ((other is MapCellComponent && other.type != MapCellType.grass) ||
-        other is BaseTankComponent) {
+    if (_collisionObjects.contains(other)) {
       _collisionObjects.remove(other);
     }
     super.onCollisionEnd(other);
   }
+
+  /// 获得资源的原始起始坐标
+  Vector2 getSrcPosition(Vector2 facingDir) {
+    return type.getSrcPosition(facingDir);
+  }
+
+  /// 更新精灵图帧
+  /// + [type] - 坦克类型
+  void updateSprite(TankType type, {Vector2? facingDirection}) {
+    sprite = Sprite(
+      assetImage,
+      srcSize: type.srcSize,
+      srcPosition: getSrcPosition(facingDirection ?? this.facingDirection),
+    );
+  }
+
+  /// 出生完成事件
+  void onBornFinished() {}
 
   /// 出生动画完成事件
   void _onBornAnimationFinished() {
@@ -233,14 +284,10 @@ abstract class BaseTankComponent extends SpriteComponent
   /// 改变坦克方向并更新精灵
   void setFacingDirection(Vector2 facingDirection) {
     if (facingDirection != Vector2.zero()) {
-      if (velocity != facingDirection) {
-        sprite = Sprite(
-          assetImage,
-          srcSize: type.srcSize,
-          srcPosition: type.getSrcPosition(facingDirection),
-        );
+      if (this.facingDirection != facingDirection) {
+        this.facingDirection = facingDirection;
+        updateSprite(type, facingDirection: facingDirection); //设置精灵图像
       }
-      this.facingDirection = facingDirection;
       velocity = facingDirection; //更新速度向量数据
     }
   }
@@ -260,12 +307,10 @@ abstract class BaseTankComponent extends SpriteComponent
 
   /// 获得装备
   void fetchProp(PropType type) {
+    var isTankPropType = false;
     if (type is TankPropType) {
+      isTankPropType = true;
       AudioUtils().playProp();
-    } else {
-      AudioUtils().playGetProp();
-    }
-    if (type is TankPropType) {
       if (this.type == TankType.player) {
         globalConfig.playerLifes += 1;
       } else {
@@ -274,6 +319,8 @@ abstract class BaseTankComponent extends SpriteComponent
           return;
         }
         globalConfig.enemyCounts += 1;
+        var mainScene = findMainScene();
+        mainScene?.onReceiveNotifier(EnemyIncrementNotifier());
       }
     } else if (type is TimerPropType) {
       var mainScene = findMainScene();
@@ -295,19 +342,21 @@ abstract class BaseTankComponent extends SpriteComponent
         BoomAllNotifier(type: type, ownerType: this.type),
       );
     } else if (type is StarPropType) {
-      if (capabilities.containsKey(StrongFireCapability)) {
-        var capability =
-            capabilities[StrongFireCapability] as StrongFireCapability;
-        var level = max(capability.fireLevel + 1, 3);
-        capability.fireLevel = level;
-        capabilities[StrongFireCapability] = capability;
-      } else {
-        capabilities[StrongFireCapability] = StrongFireCapability(fireLevel: 2);
-      }
+      // 火力等级最多按 4 颗星处理，3 颗及以上都显示 large 炮嘴；4颗星能够烧毁草场地块
+      capabilityController.putCapability(StrongFireCapability());
     } else if (type is HatProtectPropType) {
       showProtectEffect(); //如果没有保护效果的，则添加保护效果
+      capabilityController.putCapability(ProtectedCapability());
+    } else if (type is GunPropType) {
+      capabilityController.putCapability(StrongFireCapability(fireLevel: 3));
+    } else if (type is ShipPropType) {
+      capabilityController.putCapability(FerryCapability()); //设置获取轮渡能力
     }
+    if (!isTankPropType) AudioUtils().playGetProp();
   }
+
+  /// 获取攻击使用的子弹类型
+  BulletType getAttackBulletType() => BulletType.normal;
 
   /// 开炮/攻击
   /// + [onFinished] - 开火完成的事件
@@ -319,8 +368,10 @@ abstract class BaseTankComponent extends SpriteComponent
       findWarMapComponent()?.add(
         BulletComponent.create(
           ownerType: type,
+          type: getAttackBulletType(),
           velocity: facingDirection,
-          position: position + facingDirection * size.x / 2,
+          position: position + facingDirection * size.x / 3,
+          fireGrass: capabilityController.powerFireLevel >= 4,
         ),
       );
       if (onFinished != null) onFinished();

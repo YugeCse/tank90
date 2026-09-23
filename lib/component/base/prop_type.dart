@@ -47,3 +47,15 @@ class HatProtectPropType extends PropType {
   HatProtectPropType()
     : super(srcSize: Vector2(30, 28), srcPosition: Vector2(406, 110));
 }
+
+/// 手枪装备
+class GunPropType extends PropType {
+  GunPropType()
+    : super(srcSize: Vector2(30, 28), srcPosition: Vector2(436, 110));
+}
+
+/// 轮渡装备
+class ShipPropType extends PropType {
+  ShipPropType()
+    : super(srcSize: Vector2(30, 28), srcPosition: Vector2(466, 110));
+}

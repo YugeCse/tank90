@@ -8,9 +8,12 @@ part of 'shared_preferences.dart';
 
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, type=warning
+/// 创建sharedPreferencesProvider
 
 @ProviderFor(sharedPreferences)
 final sharedPreferencesProvider = SharedPreferencesProvider._();
+
+/// 创建sharedPreferencesProvider
 
 final class SharedPreferencesProvider
     extends
@@ -20,6 +23,7 @@ final class SharedPreferencesProvider
           SharedPreferencesAsync
         >
     with $Provider<SharedPreferencesAsync> {
+  /// 创建sharedPreferencesProvider
   SharedPreferencesProvider._()
     : super(
         from: null,
@@ -56,8 +60,12 @@ final class SharedPreferencesProvider
 
 String _$sharedPreferencesHash() => r'11857f0a89fb15edd205479893a6c32649f31643';
 
+/// 创建sharedPreferencesHandler
+
 @ProviderFor(sharedPreferencesHandler)
 final sharedPreferencesHandlerProvider = SharedPreferencesHandlerProvider._();
+
+/// 创建sharedPreferencesHandler
 
 final class SharedPreferencesHandlerProvider
     extends
@@ -67,6 +75,7 @@ final class SharedPreferencesHandlerProvider
           SharedPreferencesHandler
         >
     with $Provider<SharedPreferencesHandler> {
+  /// 创建sharedPreferencesHandler
   SharedPreferencesHandlerProvider._()
     : super(
         from: null,

@@ -1,8 +1,9 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
+import 'package:tank90/component/base/bullet_type.dart';
 import 'package:tank90/component/base/capability.dart';
 import 'package:tank90/component/base/direction.dart' show Direction;
+import 'package:tank90/component/base/prop_type.dart';
+import 'package:tank90/component/base/tank_cannon_type.dart';
 import 'package:tank90/component/base/tank_type.dart' show TankType;
 import 'package:tank90/data/game_constants.dart' show GameConstants;
 import 'package:flame/components.dart'
@@ -17,7 +18,7 @@ import 'base_tank_component.dart';
 /// 玩家坦克组件
 class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
   /// 开火间隔时间
-  double fireSpanTime = 0.5;
+  double _fireSpanTime = 0.5;
 
   /// 记录上一次的开火时间
   double _lastFireTime = 0;
@@ -28,34 +29,85 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
   /// 记录被按下的按键
   final Set<LogicalKeyboardKey> _pressedKeys = {};
 
+  /// 构造函数
   PlayerTankComponent({
-    required this.joystick,
+    this.joystick,
+    Vector2? position,
     super.speed,
     super.type = TankType.player,
-  }) : super(position: defaultPosition);
-
-  @override
-  FutureOr<void> onLoad() async {
-    await super.onLoad();
-    // debugMode = true;
-    // debugColor = Colors.red;
-  }
-
-  // @override
-  // void render(Canvas canvas) {
-  //   super.render(canvas);
-  //   var paint = Paint()
-  //     ..isAntiAlias = true
-  //     ..color = Colors.red;
-  //   var rect = toRect();
-  //   canvas.drawRRect(RRect.fromRectAndCorners(rect), paint);
-  // }
+    super.facingDirection,
+    super.capabilities,
+  }) : super(position: position ?? defaultPosition);
 
   @override
   void update(double dt) {
     super.update(dt);
-    _updateTankAction(); //处理Tank行为
-    _controlDirectionByJoystick(); //通过Joystick控制方向
+    if (!isBornState) {
+      _updateTankAction(); //处理Tank行为
+      _controlDirectionByJoystick(); //通过Joystick控制方向
+    }
+  }
+
+  /// 根据当前火力等级获取炮嘴类型。
+  TankCannonType get cannonType {
+    var fireLevel = capabilityController.powerFireLevel;
+    switch (fireLevel) {
+      case 1:
+        return TankCannonType.longer;
+      case 2:
+        return TankCannonType.thicker;
+      default:
+        return fireLevel >= 3 ? TankCannonType.larger : TankCannonType.normal;
+    }
+  }
+
+  @override
+  Vector2 getSrcPosition(Vector2 facingDir) {
+    if (cannonType != TankCannonType.normal) {
+      return type.getSrcPositionByCannonType(
+        type: cannonType,
+        facingDirection: facingDir,
+      );
+    }
+    return super.getSrcPosition(facingDir);
+  }
+
+  @override
+  void attacked() {
+    if (capabilityController.hasProtectedCapapbility) return;
+    if (capabilityController.hasFerryCapability) {
+      capabilityController.removeCapability(FerryCapability);
+      return;
+    }
+    // 没有被保护能力且是最大火力炮嘴类型时，能承受1次攻击
+    if (cannonType == TankCannonType.larger) {
+      if (capabilityController.hasProwerFireCapability &&
+          capabilityController.powerFireLevel >= 3) {
+        capabilityController.putCapability(StrongFireCapability(fireLevel: 2));
+        return;
+      }
+    }
+    super.attacked();
+  }
+
+  @override
+  BulletType getAttackBulletType() {
+    switch (cannonType) {
+      case TankCannonType.thicker:
+        return BulletType.strong;
+      case TankCannonType.larger:
+        return BulletType.xstrong;
+      default:
+        return super.getAttackBulletType();
+    }
+  }
+
+  @override
+  void fetchProp(PropType type) {
+    super.fetchProp(type);
+    if (_fireSpanTime > 0.3 && capabilityController.powerFireLevel >= 1) {
+      _fireSpanTime = 0.3; //如果已经获得了火力加持，直接减少发射炮弹的间隔时间
+    }
   }
 
   /// 通过Joystick控制方向
@@ -81,12 +133,12 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
     if (_pressedKeys.contains(LogicalKeyboardKey.keyJ)) {
       var curTimeSec = DateTime.now().millisecondsSinceEpoch / 1000;
       var diffTimeSec = curTimeSec - _lastFireTime;
-      if (diffTimeSec > fireSpanTime) {
+      if (diffTimeSec > _fireSpanTime) {
         _lastFireTime = curTimeSec;
         attack(); //执行开火
       }
     }
-    if (capabilities.containsKey(SleepCapability)) return;
+    if (capabilityController.hasSleepCapability) return;
     // 处理方向 - 使用标志位
     bool hasDirection = false;
     if (_pressedKeys.contains(LogicalKeyboardKey.keyW)) {
