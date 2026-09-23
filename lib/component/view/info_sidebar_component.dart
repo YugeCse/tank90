@@ -16,21 +16,11 @@ class InfoSidebarComponent extends PositionComponent
   /// 敌人的精灵装载容器
   late final PositionComponent _enemiesContainer;
 
-  /// 关卡旗帜组件
-  late final SpriteComponent _stageFlagComponent;
-
   /// 关卡数显示组件
   late final NumberSpriteComponent _stageNumComponent;
 
-  /// 关卡显示容器组件
-  late final PositionComponent _stageContainerComponent;
-
   /// 玩家生命数显示组件
   late final NumberSpriteComponent _playerLifesComponent;
-
-  late final SpriteComponent _playerLifeFlagComponent;
-
-  late final PositionComponent _playerLifeContainerComponent;
 
   @override
   FutureOr<void> onLoad() async {
@@ -44,10 +34,10 @@ class InfoSidebarComponent extends PositionComponent
       )..size = Vector2(_infoBoardWidth, GameConstants.CANVAS_SIZE.y),
     );
     add(
-      _stageContainerComponent = PositionComponent(
+      PositionComponent(
         anchor: .center,
         children: [
-          _stageFlagComponent = SpriteComponent(
+          SpriteComponent(
             sprite: Sprite(
               assetImage,
               srcSize: Vector2(30, 31),
@@ -56,15 +46,15 @@ class InfoSidebarComponent extends PositionComponent
             size: Vector2(30, 31),
           ),
           _stageNumComponent = NumberSpriteComponent(number: 1)
-            ..position = Vector2(30.0, 18.0),
+            ..position = Vector2(10.0, 18.0),
         ],
-      )..position = Vector2(0, GameConstants.CANVAS_SIZE.y - 96.0),
+      )..position = Vector2(12.0, GameConstants.CANVAS_SIZE.y - 96.0),
     );
     add(
-      _playerLifeContainerComponent = PositionComponent(
+      PositionComponent(
         anchor: .center,
         children: [
-          _playerLifeFlagComponent = SpriteComponent(
+          SpriteComponent(
             sprite: Sprite(
               assetImage,
               srcSize: Vector2(30, 32),
@@ -72,9 +62,9 @@ class InfoSidebarComponent extends PositionComponent
             ),
           ),
           _playerLifesComponent = NumberSpriteComponent(number: 0)
-            ..position = Vector2(32.0, 17),
+            ..position = Vector2(18.0, 17),
         ],
-      )..position = Vector2(0, GameConstants.CANVAS_SIZE.y - 32.0),
+      )..position = Vector2(12.0, GameConstants.CANVAS_SIZE.y - 32.0),
     );
   }
 
@@ -151,20 +141,10 @@ class InfoSidebarComponent extends PositionComponent
   /// 设置关卡等级显示
   void _setStageLevel(int level) {
     _stageNumComponent.number = level;
-    _stageContainerComponent.size = Vector2(
-      _stageFlagComponent.size.x + _stageNumComponent.size.x,
-      _stageFlagComponent.size.y,
-    );
-    _stageContainerComponent.position.x = (_infoBoardWidth) / 2.0;
   }
 
   /// 设置玩家生命数
   void _setPlayerLifes(int count) {
     _playerLifesComponent.number = count;
-    _playerLifeContainerComponent.size = Vector2(
-      _playerLifeFlagComponent.size.x + _playerLifesComponent.size.x + 2.0,
-      _playerLifeFlagComponent.size.y,
-    );
-    _playerLifeContainerComponent.position.x = (_infoBoardWidth) / 2.0;
   }
 }

@@ -151,9 +151,6 @@ class MainScene extends Component
             globalConfigInfo.enemyCounts <= 0 &&
             (game.enemyTanks?.isEmpty ?? true);
         if (isGameWin) {
-          var nextStage = (globalConfigInfo.stageLevel + 1);
-          nextStage = nextStage.clamp(1, MapStageLevel.maps.length + 1);
-          globalConfig.stageLevel = nextStage;
           //保存上一个关卡的坦克获得的能力
           if (playerTank != null) {
             globalConfig.cacheCapabilities = playerTank?.capabilities ?? {};
@@ -181,7 +178,15 @@ class MainScene extends Component
 
   /// 炸死所有坦克的通知
   void _boomAllTanks(BoomAllNotifier event) {
-    if (event.ownerType == TankType.player) {
+    if (event.ownerType != TankType.player) {
+      var allPlayers = mapComponent
+          ?.descendants()
+          .whereType<PlayerTankComponent>();
+      if (allPlayers == null) return;
+      for (var player in allPlayers) {
+        player.boomAndDestroy(); //调用爆炸的方法
+      }
+    } else {
       var allEnemies = mapComponent
           ?.descendants()
           .whereType<EnemyTankComponent>();
@@ -189,14 +194,6 @@ class MainScene extends Component
       for (var enemy in allEnemies) {
         enemy.boomAndDestroy(); //调用爆炸的方法
         _infoSidebarComponent?.removeOneEnemySprite(); //爆炸一个，删除一个记录
-      }
-    } else {
-      var allPlayers = mapComponent
-          ?.descendants()
-          .whereType<PlayerTankComponent>();
-      if (allPlayers == null) return;
-      for (var player in allPlayers) {
-        player.boomAndDestroy(); //调用爆炸的方法
       }
     }
   }
@@ -219,20 +216,19 @@ class MainScene extends Component
 
   /// 冻结敌方坦克
   void freezeEnemyTanks() {
-    game.enemyTanks?.forEach((enemy) {
-      enemy.capabilities[SleepCapability] = SleepCapability();
-    });
+    game.enemyTanks?.forEach(
+      (el) => el.capabilityController.putCapability(SleepCapability()),
+    );
   }
 
   /// 冻结玩家坦克
   void freezePlayerTank() =>
-      playerTank?.capabilities[SleepCapability] = SleepCapability();
+      playerTank?.capabilityController.putCapability(SleepCapability());
 
   /// 显示游戏失效的界面
   void showGameOver() {
     if (_gameOverComponent != null) return;
     ref.read(globalConfigProvider.notifier).gameState = GameState.gameOver;
-    add(_gameOverComponent ??= GameOverComponent()); //显示游戏结束的界面
     add(
       TimerComponent(
         period: 10,
@@ -241,6 +237,7 @@ class MainScene extends Component
             game.router.pushReplacementNamed(AppRouter.ROUTE_STATISTICS),
       ),
     );
+    add(_gameOverComponent ??= GameOverComponent()); //显示游戏结束的界面
   }
 }
 

@@ -80,27 +80,34 @@ class StatisticsScene extends PositionComponent
     );
     _itemStatisticsFooterComponentInfo = _buildStatistisFooterItemComponent();
     add(_itemStatisticsFooterComponentInfo!.root!);
+    add(
+      TimerComponent(
+        period: 12,
+        removeOnFinish: true,
+        onTick: () {
+          var canSwitchToNextStage = ref
+              .read(globalConfigProvider.notifier)
+              .switchToNextStageLevel();
+          if (canSwitchToNextStage) {
+            if (ref.read(globalConfigProvider).state == GameState.gameOver) {
+              ref.read(globalConfigProvider.notifier).resetState();
+              game.router.pushReplacementNamed(AppRouter.ROUTE_WELCOME);
+              return;
+            } else {
+              game.router.pushReplacementNamed(AppRouter.ROUTE_MAIN);
+            }
+          } else {
+            ///TODO 恭喜你，你已经完全通关！！！
+          }
+        },
+      ),
+    );
   }
 
   @override
   void onMount() {
     addToGameWidgetBuild(_showDataStatistics);
     super.onMount();
-    Future.delayed(Duration(seconds: 15), () {
-      var canSwitchToNextStage = ref
-          .read(globalConfigProvider.notifier)
-          .switchToNextStageLevel();
-      if (canSwitchToNextStage) {
-        if (ref.read(globalConfigProvider).state == GameState.gameOver) {
-          ref.read(globalConfigProvider.notifier).resetState();
-          game.router.pushReplacementNamed(AppRouter.ROUTE_WELCOME);
-          return;
-        }
-        game.router.pushReplacementNamed(AppRouter.ROUTE_MAIN);
-      } else {
-        ///TODO 恭喜你，你已经完全通关！！！
-      }
-    });
   }
 
   @override
