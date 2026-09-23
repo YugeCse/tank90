@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
+import 'package:flame/experimental.dart';
 import 'package:flame/input.dart';
+import 'package:flame/layout.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show KeyDownEvent, LogicalKeyboardKey;
@@ -28,15 +30,6 @@ class StageScreen extends Component
   /// 总的移动x轴距离
   double _totalDeltaX = 0;
 
-  /// 间隔值
-  final double _spacer = 2.0;
-
-  /// StageLevel整个组件
-  PositionComponent? _stageLevelComponent;
-
-  /// Stage图标组件
-  SpriteComponent? _stageSpriteComponent;
-
   /// 关卡数字显示组件
   NumberSpriteComponent? _numberSpriteComponent;
 
@@ -44,26 +37,30 @@ class StageScreen extends Component
   FutureOr<void> onLoad() async {
     await super.onLoad();
     add(
-      ButtonComponent(
-        position: game.size / 2,
-        button: _stageLevelComponent = PositionComponent(
-          children: [
-            _stageSpriteComponent = SpriteComponent(
-              sprite: Sprite(
-                assetImage,
-                srcSize: Vector2(78, 13),
-                srcPosition: Vector2(396, 96),
+      PositionComponent(
+        size: GameConstants.CANVAS_SIZE,
+        children: [
+          AlignComponent(
+            alignment: .center,
+            child: ButtonComponent(
+              button: RowComponent(
+                children: [
+                  SpriteComponent(
+                    sprite: Sprite(
+                      assetImage,
+                      srcSize: Vector2(78, 13),
+                      srcPosition: Vector2(396, 96),
+                    ),
+                    size: Vector2(78.0, 13),
+                  ),
+                  PositionComponent(size: Vector2(5.0, 2.0)),
+                  _numberSpriteComponent = NumberSpriteComponent(number: 0),
+                ],
               ),
-              size: Vector2(78.0, 13),
-              position: Vector2(0, 0),
+              onPressed: () => _goToMainGameScene(),
             ),
-            _numberSpriteComponent = NumberSpriteComponent(
-              number: 0,
-              position: Vector2(78.0 + _spacer, 0),
-            ),
-          ],
-        ),
-        onPressed: () => _goToMainGameScene(),
+          ),
+        ],
       ),
     );
   }
@@ -161,17 +158,6 @@ class StageScreen extends Component
   /// 设置关卡数
   void _setStageLevel(int level) {
     _numberSpriteComponent?.number = level;
-    var stageSpriteSize = Vector2(
-      (_stageSpriteComponent?.size.x ?? 0) +
-          _spacer +
-          (_numberSpriteComponent?.size.x ?? 0),
-      (_stageSpriteComponent?.size.y ?? 0),
-    );
-    _stageLevelComponent?.size = stageSpriteSize;
-    _stageLevelComponent?.position = Vector2(
-      (GameConstants.CANVAS_SIZE.x - stageSpriteSize.x - _spacer) / 2.0,
-      (GameConstants.CANVAS_SIZE.y - stageSpriteSize.y - _spacer) / 2.0,
-    );
   }
 
   @override
