@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flame/components.dart';
 import 'package:flame/events.dart';
+import 'package:flame/input.dart';
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show KeyDownEvent, LogicalKeyboardKey;
@@ -19,7 +20,14 @@ class StageScreen extends Component
         HasGameReference<TankWarGame>,
         KeyboardHandler,
         DoubleTapCallbacks,
+        DragCallbacks,
         RiverpodComponentMixin {
+  /// 总的移动y轴距离
+  double _totalDeltaY = 0;
+
+  /// 总的移动x轴距离
+  double _totalDeltaX = 0;
+
   /// 间隔值
   final double _spacer = 2.0;
 
@@ -36,20 +44,26 @@ class StageScreen extends Component
   FutureOr<void> onLoad() async {
     await super.onLoad();
     add(
-      _stageLevelComponent = PositionComponent(
+      ButtonComponent(
         position: game.size / 2,
-        children: [
-          _stageSpriteComponent = SpriteComponent(
-            sprite: Sprite(
-              assetImage,
-              srcSize: Vector2(78, 13),
-              srcPosition: Vector2(396, 96),
+        button: _stageLevelComponent = PositionComponent(
+          children: [
+            _stageSpriteComponent = SpriteComponent(
+              sprite: Sprite(
+                assetImage,
+                srcSize: Vector2(78, 13),
+                srcPosition: Vector2(396, 96),
+              ),
+              size: Vector2(78.0, 13),
+              position: Vector2(0, 0),
             ),
-            size: Vector2(78.0, 13),
-          )..position = Vector2(0, 0),
-          _numberSpriteComponent = NumberSpriteComponent(number: 0)
-            ..position = Vector2(78.0 + _spacer, 0),
-        ],
+            _numberSpriteComponent = NumberSpriteComponent(
+              number: 0,
+              position: Vector2(78.0 + _spacer, 0),
+            ),
+          ],
+        ),
+        onPressed: () => _goToMainGameScene(),
       ),
     );
   }
@@ -70,24 +84,41 @@ class StageScreen extends Component
   }
 
   @override
-  void render(Canvas canvas) {
-    // var paint = Paint()
-    //   ..isAntiAlias = true
-    //   ..style = PaintingStyle.fill
-    //   ..color = GameConstants.CANVAS_BG_COLOR;
-    // canvas.drawRect(GameConstants.CANVAS_RECT, paint);
-    // paint.color = Colors.amber;
-    // canvas.drawLine(
-    //   Offset(0, GameConstants.CANVAS_SIZE.y / 2),
-    //   Offset(GameConstants.CANVAS_SIZE.x, GameConstants.CANVAS_SIZE.y / 2),
-    //   paint,
-    // );
-    // canvas.drawLine(
-    //   Offset(GameConstants.CANVAS_SIZE.x / 2, 0),
-    //   Offset(GameConstants.CANVAS_SIZE.x / 2, GameConstants.CANVAS_SIZE.y),
-    //   paint,
-    // );
-    super.render(canvas);
+  void onDragStart(DragStartEvent event) {
+    super.onDragStart(event);
+    _totalDeltaY = 0;
+    _totalDeltaX = 0;
+  }
+
+  @override
+  void onDragUpdate(DragUpdateEvent event) {
+    super.onDragUpdate(event);
+    _totalDeltaY += event.localDelta.y;
+    _totalDeltaX += event.localDelta.x;
+  }
+
+  @override
+  void onDragEnd(DragEndEvent event) {
+    super.onDragEnd(event);
+    const threshold = 50.0; // 滑动阈值，按需调整
+    // 判断是否是上下滑动：垂直位移大于阈值，且大于水平位移
+    if (_totalDeltaY.abs() > threshold &&
+        _totalDeltaY.abs() > _totalDeltaX.abs()) {
+      if (_totalDeltaY < 0) {
+        debugPrint('向上滑动'); // 处理向上滑动
+        _decrementStageLevel();
+      } else {
+        debugPrint('向下滑动'); // 处理向下滑动
+        _incrementStageLevel();
+      }
+    }
+  }
+
+  @override
+  void onDragCancel(DragCancelEvent event) {
+    _totalDeltaX = 0.0;
+    _totalDeltaY = 0.0;
+    super.onDragCancel(event);
   }
 
   @override
@@ -100,21 +131,31 @@ class StageScreen extends Component
         LogicalKeyboardKey.arrowUp,
         LogicalKeyboardKey.keyJ,
       }.contains(key)) {
-        var stageLevel = globalConfigInfo.stageLevel - 1;
-        globalConfig.stageLevel = stageLevel >= 1
-            ? stageLevel
-            : MapStageLevel.maps.length;
+        _incrementStageLevel();
       } else if ({
         LogicalKeyboardKey.arrowDown,
         LogicalKeyboardKey.keyK,
       }.contains(key)) {
-        var stageLevel = globalConfigInfo.stageLevel + 1;
-        globalConfig.stageLevel = stageLevel > MapStageLevel.maps.length
-            ? 1
-            : stageLevel;
+        _decrementStageLevel();
       }
     }
     return super.onKeyEvent(event, keysPressed);
+  }
+
+  /// 减少关卡数设置
+  void _decrementStageLevel() {
+    var stageLevel = globalConfigInfo.stageLevel - 1;
+    globalConfig.stageLevel = stageLevel >= 1
+        ? stageLevel
+        : MapStageLevel.maps.length;
+  }
+
+  /// 增加关卡数设置
+  void _incrementStageLevel() {
+    var stageLevel = globalConfigInfo.stageLevel + 1;
+    globalConfig.stageLevel = stageLevel > MapStageLevel.maps.length
+        ? 1
+        : stageLevel;
   }
 
   /// 设置关卡数
