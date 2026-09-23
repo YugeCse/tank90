@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 
 import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +6,7 @@ import 'package:tank90/app/notifier/enemy_increment_notifier.dart';
 import 'package:tank90/component/base/boss_wall_state.dart';
 import 'package:tank90/component/base/bullet_type.dart';
 import 'package:tank90/component/base/capability.dart';
+import 'package:tank90/component/base/capability_controller.dart';
 import 'package:tank90/component/base/direction.dart';
 import 'package:tank90/component/base/hitbox_mixin.dart';
 import 'package:tank90/component/base/map_cell_type.dart';
@@ -65,8 +65,8 @@ abstract class BaseTankComponent extends SpriteComponent
   /// 防爆次数
   int explosionProofCount;
 
-  /// 拥有的能力对象集合
-  Map<Type, Capability> capabilities = <Type, Capability>{};
+  /// 拥有的能力控制器
+  CapabilityController capabilityController;
 
   /// 碰撞对象集合, 方便计算碰撞数据
   final Set<Component> _collisionObjects = <Component>{};
@@ -76,6 +76,10 @@ abstract class BaseTankComponent extends SpriteComponent
 
   /// 是否是处理被保护状态
   bool get isProtectedState => _tankProtectComponent != null;
+
+  /// 获取所有能力集合
+  Map<Type, Capability> get capabilities =>
+      capabilityController.allCapabilities;
 
   /// 构造方法
   BaseTankComponent({
@@ -92,8 +96,10 @@ abstract class BaseTankComponent extends SpriteComponent
            facingDirection ??
            (type == TankType.player ? Direction.up : Direction.random()),
        explosionProofCount = type.explosionProofCount,
+       capabilityController = CapabilityController(
+         capabilities: Map.from(capabilities ?? {}),
+       ),
        super(size: type.srcSize, anchor: Anchor.center, priority: 600) {
-    this.capabilities = Map.from(capabilities ?? {});
     updateSprite(type); //更新当前显示的精灵图片
     setFacingDirection(this.facingDirection); //设置当前的朝向数据
   }
@@ -107,7 +113,9 @@ abstract class BaseTankComponent extends SpriteComponent
         collisionType: CollisionType.inactive,
       ),
     );
-    if (capabilities[ProtectedCapability] != null) showProtectEffect(); //显示保护状态
+    if (capabilityController.hasProtectedCapapbility) {
+      showProtectEffect(); //显示保护状态
+    }
   }
 
   @override
@@ -123,7 +131,7 @@ abstract class BaseTankComponent extends SpriteComponent
 
   @override
   void render(Canvas canvas) {
-    if (capabilities[FerryCapability] != null) {
+    if (capabilityController.hasFerryCapability) {
       var paint = Paint()
         ..isAntiAlias = true
         ..style = .stroke
@@ -143,13 +151,15 @@ abstract class BaseTankComponent extends SpriteComponent
     super.update(dt);
     // 非正在出生的状态，才能执行下面的逻辑
     if (!isBornState) {
-      if (!capabilities.containsKey(SleepCapability)) {
+      if (!capabilityController.hasSleepCapability) {
         position += velocity * speed * dt;
       } else {
-        var capability = capabilities[SleepCapability] as SleepCapability;
+        var capability =
+            capabilityController.getCapability(SleepCapability)
+                as SleepCapability;
         capability.sleepTimeSec -= dt;
         if (capability.sleepTimeSec <= 0.0) {
-          capabilities.remove(SleepCapability); //移除这个能力
+          capabilityController.removeCapability(SleepCapability); //移除这个能力
         }
       }
     }
@@ -211,8 +221,10 @@ abstract class BaseTankComponent extends SpriteComponent
     }
   }
 
+  /// 在碰撞发生前调整坐标数据
   void onAdjustPositionStartBeforeCollision() {}
 
+  /// 在碰撞发生后调整坐标数据
   void onAdjustPositionEndedAfterCollision() {}
 
   @override
@@ -228,7 +240,7 @@ abstract class BaseTankComponent extends SpriteComponent
                   MapCellType.ice,
                   MapCellType.rive,
                 ].contains(other.type)) ||
-                (capabilities[FerryCapability] == null &&
+                (!capabilityController.hasFerryCapability &&
                     other.type == MapCellType.rive)))) {
       _collisionObjects.add(other);
     }
@@ -330,28 +342,15 @@ abstract class BaseTankComponent extends SpriteComponent
         BoomAllNotifier(type: type, ownerType: this.type),
       );
     } else if (type is StarPropType) {
-      if (capabilities.containsKey(StrongFireCapability)) {
-        var capability =
-            capabilities[StrongFireCapability] as StrongFireCapability;
-        // 火力等级最多按 4 颗星处理，3 颗及以上都显示 large 炮嘴；4颗星能够烧毁草场地块
-        var level = min(capability.fireLevel + 1, 4);
-        capability.fireLevel = level;
-        capabilities[StrongFireCapability] = capability;
-      } else {
-        // 第一颗星对应 longer 炮嘴。
-        capabilities[StrongFireCapability] = StrongFireCapability(fireLevel: 1);
-      }
+      // 火力等级最多按 4 颗星处理，3 颗及以上都显示 large 炮嘴；4颗星能够烧毁草场地块
+      capabilityController.putCapability(StrongFireCapability());
     } else if (type is HatProtectPropType) {
-      capabilities[ProtectedCapability] = ProtectedCapability();
       showProtectEffect(); //如果没有保护效果的，则添加保护效果
+      capabilityController.putCapability(ProtectedCapability());
     } else if (type is GunPropType) {
-      var capability =
-          capabilities[StrongFireCapability] as StrongFireCapability?;
-      capabilities[StrongFireCapability] = StrongFireCapability(
-        fireLevel: capability == null ? 3 : 4,
-      );
+      capabilityController.putCapability(StrongFireCapability(fireLevel: 3));
     } else if (type is ShipPropType) {
-      capabilities[FerryCapability] = FerryCapability(); //设置获取轮渡能力
+      capabilityController.putCapability(FerryCapability()); //设置获取轮渡能力
     }
     if (!isTankPropType) AudioUtils().playGetProp();
   }
@@ -366,18 +365,13 @@ abstract class BaseTankComponent extends SpriteComponent
       if (this is PlayerTankComponent) {
         AudioUtils().playAttack(); //播放玩家射击的声音
       }
-      var canFireGrass =
-          ((capabilities[StrongFireCapability] as StrongFireCapability?)
-                  ?.fireLevel ??
-              0) >=
-          4;
       findWarMapComponent()?.add(
         BulletComponent.create(
           ownerType: type,
           type: getAttackBulletType(),
-          fireGrass: canFireGrass,
           velocity: facingDirection,
           position: position + facingDirection * size.x / 3,
+          fireGrass: capabilityController.powerFireLevel >= 4,
         ),
       );
       if (onFinished != null) onFinished();

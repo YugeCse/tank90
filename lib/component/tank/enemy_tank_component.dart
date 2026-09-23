@@ -56,7 +56,7 @@ class EnemyTankComponent extends BaseTankComponent {
         _isRedFlickerState = false;
         _removeRedFlickerEffect(); //移除红色闪烁效果
       }
-      if (capabilities.containsKey(SleepCapability)) {
+      if (capabilityController.hasSleepCapability) {
         _removeAutoMoveTimer();
         _removeRandomFireTime();
       } else {
@@ -90,6 +90,11 @@ class EnemyTankComponent extends BaseTankComponent {
 
   @override
   void attacked() {
+    if (capabilityController.hasProtectedCapapbility) return;
+    if (capabilityController.hasFerryCapability) {
+      capabilityController.removeCapability(FerryCapability);
+      return;
+    }
     if (redFlickerCounter <= 0) {
       super.attacked();
     } else {
@@ -113,9 +118,7 @@ class EnemyTankComponent extends BaseTankComponent {
 
   @override
   BulletType getAttackBulletType() {
-    var strongFireCability =
-        capabilities[StrongFireCapability] as StrongFireCapability?;
-    var strongFireLevel = (strongFireCability?.fireLevel ?? 0);
+    var strongFireLevel = capabilityController.powerFireLevel;
     if (strongFireLevel > 0) {
       if ([TankType.enemy2, TankType.enemy3, TankType.enemy4].contains(type) ||
           TankType.enemy0 == type ||

@@ -50,26 +50,20 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
 
   /// 根据当前火力等级获取炮嘴类型。
   TankCannonType get cannonType {
-    final capability = capabilities[StrongFireCapability];
-    if (capability is! StrongFireCapability) {
-      return TankCannonType.normal;
-    }
-    switch (capability.fireLevel) {
+    var fireLevel = capabilityController.powerFireLevel;
+    switch (fireLevel) {
       case 1:
         return TankCannonType.longer;
       case 2:
         return TankCannonType.thicker;
       default:
-        return capability.fireLevel >= 3
-            ? TankCannonType.larger
-            : TankCannonType.normal;
+        return fireLevel >= 3 ? TankCannonType.larger : TankCannonType.normal;
     }
   }
 
   @override
   Vector2 getSrcPosition(Vector2 facingDir) {
     if (cannonType != TankCannonType.normal) {
-      debugPrint('-----> facingDir $facingDir');
       return type.getSrcPositionByCannonType(
         type: cannonType,
         facingDirection: facingDir,
@@ -80,14 +74,16 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
 
   @override
   void attacked() {
+    if (capabilityController.hasProtectedCapapbility) return;
+    if (capabilityController.hasFerryCapability) {
+      capabilityController.removeCapability(FerryCapability);
+      return;
+    }
     // 没有被保护能力且是最大火力炮嘴类型时，能承受1次攻击
-    if (capabilities[ProtectedCapability] == null &&
-        cannonType == TankCannonType.larger) {
-      var capability = capabilities[StrongFireCapability];
-      if (capability != null) {
-        capability = (capability as StrongFireCapability);
-        capability.fireLevel = 2;
-        capabilities[StrongFireCapability] = capability;
+    if (cannonType == TankCannonType.larger) {
+      if (capabilityController.hasProwerFireCapability &&
+          capabilityController.powerFireLevel >= 3) {
+        capabilityController.putCapability(StrongFireCapability(fireLevel: 2));
         return;
       }
     }
@@ -109,11 +105,7 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
   @override
   void fetchProp(PropType type) {
     super.fetchProp(type);
-    if (_fireSpanTime > 0.3 &&
-        ((capabilities[StrongFireCapability] as StrongFireCapability?)
-                    ?.fireLevel ??
-                0) >=
-            1) {
+    if (_fireSpanTime > 0.3 && capabilityController.powerFireLevel >= 1) {
       _fireSpanTime = 0.3; //如果已经获得了火力加持，直接减少发射炮弹的间隔时间
     }
   }
@@ -146,7 +138,7 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
         attack(); //执行开火
       }
     }
-    if (capabilities.containsKey(SleepCapability)) return;
+    if (capabilityController.hasSleepCapability) return;
     // 处理方向 - 使用标志位
     bool hasDirection = false;
     if (_pressedKeys.contains(LogicalKeyboardKey.keyW)) {
