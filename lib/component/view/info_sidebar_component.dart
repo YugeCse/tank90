@@ -41,7 +41,7 @@ class InfoSidebarComponent extends PositionComponent
             sprite: Sprite(
               assetImage,
               srcSize: Vector2(30, 31),
-              srcPosition: Vector2(61, 112),
+              srcPosition: Vector2(60, 114),
             ),
             size: Vector2(30, 31),
           ),

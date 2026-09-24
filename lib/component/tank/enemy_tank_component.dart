@@ -156,13 +156,8 @@ class EnemyTankComponent extends BaseTankComponent {
     add(
       _redFlickerEffect ??= CombinedEffect(
         [
-          ColorEffect(
-            Colors.red,
-            EffectController(duration: 1.0, alternate: true),
-          ),
-          OpacityEffect.fadeOut(
-            EffectController(duration: 1.0, alternate: true),
-          ),
+          ColorEffect(Colors.red, EffectController(duration: 1.0)),
+          OpacityEffect.to(0.0, EffectController(duration: 1.0)),
         ],
         alternate: true,
         infinite: true,
@@ -172,13 +167,13 @@ class EnemyTankComponent extends BaseTankComponent {
 
   /// 移除红色闪烁特效
   void _removeRedFlickerEffect() {
-    if (_redFlickerEffect != null) {
-      _redFlickerEffect?.removeFromParent();
-      _redFlickerEffect = null;
+    if (_redFlickerEffect == null) return;
+    if (_redFlickerEffect?.isPaused != true) {
+      _redFlickerEffect?.pause(); //设置 0.0后暂停
     }
-    // 手动恢复初始状态
-    paint.color = Colors.white;
-    sprite?.paint.color = Colors.white;
+    _redFlickerEffect?.reset();
+    _redFlickerEffect?.removeFromParent();
+    _redFlickerEffect = null;
   }
 
   /// 启动随机开火的定时器
