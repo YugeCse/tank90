@@ -12,6 +12,7 @@ import 'package:tank90/app/app_router.dart';
 import 'package:tank90/app/provider/global_config.dart';
 import 'package:tank90/component/view/number_sprite_component.dart';
 import 'package:tank90/data/game_constants.dart';
+import 'package:tank90/data/game_properties.dart';
 import 'package:tank90/data/map_stage_level.dart';
 import 'package:tank90/app/tank_war_game.dart';
 import 'package:tank90/utils/res_img_utils.dart';
@@ -163,10 +164,12 @@ class StageScreen extends Component
   @override
   void onDoubleTapUp(DoubleTapEvent event) {
     super.onDoubleTapUp(event);
-    game.router.pushReplacementNamed(AppRouter.ROUTE_MAIN);
+    _goToMainGameScene(); //进入游戏主界面
   }
 
   /// 跳转到主界面
-  void _goToMainGameScene() =>
-      game.router.pushReplacementNamed(AppRouter.ROUTE_MAIN);
+  void _goToMainGameScene() {
+    game.router.pushReplacementNamed(AppRouter.ROUTE_MAIN);
+    ref.read(globalConfigProvider.notifier).gameState = GameState.playing;
+  }
 }

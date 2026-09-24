@@ -29,6 +29,9 @@ class EnemyTankComponent extends BaseTankComponent {
   /// 红色闪烁组件
   CombinedEffect? _redFlickerEffect;
 
+  /// 红色闪烁组件组
+  List<Effect>? _redFlickerEffects;
+
   /// 随机数计算对象
   final Random _random = Random();
 
@@ -131,13 +134,22 @@ class EnemyTankComponent extends BaseTankComponent {
     return super.getAttackBulletType();
   }
 
+  /// 获得随机的时间秒数
+  double get _randMoveTimerSec => _random.nextDoubleBetween(0.5, 1.5);
+
   /// 启动自动移动的定时器
-  void _startAutoMoveTimer() {
+  void _startAutoMoveTimer({double? randomTimeSec}) {
     add(
       _moveTimer ??= TimerComponent(
-        period: 2.0,
-        repeat: true,
-        onTick: () => setFacingDirection(Direction.random()),
+        period: randomTimeSec ?? _randMoveTimerSec,
+        repeat: false,
+        removeOnFinish: true,
+        onTick: () {
+          if (capabilityController.hasSleepCapability) return;
+          _removeAutoMoveTimer();
+          setFacingDirection(Direction.random());
+          _startAutoMoveTimer(randomTimeSec: _randMoveTimerSec);
+        },
       ),
     );
   }
@@ -153,31 +165,39 @@ class EnemyTankComponent extends BaseTankComponent {
   /// 显示红坦克特效
   void _showRedFlickerEffect() {
     if (_redFlickerEffect != null) return;
-    add(
-      _redFlickerEffect ??= CombinedEffect(
-        [
-          ColorEffect(Colors.red, EffectController(duration: 1.0)),
-          OpacityEffect.to(0.0, EffectController(duration: 1.0)),
-        ],
-        alternate: true,
-        infinite: true,
+    var es = [
+      ColorEffect(
+        Colors.red.withAlpha(200),
+        EffectController(duration: 1.0, reverseDuration: 1.0, infinite: true),
       ),
-    );
+      OpacityEffect.fadeOut(EffectController(duration: 1.0, infinite: true)),
+    ];
+    _redFlickerEffects = es;
+    add(_redFlickerEffect ??= CombinedEffect(es));
   }
 
   /// 移除红色闪烁特效
   void _removeRedFlickerEffect() {
     if (_redFlickerEffect == null) return;
     if (_redFlickerEffect?.isPaused != true) {
-      _redFlickerEffect?.pause(); //设置 0.0后暂停
+      _redFlickerEffect?.pause();
     }
     _redFlickerEffect?.reset();
     _redFlickerEffect?.removeFromParent();
+    if (_redFlickerEffects?.isNotEmpty == true) {
+      _redFlickerEffects?.forEach((e) {
+        e.reset();
+        if (!e.isPaused) e.pause();
+      });
+    }
     _redFlickerEffect = null;
+    _redFlickerEffects = null;
+    opacity = 1.0;
+    paint.colorFilter = null;
   }
 
   /// 启动随机开火的定时器
-  void _startRandomFireTimer() {
+  void _startRandomFireTimer({double? randTimeSec}) {
     add(
       _fireTimer ??= TimerComponent(
         onTick: () => fire(
@@ -187,7 +207,7 @@ class EnemyTankComponent extends BaseTankComponent {
           },
         ),
         removeOnFinish: true,
-        period: _random.nextDouble() * 3 + 1,
+        period: randTimeSec ?? _random.nextDouble() * 3 + 0.3,
       ),
     );
   }
@@ -300,6 +320,7 @@ class EnemyTankFactory extends PositionComponent
             : 0;
         var newTank = generate(position, redFlickerCount: redFlickerCount);
         game.warMapComponent?.add(newTank);
+        game.mainScene?.removeOneEnemyTag();
         addedTanks.add(newTank); //记录这个新增的坦克
         _generateTankCount++; //生成的坦克数量增加 1 次
         if (globalConfigInfo.enemyCounts > 0) {

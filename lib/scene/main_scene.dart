@@ -101,29 +101,24 @@ class MainScene extends Component
   @override
   void onMount() {
     addToGameWidgetBuild(() {
-      Future.microtask(() {
-        ref.read(globalConfigProvider.notifier).gameState = GameState.playing;
-      });
+      var nowStage = globalConfigInfo.stageLevel;
+      add(
+        mapComponent ??= WarMapComponent(
+          position: Vector2.zero(),
+          stage: nowStage.clamp(1, MapStageLevel().stageCount),
+        ),
+      );
+      mapComponent?.add(
+        _propFactoryComponent ??= PropFactoryComponent(),
+      ); //添加装备道具工厂组件
+      add(
+        _infoSidebarComponent ??= InfoSidebarComponent(
+          position: Vector2(GameConstants.MAP_SIZE.x, 0),
+        ),
+      );
+      mapComponent?.add(EnemyTankFactory()); //添加敌方坦克工厂组件
     });
     super.onMount();
-    var curStage = (globalConfigInfo.stageLevel).clamp(
-      1,
-      MapStageLevel().stageCount,
-    );
-    add(
-      mapComponent ??= WarMapComponent(
-        stage: curStage,
-        position: Vector2.zero(),
-      ),
-    );
-    mapComponent?.add(
-      _propFactoryComponent = PropFactoryComponent(),
-    ); //添加装备道具工厂组件
-    mapComponent?.add(EnemyTankFactory()); //添加敌方坦克工厂组件
-    add(
-      _infoSidebarComponent = InfoSidebarComponent()
-        ..position = Vector2(GameConstants.MAP_SIZE.x, 0),
-    );
   }
 
   /// 接受消息事件
@@ -140,7 +135,6 @@ class MainScene extends Component
           showGameOver(); //显示游戏结束的界面
         }
       } else {
-        _infoSidebarComponent?.removeOneEnemySprite();
         var statisticsInfo = ScoreStatisticsInfo(
           type: event.type,
           score: event.type.score,
@@ -193,7 +187,6 @@ class MainScene extends Component
       if (allEnemies == null) return;
       for (var enemy in allEnemies) {
         enemy.boomAndDestroy(); //调用爆炸的方法
-        _infoSidebarComponent?.removeOneEnemySprite(); //爆炸一个，删除一个记录
       }
     }
   }
@@ -239,6 +232,9 @@ class MainScene extends Component
     );
     add(_gameOverComponent ??= GameOverComponent()); //显示游戏结束的界面
   }
+
+  /// 移除一个地方精灵标记
+  void removeOneEnemyTag() => _infoSidebarComponent?.removeOneEnemySprite();
 }
 
 /// 主场景混淆类

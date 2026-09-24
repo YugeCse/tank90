@@ -386,7 +386,7 @@ abstract class BaseTankComponent extends SpriteComponent
       if (doubleFireAvailable) {
         add(
           TimerComponent(
-            period: 0.2, //第二个延迟0.2s
+            period: 0.02, //第二个延迟0.02s
             removeOnFinish: true,
             onTick: () => openFire(isSecond: true),
           ),

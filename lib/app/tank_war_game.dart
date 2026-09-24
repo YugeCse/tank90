@@ -11,6 +11,7 @@ import 'package:tank90/component/tank/base_tank_component.dart';
 import 'package:tank90/component/tank/enemy_tank_component.dart';
 import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/scene/main_scene.dart';
+import 'package:tank90/utils/res_img_utils.dart';
 
 /// 游戏主场景
 class TankWarGame extends FlameGame
@@ -31,10 +32,10 @@ class TankWarGame extends FlameGame
 
   @override
   FutureOr<void> load() async {
-    await images.load('tankAll.png');
+    await preloadImages();
     world.add(
       router = RouterComponent(
-        initialRoute: AppRouter.INIT_ROUTE,
+        initialRoute: AppRouter.ROUTE_WELCOME,
         routes: AppRouter.buildRouteConfigs(
           requestRouterPop: () => router.pop(),
         ),
