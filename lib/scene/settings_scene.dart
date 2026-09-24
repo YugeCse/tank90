@@ -6,96 +6,116 @@ import 'package:flame_riverpod/flame_riverpod.dart';
 import 'package:flutter/material.dart' hide OverlayRoute;
 import 'package:tank90/app/provider/global_config.dart';
 import 'package:tank90/app/tank_war_game.dart';
+import 'package:tank90/component/view/game_level_radio_component.dart';
 import 'package:tank90/data/game_constants.dart';
 import 'package:tank90/data/game_properties.dart';
+import 'package:tank90/utils/res_img_utils.dart';
 
 /// 设置弹窗界面
 class SettingsScene extends PositionComponent
     with RiverpodComponentMixin, HasGameReference<TankWarGame> {
-  late final Sprite _musicOpenSprite;
-  late final Sprite _musicCloseSprite;
+  late final List<Sprite> _checkSprites;
   late final SpriteComponent? _musicStatusSprite;
-  late final List<Sprite> _gameLevelSprites;
-  late final SpriteComponent _gameLevelSprite;
+  late final Map<GameLevel, GameLevelRadioComponent> _gameLevelComponents = {};
 
-  @override
-  FutureOr<void> onLoad() async {
-    await super.onLoad();
-    _musicCloseSprite = await Sprite.load('music_close.png');
-    _musicOpenSprite = await Sprite.load('music_open.png');
-    _gameLevelSprites = [
-      await Sprite.load('game_easy.png'),
-      await Sprite.load('game_normal.png'),
-      await Sprite.load('game_difficult.png'),
+  /// 加载组件集合
+  FutureOr<void> _loadComponents() async {
+    _checkSprites = [
+      Sprite(
+        uiDesignImage,
+        srcSize: Vector2.all(16),
+        srcPosition: Vector2(96, 0),
+      ),
+      Sprite(
+        uiDesignImage,
+        srcSize: Vector2.all(16),
+        srcPosition: Vector2(96, 16),
+      ),
     ];
     var offsetX = (GameConstants.CANVAS_SIZE.x - 300.0) / 2.0;
     var offsetY = (GameConstants.CANVAS_SIZE.y - 200.0) / 2.0;
     var offsetMx = GameConstants.CANVAS_SIZE.x - offsetX;
     var offsetMy = GameConstants.CANVAS_SIZE.y - offsetY;
-    var circlePaint = Paint()
-      ..isAntiAlias = true
-      ..style = .fill
-      ..color = Colors.transparent;
     add(
+      // 游戏设置
       SpriteComponent(
-        sprite: await Sprite.load('game_settings.png'),
+        sprite: Sprite(
+          uiDesignImage,
+          srcSize: Vector2(56, 16),
+          srcPosition: Vector2.zero(),
+        ),
         position: Vector2(offsetX + 20, offsetY + 15),
       ),
     );
     add(
+      // 声音设置
       SpriteComponent(
-        sprite: await Sprite.load('game_music.png'),
+        sprite: Sprite(
+          uiDesignImage,
+          srcSize: Vector2(56, 16),
+          srcPosition: Vector2(0, 16),
+        ),
         position: Vector2(offsetX + 20, offsetY + 62),
       ),
     );
     add(
+      // 音乐开关选项
       ButtonComponent(
+        button: _musicStatusSprite = SpriteComponent(
+          sprite: _checkSprites.first,
+        ),
         onPressed: _toggleGameMusicStatus,
-        position: Vector2(offsetMx - 48, offsetY + 62),
-        button: _musicStatusSprite = SpriteComponent(sprite: _musicCloseSprite),
+        position: Vector2(offsetMx - 36, offsetY + 62),
       ),
     );
     add(
+      // 游戏难度
       SpriteComponent(
-        sprite: await Sprite.load('game_level.png'),
-        position: Vector2(offsetX + 16, offsetY + 94),
+        sprite: Sprite(
+          uiDesignImage,
+          srcSize: Vector2(56, 16),
+          srcPosition: Vector2(0, 32),
+        ),
+        position: Vector2(offsetX + 20, offsetY + 94),
       ),
     );
-    add(
-      PositionComponent(
-        position: Vector2(offsetMx - 148, offsetY + 94),
-        children: [
-          _gameLevelSprite = SpriteComponent(sprite: _gameLevelSprites.first),
-          ButtonComponent(
-            anchor: .center,
-            size: Vector2.all(12),
-            position: Vector2(35, 16),
-            onPressed: () => _toggleGameLevel(.easy),
-            button: CircleComponent(radius: 6, paint: circlePaint),
-          ),
-          ButtonComponent(
-            anchor: .center,
-            size: Vector2.all(12),
-            position: Vector2(80, 16),
-            onPressed: () => _toggleGameLevel(.normal),
-            button: CircleComponent(radius: 6, paint: circlePaint),
-          ),
-          ButtonComponent(
-            anchor: .center,
-            size: Vector2.all(12),
-            position: Vector2(121, 16),
-            onPressed: () => _toggleGameLevel(.difficulty),
-            button: CircleComponent(radius: 6, paint: circlePaint),
-          ),
-        ],
-      ),
+    _gameLevelComponents[.easy] = GameLevelRadioComponent(
+      level: .easy,
+      position: Vector2(offsetMx - 164, offsetY + 94),
+      onCheckChanged: (value) {
+        if (!value) return;
+        _toggleGameLevel(.easy);
+      },
     );
+    add(_gameLevelComponents[GameLevel.easy]!);
+    _gameLevelComponents[.normal] = GameLevelRadioComponent(
+      level: .normal,
+      position: Vector2(offsetMx - 116, offsetY + 94),
+      onCheckChanged: (value) {
+        if (!value) return;
+        _toggleGameLevel(.normal);
+      },
+    );
+    add(_gameLevelComponents[GameLevel.normal]!);
+    _gameLevelComponents[.difficulty] = GameLevelRadioComponent(
+      level: .difficulty,
+      position: Vector2(offsetMx - 68, offsetY + 94),
+      onCheckChanged: (value) {
+        if (!value) return;
+        _toggleGameLevel(.difficulty);
+      },
+    );
+    add(_gameLevelComponents[GameLevel.difficulty]!);
     add(
       ButtonComponent(
         anchor: .center,
         onPressed: _closeDialog,
         button: SpriteComponent(
-          sprite: await Sprite.load('game_settings_close.png'),
+          sprite: Sprite(
+            uiDesignImage,
+            srcSize: Vector2(44, 23),
+            srcPosition: Vector2(50, 64),
+          ),
         ),
         position: Vector2(GameConstants.CANVAS_SIZE.x / 2.0, offsetMy - 32),
       ),
@@ -104,6 +124,7 @@ class SettingsScene extends PositionComponent
 
   @override
   void onMount() {
+    _loadComponents(); //加载组件合集
     addToGameWidgetBuild(() {
       var globalConfig = ref.read(globalConfigProvider);
       _setGameLevelSprite(globalConfig.gameLevel);
@@ -125,8 +146,8 @@ class SettingsScene extends PositionComponent
   /// 设置音乐开关的sprite
   void _setGameMusicStatusSprite(bool isAvailable) {
     _musicStatusSprite?.sprite = isAvailable
-        ? _musicCloseSprite
-        : _musicOpenSprite;
+        ? _checkSprites.last
+        : _checkSprites.first;
   }
 
   /// 切换游戏声音状态
@@ -138,13 +159,14 @@ class SettingsScene extends PositionComponent
 
   /// 设置游戏等级的sprite
   void _setGameLevelSprite(GameLevel target) {
-    _gameLevelSprite.sprite = (target == .easy
-        ? _gameLevelSprites.first
-        : (target == .normal ? _gameLevelSprites[1] : _gameLevelSprites.last));
+    for (var key in _gameLevelComponents.keys) {
+      _gameLevelComponents[key]?.isChecked = key == target;
+    }
   }
 
   /// 切换游戏等级设置
   void _toggleGameLevel(GameLevel target) {
+    if (!isMounted) return;
     debugPrint('current target: $target');
     ref.read(globalConfigProvider.notifier).gameLevel = target;
   }

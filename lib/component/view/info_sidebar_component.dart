@@ -22,6 +22,9 @@ class InfoSidebarComponent extends PositionComponent
   /// 玩家生命数显示组件
   late final NumberSpriteComponent _playerLifesComponent;
 
+  /// 构造函数
+  InfoSidebarComponent({super.position});
+
   @override
   FutureOr<void> onLoad() async {
     size = Vector2(_infoBoardWidth, GameConstants.CANVAS_SIZE.y);
@@ -77,7 +80,7 @@ class InfoSidebarComponent extends PositionComponent
   @override
   void render(Canvas canvas) {
     canvas.drawRect(
-      Rect.fromLTWH(0, 0, _infoBoardWidth, GameConstants.CANVAS_SIZE.y),
+      .fromLTWH(0, 0, _infoBoardWidth, GameConstants.CANVAS_SIZE.y),
       Paint()
         ..isAntiAlias = true
         ..style = PaintingStyle.fill
