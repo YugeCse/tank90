@@ -13,7 +13,7 @@ class AppRouter {
   AppRouter._();
 
   /// 初始界面
-  static const INIT_ROUTE = ROUTE_TEST;
+  static const INIT_ROUTE = ROUTE_WELCOME;
 
   /// 测试路由
   static const ROUTE_TEST = 'Test';

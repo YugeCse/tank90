@@ -16,8 +16,8 @@ import 'package:flame/components.dart';
 /// 战场地图组件
 class WarMapComponent extends PositionComponent
     with HasGameReference<TankWarGame> {
-  /// 关卡数, 从0开始
-  int stage = 0;
+  /// 关卡数, 从1开始
+  int stage = 1;
 
   /// boss 表格坐标
   Vector2? _bossGridPosition;

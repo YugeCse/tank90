@@ -106,9 +106,9 @@ class MainScene extends Component
       });
     });
     super.onMount();
-    var curStage = (globalConfigInfo.stageLevel - 1).clamp(
-      0,
-      MapStageLevel().stageCount - 1,
+    var curStage = (globalConfigInfo.stageLevel).clamp(
+      1,
+      MapStageLevel().stageCount,
     );
     add(
       mapComponent ??= WarMapComponent(
