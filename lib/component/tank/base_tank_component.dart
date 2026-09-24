@@ -359,9 +359,14 @@ abstract class BaseTankComponent extends SpriteComponent
   BulletType getAttackBulletType() => BulletType.normal;
 
   /// 开炮/攻击
-  /// + [onFinished] - 开火完成的事件
-  void attack({void Function()? onFinished}) {
-    if (facingDirection != Vector2.zero()) {
+  /// + [onFireFinished] - 开火完成的事件
+  /// + [doubleFireAvailable] - 双倍火力是否可用，如果开启且本身支持才行
+  void fire({
+    bool doubleFireAvailable = false,
+    void Function()? onFireFinished,
+  }) {
+    /// 开火，添加子弹精灵
+    void openFire({bool isSecond = false}) {
       if (this is PlayerTankComponent) {
         AudioUtils().playAttack(); //播放玩家射击的声音
       }
@@ -374,7 +379,20 @@ abstract class BaseTankComponent extends SpriteComponent
           fireGrass: capabilityController.powerFireLevel >= 4,
         ),
       );
-      if (onFinished != null) onFinished();
+    }
+
+    if (facingDirection != Vector2.zero()) {
+      openFire(isSecond: false);
+      if (doubleFireAvailable) {
+        add(
+          TimerComponent(
+            period: 0.2, //第二个延迟0.2s
+            removeOnFinish: true,
+            onTick: () => openFire(isSecond: true),
+          ),
+        );
+      }
+      if (onFireFinished != null) onFireFinished();
     }
   }
 

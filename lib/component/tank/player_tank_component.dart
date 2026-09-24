@@ -135,7 +135,15 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
       var diffTimeSec = curTimeSec - _lastFireTime;
       if (diffTimeSec > _fireSpanTime) {
         _lastFireTime = curTimeSec;
-        attack(); //执行开火
+        fire(doubleFireAvailable: false); //执行开火
+      }
+    } else if (_pressedKeys.contains(LogicalKeyboardKey.keyK)) {
+      var curTimeSec = DateTime.now().millisecondsSinceEpoch / 1000;
+      var diffTimeSec = curTimeSec - _lastFireTime;
+      if (diffTimeSec > _fireSpanTime) {
+        _lastFireTime = curTimeSec;
+        var powerFireLevel = capabilityController.powerFireLevel;
+        fire(doubleFireAvailable: powerFireLevel >= 2); //执行开火
       }
     }
     if (capabilityController.hasSleepCapability) return;

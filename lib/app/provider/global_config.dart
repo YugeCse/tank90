@@ -75,7 +75,7 @@ class GlobalConfig extends _$GlobalConfig {
   /// 切换到下一关卡
   bool switchToNextStageLevel() {
     var level = stageLevel;
-    if (level >= MapStageLevel.maps.length) {
+    if (level >= MapStageLevel().stageCount) {
       return false;
     }
     stageLevel = level + 1;
