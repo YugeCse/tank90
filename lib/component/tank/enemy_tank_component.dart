@@ -185,8 +185,8 @@ class EnemyTankComponent extends BaseTankComponent {
   void _startRandomFireTimer() {
     add(
       _fireTimer ??= TimerComponent(
-        onTick: () => attack(
-          onFinished: () {
+        onTick: () => fire(
+          onFireFinished: () {
             _fireTimer = null;
             _startRandomFireTimer();
           },

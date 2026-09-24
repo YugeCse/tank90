@@ -64,7 +64,7 @@ class WarMapComponent extends PositionComponent
 
   /// 生成战争地图
   Future<void> generateWarMap() async {
-    mapCellDatas = MapStageLevel.maps[stage];
+    mapCellDatas = await MapStageLevel().loadMap(stage);
     // 初始化 mapCells 为相同的行列结构，方便按行列索引瓦片组件
     mapCells = List.generate(
       mapCellDatas!.length,

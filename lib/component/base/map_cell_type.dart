@@ -1,6 +1,7 @@
 import 'package:flame/image_composition.dart' show Vector2;
 
 /// 地图地形类型
+/// 取值：1：水泥墙 2：铁墙 3：草 4：水 5：冰 9：家
 enum MapCellType {
   /// 草场
   grass(3, 32, 96.0),

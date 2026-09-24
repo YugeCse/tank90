@@ -144,13 +144,13 @@ class StageScreen extends Component
     var stageLevel = globalConfigInfo.stageLevel - 1;
     globalConfig.stageLevel = stageLevel >= 1
         ? stageLevel
-        : MapStageLevel.maps.length;
+        : MapStageLevel().stageCount;
   }
 
   /// 增加关卡数设置
   void _incrementStageLevel() {
     var stageLevel = globalConfigInfo.stageLevel + 1;
-    globalConfig.stageLevel = stageLevel > MapStageLevel.maps.length
+    globalConfig.stageLevel = stageLevel > MapStageLevel().stageCount
         ? 1
         : stageLevel;
   }

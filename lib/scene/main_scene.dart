@@ -81,7 +81,7 @@ class MainScene extends Component
           margin: EdgeInsets.only(bottom: 120, right: 120),
           children: [
             joystickFire = JoystickFireComponent(
-              onFireTap: () => playerTank?.attack(),
+              onFireTap: () => playerTank?.fire(),
             ),
           ],
         ),
@@ -108,7 +108,7 @@ class MainScene extends Component
     super.onMount();
     var curStage = (globalConfigInfo.stageLevel - 1).clamp(
       0,
-      MapStageLevel.maps.length - 1,
+      MapStageLevel().stageCount - 1,
     );
     add(
       mapComponent ??= WarMapComponent(
