@@ -4,7 +4,6 @@ import 'package:tank90/component/base/capability.dart';
 import 'package:tank90/component/base/direction.dart' show Direction;
 import 'package:tank90/component/base/prop_type.dart';
 import 'package:tank90/component/base/tank_cannon_type.dart';
-import 'package:tank90/component/base/tank_type.dart' show TankType;
 import 'package:tank90/data/game_constants.dart' show GameConstants;
 import 'package:flame/components.dart'
     show KeyboardHandler, JoystickDirection, Vector2;

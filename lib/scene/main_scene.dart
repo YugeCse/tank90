@@ -102,22 +102,18 @@ class MainScene extends Component
   void onMount() {
     addToGameWidgetBuild(() {
       var nowStage = globalConfigInfo.stageLevel;
-      add(
-        mapComponent ??=
-            WarMapComponent(
-                position: Vector2.zero(),
-                stage: nowStage.clamp(1, MapStageLevel().stageCount),
-              )
-              ..add(EnemyTankFactory())
-              ..add(_propFactoryComponent ??= PropFactoryComponent()),
-      );
-      add(
-        _infoSidebarComponent ??= InfoSidebarComponent(
-          position: Vector2(GameConstants.MAP_SIZE.x, 0),
-        ),
-      );
+      nowStage = nowStage.clamp(1, MapStageLevel().stageCount);
+      mapComponent?.setStage(nowStage); //设置当前关卡数
     });
     super.onMount();
+    add(mapComponent ??= WarMapComponent(position: Vector2.zero()));
+    add(
+      _infoSidebarComponent ??= InfoSidebarComponent(
+        position: Vector2(GameConstants.MAP_SIZE.x, 0),
+      ),
+    );
+    mapComponent?.add(EnemyTankFactory());
+    mapComponent?.add(_propFactoryComponent ??= PropFactoryComponent());
   }
 
   /// 接受消息事件

@@ -16,8 +16,8 @@ import 'package:flame/components.dart';
 /// 战场地图组件
 class WarMapComponent extends PositionComponent
     with HasGameReference<TankWarGame> {
-  /// 关卡数, 从1开始
-  int stage = 1;
+  /// 关卡数
+  int? _stage;
 
   /// boss 表格坐标
   Vector2? _bossGridPosition;
@@ -43,14 +43,22 @@ class WarMapComponent extends PositionComponent
   final List<Vector2> _bossWallCoordinations = [];
 
   /// 构造方法
-  WarMapComponent({required this.stage, super.position});
+  WarMapComponent({int? stage, super.position}) : _stage = stage;
+
+  /// 设置当前关卡
+  void setStage(int stage) async {
+    if (_stage != stage) {
+      _stage = stage;
+      await generateWarMap(_stage!); //生成战争地图数据
+      changeBossWallState(FlickerBossWallState());
+    }
+  }
 
   @override
   Future<void>? onLoad() async {
     size = GameConstants.MAP_SIZE;
     await add(GameCellComponent()); //生成地图基础格子
-    await generateWarMap(); //生成战争地图数据
-    changeBossWallState(FlickerBossWallState());
+    if (_stage != null) setStage(_stage!);
   }
 
   @override
@@ -63,7 +71,7 @@ class WarMapComponent extends PositionComponent
   }
 
   /// 生成战争地图
-  Future<void> generateWarMap() async {
+  Future<void> generateWarMap(int stage) async {
     mapCellDatas = await MapStageLevel().loadMap(stage);
     // 初始化 mapCells 为相同的行列结构，方便按行列索引瓦片组件
     mapCells = List.generate(
