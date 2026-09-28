@@ -42,6 +42,7 @@ class WelcomeScene extends Component
       ),
     );
     add(
+      // 开始游戏
       ButtonComponent(
         anchor: .center,
         button: SpriteComponent(
@@ -51,10 +52,11 @@ class WelcomeScene extends Component
             srcPosition: Vector2(0, 96),
           ),
         ),
+        scale: Vector2.all(2.0),
         onPressed: _changeToStageScene,
         position: Vector2(
           GameConstants.CANVAS_SIZE.x / 2.0,
-          GameConstants.CANVAS_SIZE.y - 64.0,
+          GameConstants.CANVAS_SIZE.y - 54.0,
         ),
       ),
     );
@@ -73,7 +75,7 @@ class WelcomeScene extends Component
       _welcomeComponent?.position = (game.size - _welcomeComponent!.size) / 2.0;
     }
     if (_settingsButtonComponent != null) {
-      _settingsButtonComponent?.position = Vector2(game.size.x - 40.0, 13.0);
+      _settingsButtonComponent?.position = Vector2(game.size.x - 40.0, 16.0);
     }
   }
 
