@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:tank90/app/app_router.dart';
 import 'package:tank90/app/tank_war_game.dart';
 import 'package:tank90/data/game_constants.dart';
+import 'package:tank90/utils/res_img_utils.dart';
 
 /// 还原场景
 class WelcomeScene extends Component
@@ -20,9 +21,6 @@ class WelcomeScene extends Component
   /// 设置按钮组件
   ButtonComponent? _settingsButtonComponent;
 
-  /// 开始按钮组件
-  ButtonComponent? _startButtonComponent;
-
   @override
   FutureOr<void> onLoad() async {
     add(
@@ -33,25 +31,31 @@ class WelcomeScene extends Component
     add(
       _settingsButtonComponent = ButtonComponent(
         anchor: Anchor.topRight,
-        button: TextComponent(
-          text: 'Settings',
-          textRenderer: TextPaint(
-            style: TextStyle(fontSize: 16, color: Colors.white),
+        button: SpriteComponent(
+          sprite: Sprite(
+            uiDesignImage,
+            srcSize: Vector2(48, 16),
+            srcPosition: Vector2(64, 48),
           ),
-        ),
+        )..tint(Colors.white),
         onPressed: _showSettingsScene,
       ),
     );
     add(
-      _startButtonComponent = ButtonComponent(
-        anchor: Anchor.bottomCenter,
-        button: TextComponent(
-          text: 'START GAME',
-          textRenderer: TextPaint(
-            style: TextStyle(fontSize: 28, color: Colors.white),
+      ButtonComponent(
+        anchor: .center,
+        button: SpriteComponent(
+          sprite: Sprite(
+            uiDesignImage,
+            srcSize: Vector2(64, 16),
+            srcPosition: Vector2(0, 96),
           ),
         ),
         onPressed: _changeToStageScene,
+        position: Vector2(
+          GameConstants.CANVAS_SIZE.x / 2.0,
+          GameConstants.CANVAS_SIZE.y - 64.0,
+        ),
       ),
     );
     _adjustComponentPositions(); //调整welcome图标的位置
@@ -67,15 +71,9 @@ class WelcomeScene extends Component
   void _adjustComponentPositions() {
     if (_welcomeComponent != null) {
       _welcomeComponent?.position = (game.size - _welcomeComponent!.size) / 2.0;
-      if (_startButtonComponent != null) {
-        _startButtonComponent?.position = Vector2(
-          game.size.x / 2.0,
-          GameConstants.MAP_SIZE.y - 20.0,
-        );
-      }
     }
     if (_settingsButtonComponent != null) {
-      _settingsButtonComponent?.position = Vector2(game.size.x - 10.0, 10.0);
+      _settingsButtonComponent?.position = Vector2(game.size.x - 40.0, 13.0);
     }
   }
 

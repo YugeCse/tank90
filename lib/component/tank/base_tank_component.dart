@@ -94,12 +94,12 @@ abstract class BaseTankComponent extends SpriteComponent
        velocity = velocity ?? Vector2.zero(),
        facingDirection =
            facingDirection ??
-           (type == TankType.player ? Direction.up : Direction.random()),
+           (type == .player ? Direction.up : Direction.random()),
        explosionProofCount = type.explosionProofCount,
        capabilityController = CapabilityController(
          capabilities: Map.from(capabilities ?? {}),
        ),
-       super(size: type.srcSize, anchor: Anchor.center, priority: 600) {
+       super(size: type.srcSize, anchor: .center, priority: 600) {
     updateSprite(type); //更新当前显示的精灵图片
     setFacingDirection(this.facingDirection); //设置当前的朝向数据
   }
@@ -107,12 +107,7 @@ abstract class BaseTankComponent extends SpriteComponent
   @override
   FutureOr<void> onLoad() {
     opacity = 0; //默认设置透明度为0
-    add(
-      hitbox = RectangleHitbox(
-        size: size,
-        collisionType: CollisionType.inactive,
-      ),
-    );
+    add(hitbox = RectangleHitbox(size: size, collisionType: .inactive));
     if (capabilityController.hasProtectedCapapbility) {
       showProtectEffect(); //显示保护状态
     }
@@ -138,7 +133,7 @@ abstract class BaseTankComponent extends SpriteComponent
         ..strokeWidth = 2.0
         ..color = Colors.white70;
       var rrect = RRect.fromRectAndRadius(
-        Rect.fromLTWH(0, 0, width, height),
+        .fromLTWH(0, 0, width, height),
         .circular(3),
       );
       canvas.drawRRect(rrect, paint);
@@ -277,7 +272,7 @@ abstract class BaseTankComponent extends SpriteComponent
   void _onBornAnimationFinished() {
     opacity = 1.0;
     isBornState = false;
-    hitbox.collisionType = CollisionType.active;
+    hitbox.collisionType = .active;
     onBornFinished(); //出生完成
   }
 
@@ -414,8 +409,8 @@ abstract class BaseTankComponent extends SpriteComponent
     var mainScene = findMainScene();
     var warMapComponent = findWarMapComponent();
     removeFromParent(); //从父节点移除
-    hitbox.collisionType = CollisionType.inactive;
-    _originType == TankType.player
+    hitbox.collisionType = .inactive;
+    _originType == .player
         ? AudioUtils().playPlayerCrack()
         : AudioUtils().playTankCrack();
     warMapComponent?.add(

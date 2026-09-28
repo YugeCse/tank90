@@ -39,6 +39,7 @@ dependencies:
   shared_preferences_android: ^2.4.28
   flame: ^1.38.2
   flame_audio: ^2.12.2
+  riverpod: ^3.4.3
   flame_riverpod: ^5.5.5
   flutter_riverpod: ^3.4.3
   riverpod_annotation: ^4.0.7
