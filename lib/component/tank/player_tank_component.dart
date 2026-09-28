@@ -34,7 +34,7 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
     this.joystick,
     Vector2? position,
     super.speed,
-    super.type = TankType.player,
+    super.type = .player,
     super.facingDirection,
     super.capabilities,
   }) : super(position: position ?? defaultPosition);
@@ -53,11 +53,11 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
     var fireLevel = capabilityController.powerFireLevel;
     switch (fireLevel) {
       case 1:
-        return TankCannonType.longer;
+        return .longer;
       case 2:
-        return TankCannonType.thicker;
+        return .thicker;
       default:
-        return fireLevel >= 3 ? TankCannonType.larger : TankCannonType.normal;
+        return fireLevel >= 3 ? .larger : .normal;
     }
   }
 
@@ -80,7 +80,7 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
       return;
     }
     // 没有被保护能力且是最大火力炮嘴类型时，能承受1次攻击
-    if (cannonType == TankCannonType.larger) {
+    if (cannonType == .larger) {
       if (capabilityController.hasProwerFireCapability &&
           capabilityController.powerFireLevel >= 3) {
         capabilityController.putCapability(StrongFireCapability(fireLevel: 2));
@@ -93,10 +93,10 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
   @override
   BulletType getAttackBulletType() {
     switch (cannonType) {
-      case TankCannonType.thicker:
-        return BulletType.strong;
-      case TankCannonType.larger:
-        return BulletType.xstrong;
+      case .thicker:
+        return .strong;
+      case .larger:
+        return .xstrong;
       default:
         return super.getAttackBulletType();
     }
@@ -165,19 +165,14 @@ class PlayerTankComponent extends BaseTankComponent with KeyboardHandler {
     if (!hasDirection) velocity = Vector2.zero(); //方向速度归零
   }
 
-  /// 处理键盘事件，返回是否处理该事件
-  void handleKeyEvent(KeyEvent event) {
-    if (event is KeyDownEvent) {
-      _pressedKeys.add(event.logicalKey);
-    } else if (event is KeyUpEvent) {
-      _pressedKeys.remove(event.logicalKey);
-    }
-  }
-
   @override
   bool onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
     if (globalConfigInfo.state == GameState.playing && !isBornState) {
-      handleKeyEvent(event);
+      if (event is KeyDownEvent) {
+        _pressedKeys.add(event.logicalKey);
+      } else if (event is KeyUpEvent) {
+        _pressedKeys.remove(event.logicalKey);
+      }
     }
     return super.onKeyEvent(event, keysPressed);
   }

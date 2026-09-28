@@ -103,20 +103,19 @@ class MainScene extends Component
     addToGameWidgetBuild(() {
       var nowStage = globalConfigInfo.stageLevel;
       add(
-        mapComponent ??= WarMapComponent(
-          position: Vector2.zero(),
-          stage: nowStage.clamp(1, MapStageLevel().stageCount),
-        ),
+        mapComponent ??=
+            WarMapComponent(
+                position: Vector2.zero(),
+                stage: nowStage.clamp(1, MapStageLevel().stageCount),
+              )
+              ..add(EnemyTankFactory())
+              ..add(_propFactoryComponent ??= PropFactoryComponent()),
       );
-      mapComponent?.add(
-        _propFactoryComponent ??= PropFactoryComponent(),
-      ); //添加装备道具工厂组件
       add(
         _infoSidebarComponent ??= InfoSidebarComponent(
           position: Vector2(GameConstants.MAP_SIZE.x, 0),
         ),
       );
-      mapComponent?.add(EnemyTankFactory()); //添加敌方坦克工厂组件
     });
     super.onMount();
   }
